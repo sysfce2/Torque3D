@@ -417,9 +417,10 @@ U32 ShapeAsset::load()
       }
    }
 
+   mLoadedState = Ok;
+
    mChangeSignal.trigger();
 
-   mLoadedState = Ok;
    return mLoadedState;
 }
 
@@ -534,7 +535,6 @@ void ShapeAsset::onAssetRefresh(void)
       mFilePath = getOwned() ? expandAssetFilePath(mFileName) : mFilePath;
 
    load();
-   //onAssetRefresh();
 }
 
 void ShapeAsset::SplitSequencePathAndName(String& srcPath, String& srcName)

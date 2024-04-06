@@ -606,15 +606,6 @@ void TSStatic::onRemove()
    Parent::onRemove();
 }
 
-void TSStatic::_onResourceChanged(const Torque::Path& path)
-{
-   if (path != Path(mShapeName))
-      return;
-
-   _createShape();
-   _updateShouldTick();
-}
-
 void TSStatic::onShapeChanged()
 {
    _createShape();
