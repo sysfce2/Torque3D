@@ -610,9 +610,6 @@ void TSStatic::onShapeChanged()
 {
    _createShape();
    _updateShouldTick();
-
-   if (isServerObject())
-      setMaskBits(AdvancedStaticOptionsMask);
 }
 
 void TSStatic::setSkinName(const char* name)
