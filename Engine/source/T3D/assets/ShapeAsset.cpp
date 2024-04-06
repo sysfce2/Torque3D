@@ -304,8 +304,6 @@ void ShapeAsset::_onResourceChanged(const Torque::Path &path)
       return;
 
    refreshAsset();
-
-   onAssetRefresh();
 }
 
 U32 ShapeAsset::load()
@@ -534,6 +532,9 @@ void ShapeAsset::onAssetRefresh(void)
    // Update.
    if(!Platform::isFullPath(mFileName))
       mFilePath = getOwned() ? expandAssetFilePath(mFileName) : mFilePath;
+
+   load();
+   //onAssetRefresh();
 }
 
 void ShapeAsset::SplitSequencePathAndName(String& srcPath, String& srcName)

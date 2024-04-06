@@ -389,7 +389,7 @@ bool TSStatic::_createShape()
    SAFE_DELETE(mPhysicsRep);
    SAFE_DELETE(mShapeInstance);
    mAmbientThread = NULL;
-   mShape = NULL;
+   //mShape = NULL;
 
    U32 assetStatus = ShapeAsset::getAssetErrCode(mShapeAsset);
    if (assetStatus == AssetBase::Ok || assetStatus == AssetBase::UsingFallback)
@@ -619,6 +619,9 @@ void TSStatic::onShapeChanged()
 {
    _createShape();
    _updateShouldTick();
+
+   if (isServerObject())
+      setMaskBits(AdvancedStaticOptionsMask);
 }
 
 void TSStatic::setSkinName(const char* name)
