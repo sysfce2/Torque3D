@@ -958,19 +958,14 @@ void Gizmo::on3DMouseDragged( const Gui3DMouseEvent & event )
          mDeltaScale.zero();
 
          Point3F newPosition;
-         if( mProfile->snapToGrid )
-         {
-            Point3F snappedMouseDownProjPnt = _snapPoint( mMouseDownProjPnt );
-            mDeltaTotalPos = projPnt - snappedMouseDownProjPnt;
-            newPosition = projPnt;
-         }
-         else
-         {
-            mDeltaTotalPos = projPnt - mMouseDownProjPnt;  
-            newPosition = mSavedTransform.getPosition() + mDeltaTotalPos;
-         }
-         
+         mDeltaTotalPos = projPnt - mMouseDownProjPnt;
+         newPosition = mSavedTransform.getPosition() + mDeltaTotalPos;
+
          mDeltaPos = newPosition - mTransform.getPosition();
+
+         if (mProfile->snapToGrid)
+            newPosition = _snapPoint(newPosition);
+
          mTransform.setPosition( newPosition );
 
          mCurrentTransform.setPosition( newPosition );
