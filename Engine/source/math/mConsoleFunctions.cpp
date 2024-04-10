@@ -103,6 +103,7 @@ DefineEngineFunction( mRound, S32, ( F32 v  ),,
     "@ingroup Math" )  
 {
    return mRound(v);
+}
 
 DefineEngineFunction(mRoundF, F32, (F32 v, F32 step), ,
    "Round v to the nth decimal place or the nearest whole number by default."
