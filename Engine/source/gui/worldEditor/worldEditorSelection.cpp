@@ -320,17 +320,7 @@ void WorldEditorSelection::offset( const Point3F& offset, F32 gridSnap )
 
 F32 WorldEditorSelection::_snapFloat(const F32 &val, const F32 &snap) const
 {
-   if (snap == 0.0f)
-      return val;
-
-   F32 a = mFmod(val, snap);
-
-   F32 temp = val;
-
-   if (mFabs(a) > (snap / 2))
-      val < 0.0f ? temp -= snap : temp += snap;
-
-   return(temp - a);
+   return mRoundF(val, snap);
 }
 
 

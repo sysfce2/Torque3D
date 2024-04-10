@@ -1895,18 +1895,8 @@ Point3F Gizmo::_snapPoint( const Point3F &pnt ) const
 }
 
 F32 Gizmo::_snapFloat( const F32 &val, const F32 &snap ) const
-{   
-   if ( snap == 0.0f )
-      return val;
-
-   F32 a = mFmod( val, snap );
-
-   F32 temp = val;
-
-   if ( mFabs(a) > (snap / 2) )
-      val < 0.0f ? temp -= snap : temp += snap;
-
-   return(temp - a);
+{
+   return mRoundF(val, snap);
 }
 
 GizmoAlignment Gizmo::_filteredAlignment()
