@@ -1089,7 +1089,7 @@ void Gizmo::on3DMouseDragged( const Gui3DMouseEvent & event )
 
       //
       if((mProfile->forceSnapRotations && event.modifier | SI_SHIFT) || (mProfile->allowSnapRotations && event.modifier & SI_SHIFT ))
-         angle = mDegToRad( _snapFloat( mRadToDeg( angle ), mProfile->rotationSnap ) );
+         angle = mDegToRad( mRoundF( mRadToDeg( angle ), mProfile->rotationSnap ) );
 
       mDeltaAngle = angle - mLastAngle;
       mLastAngle = angle;         
@@ -1882,16 +1882,11 @@ Point3F Gizmo::_snapPoint( const Point3F &pnt ) const
       return pnt;
 
    Point3F snap;
-   snap.x = _snapFloat( pnt.x, mProfile->gridSize.x );
-   snap.y = _snapFloat( pnt.y, mProfile->gridSize.y );
-   snap.z = _snapFloat( pnt.z, mProfile->gridSize.z );
+   snap.x = mRoundF( pnt.x, mProfile->gridSize.x );
+   snap.y = mRoundF( pnt.y, mProfile->gridSize.y );
+   snap.z = mRoundF( pnt.z, mProfile->gridSize.z );
 
    return snap;
-}
-
-F32 Gizmo::_snapFloat( const F32 &val, const F32 &snap ) const
-{
-   return mRoundF(val, snap);
 }
 
 GizmoAlignment Gizmo::_filteredAlignment()
