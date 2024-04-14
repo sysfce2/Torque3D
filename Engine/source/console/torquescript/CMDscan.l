@@ -30,7 +30,7 @@ inline Token< T > MakeToken( T value, U32 lineNumber )
    return result;
 }
 
-#include "console/torquescript/cmdgram.h"
+#include "console/torquescript/CMDgram.h"
 
 // HACK: C++17 and beyond can't use register keyword
 #define register
