@@ -95,7 +95,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "console/console.h"
-#include "compiler.h"
+#include "console/torquescript/compiler.h"
 #include "console/consoleInternal.h"
 #include "core/strings/stringFunctions.h"
 
@@ -2390,3 +2390,5 @@ yyerrhandle:
   goto yynewstate;
 }
 #line 617 "cmdgram.y"
+
+

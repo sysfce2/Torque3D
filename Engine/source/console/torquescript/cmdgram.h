@@ -1,6 +1,3 @@
-#ifndef _CMDGRAM_H_
-#define _CMDGRAM_H_
-
 typedef union {
    Token< char >           c;
    Token< int >            i;
@@ -93,5 +90,3 @@ typedef union {
 
 
 extern YYSTYPE CMDlval;
-
-#endif
