@@ -115,6 +115,8 @@ void ShaderConstHandles::init( GFXShader *shader, CustomMaterial* mat /*=NULL*/)
    // MFT_HardwareSkinning
    mNodeTransforms = shader->getShaderConstHandle( "$nodeTransforms" );
 
+   mIsCapturingSC = shader->getShaderConstHandle(ShaderGenVars::isCapturing);
+
    // Clear any existing texture handles.
    dMemset( mTexHandlesSC, 0, sizeof( mTexHandlesSC ) );
    if(mat)
@@ -1093,6 +1095,8 @@ void ProcessedShaderMaterial::_setShaderConstants(SceneRenderState * state, cons
    shaderConsts->setSafe( handles->mAccumTimeSC, MATMGR->getTotalTime() );
 
    shaderConsts->setSafe(handles->mDampnessSC, MATMGR->getDampnessClamped());
+   shaderConsts->setSafe(handles->mIsCapturingSC, (S32)state->isCapturing());
+   
    // If the shader constants have not been lost then
    // they contain the content from a previous render pass.
    //
