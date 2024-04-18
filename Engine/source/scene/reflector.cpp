@@ -531,7 +531,7 @@ F32 PlaneReflector::calcScore( const ReflectParams &params )
    return score;
 }
 
-void PlaneReflector::updateReflection( const ReflectParams &params )
+void PlaneReflector::updateReflection( const ReflectParams &params, Point3F explicitPostion)
 {
    PROFILE_SCOPE(PlaneReflector_updateReflection);   
    GFXDEBUGEVENT_SCOPE( PlaneReflector_updateReflection, ColorI::WHITE );
