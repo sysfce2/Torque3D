@@ -1,3 +1,6 @@
+%define parse.error custom
+%locations
+%define api.header.include {"CMDgram.h"}
 %{
 
 // bison --defines=cmdgram.h --verbose -o cmdgram.cpp -p CMD CMDgram.y
@@ -20,6 +23,7 @@
 
 int outtext(char *fmt, ...);
 extern int serrors;
+extern char linebuf[512];
 
 #define nil 0
 #undef YY_ARGS
@@ -27,6 +31,7 @@ extern int serrors;
 
 int CMDlex();
 void CMDerror(const char *, ...);
+
 
 #ifdef alloca
 #undef alloca
@@ -616,3 +621,38 @@ aidx_expr
    ;
 %%
 
+int
+yyreport_syntax_error (const yypcontext_t *ctx)
+{
+   int ret = 0;
+   String output;
+   const YYLTYPE *loc = yypcontext_location (ctx);
+   output += "syntax error: ";
+
+   yysymbol_kind_t nxt = yypcontext_token(ctx);
+   if (nxt != YYSYMBOL_YYEMPTY)
+      output += String::ToString("unexpected: %s at column: %d", yysymbol_name(nxt), loc->first_column);
+
+   enum { TOKENMAX = 10 };
+   yysymbol_kind_t expected[TOKENMAX];
+
+   int exp = yypcontext_expected_tokens(ctx, expected, TOKENMAX);
+   if (exp < 0)
+      ret = exp;
+   else
+   {
+      for (int i = 0; i < exp; ++i)
+         output += String::ToString("%s %s", i == 0 ? ": expected" : "or", yysymbol_name(expected[i]));
+   }
+
+   if (dStrlen(linebuf) > 1) 
+   {
+     output += "\n";
+     output += String::ToString("%5d | %s\n", loc->first_line, linebuf);
+     output += String::ToString("%5s | %*s", "", loc->first_column, "^");
+   }
+
+   yyerror(output.c_str());
+
+   return ret;
+}
