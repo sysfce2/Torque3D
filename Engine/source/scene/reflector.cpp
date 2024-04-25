@@ -338,7 +338,8 @@ void CubeReflector::updateReflection( const ReflectParams &params, Point3F expli
 
    for ( U32 i = 0; i < 6; i++ )
       updateFace( params, i, explicitPostion);
-   
+
+   mCubemap->generateMipMaps();
 
    GFX->popActiveRenderTarget();
 
