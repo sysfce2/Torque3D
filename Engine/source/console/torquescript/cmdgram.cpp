@@ -3357,7 +3357,7 @@ yyreport_syntax_error (const yypcontext_t *ctx)
       output += "\n";
       for (int i = 0; i < lines.size(); i++)
       {
-         int line = 10 - i;
+         int line = lines.size() - i;
          output += String::ToString("%5d | ", loc->first_line - (line-1)) + lines[i] + "\n";
       }
       output += String::ToString("%5s | %*s", "", loc->first_column, "^");
