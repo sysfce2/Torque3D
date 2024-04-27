@@ -98,7 +98,7 @@
 
 int outtext(char *fmt, ...);
 extern int serrors;
-extern char linebuf[512];
+extern Vector<String> lines;
 
 #define nil 0
 #undef YY_ARGS
@@ -3352,11 +3352,15 @@ yyreport_syntax_error (const yypcontext_t *ctx)
          output += String::ToString("%s %s", i == 0 ? ": expected" : "or", yysymbol_name(expected[i]));
    }
 
-   if (dStrlen(linebuf) > 1) 
+   if (lines.size() > 0) 
    {
-     output += "\n";
-     output += String::ToString("%5d | %s\n", loc->first_line, linebuf);
-     output += String::ToString("%5s | %*s", "", loc->first_column, "^");
+      output += "\n";
+      for (int i = 0; i < lines.size(); i++)
+      {
+         int line = 10 - i;
+         output += String::ToString("%5d | ", loc->first_line - (line-1)) + lines[i] + "\n";
+      }
+      output += String::ToString("%5s | %*s", "", loc->first_column, "^");
    }
 
    yyerror(output.c_str());

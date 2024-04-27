@@ -55,7 +55,7 @@ static int Sc_ScanIdent();
 #define FLEX_DEBUG 0
 #endif
 
-char linebuf[512];
+Vector<String> lines;
 
 // Install our own input code...
 #undef CMDgetc
@@ -116,7 +116,13 @@ HEXDIGIT [a-fA-F0-9]
 ("///"([^/\n\r][^\n\r]*)?[\n\r]+)+ { return(Sc_ScanDocBlock()); }
 "//"[^\n\r]*   ;
 [\r]        ;
-\n.*        { yycolumn = 1;  dStrcpy(linebuf, yytext + 1, sizeof(linebuf)); yyless(1); }
+\n.*        { yycolumn = 1;
+   lines.push_back(String::ToString("%s", yytext+1));
+   if (lines.size() > Con::getIntVariable("$scriptErrorLineCount", 10))
+      lines.erase(lines.begin());
+
+   yyless(1);
+}
 \"(\\.|[^\\"\n\r])*\"      { return(Sc_ScanString(STRATOM)); }
 \'(\\.|[^\\'\n\r])*\'      { return(Sc_ScanString(TAGATOM)); }
 "=="        { CMDlval.i = MakeToken< int >( opEQ, yylineno ); return opEQ; }
