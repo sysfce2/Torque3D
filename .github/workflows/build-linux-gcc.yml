@@ -14,7 +14,6 @@ concurrency:
     cancel-in-progress: true
 jobs:
     build-linux:
-        if: github.repository == 'TorqueGameEngines/Torque3D'
         name: ${{matrix.config.name}}
         runs-on: ubuntu-latest
         strategy:
@@ -65,7 +64,7 @@ jobs:
                 
 
             - name: Configure, Build & Install
-              uses: threeal/cmake-action@v1.2.0
+              uses: threeal/cmake-action@v1.3.0
               with:
                 source-dir: ${{github.workspace}}
                 build-dir: ${{github.workspace}}/build
@@ -85,3 +84,4 @@ jobs:
               uses: ./.github/actions/upload-artifact
               with:
                 name: torque3dLinuxGCCUnitTest
+                path: "${{github.workspace}}/My Projects/Torque3D/game/test_detail.xml"
