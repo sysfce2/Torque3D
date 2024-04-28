@@ -14,6 +14,7 @@ concurrency:
     cancel-in-progress: true
 jobs:
     build-linux:
+        if: github.repository == 'TorqueGameEngines/Torque3D'
         name: ${{matrix.config.name}}
         runs-on: ubuntu-latest
         strategy:
