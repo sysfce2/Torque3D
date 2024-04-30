@@ -1765,12 +1765,12 @@ void GuiInspectorTypeSFXSourceName::consoleInit()
 
 void GuiInspectorType2DValue::constructEditControlChildren(GuiControl* retCtrl, S32 width)
 {
-   mCtrlX = new GuiTextEditSliderCtrl();
+   mCtrlX = new GuiTextEditCtrl();
    _registerEditControl(mCtrlX, "x");
    mLabelX = new GuiControl();
    _registerEditControl(mLabelX, "lx");
 
-   mCtrlY = new GuiTextEditSliderCtrl();
+   mCtrlY = new GuiTextEditCtrl();
    _registerEditControl(mCtrlY, "y");
    mLabelY = new GuiControl();
    _registerEditControl(mLabelY, "ly");
@@ -1824,14 +1824,17 @@ void GuiInspectorType2DValue::constructEditControlChildren(GuiControl* retCtrl, 
    mCtrlX->setPosition(Point2I(labelWidth, 0));
    mCtrlY->setPosition(Point2I(labelWidth, 0));
 
-   char szBuffer[512];
-   dSprintf(szBuffer, 512, "%d.apply(%d.getText() SPC %d.getText());", getId(), mCtrlX->getId(), mCtrlY->getId());
+   char szXCBuffer[512];
+   dSprintf(szXCBuffer, 512, "%d.applyWord(0, %d.getText());", getId(), mCtrlX->getId());
 
-   mCtrlX->setField("AltCommand", szBuffer);
-   mCtrlY->setField("AltCommand", szBuffer);
+   char szYCBuffer[512];
+   dSprintf(szYCBuffer, 512, "%d.applyWord(1, %d.getText());", getId(), mCtrlY->getId());
 
-   mCtrlX->setField("Validate", szBuffer);
-   mCtrlY->setField("Validate", szBuffer);
+   mCtrlX->setField("AltCommand", szXCBuffer);
+   mCtrlY->setField("AltCommand", szYCBuffer);
+
+   mCtrlX->setField("Validate", szXCBuffer);
+   mCtrlY->setField("Validate", szYCBuffer);
 
    mContainerX = new GuiControl();
    mContainerX->setDataField(StringTable->insert("profile"), NULL, "GuiInspectorTextEditProfile");
@@ -1933,7 +1936,7 @@ void GuiInspectorType3DValue::constructEditControlChildren(GuiControl* retCtrl, 
 {
    Parent::constructEditControlChildren(retCtrl, width);
 
-   mCtrlZ = new GuiTextEditSliderCtrl();
+   mCtrlZ = new GuiTextEditCtrl();
    _registerEditControl(mCtrlZ, "z");
    mLabelZ = new GuiControl();
    _registerEditControl(mLabelZ, "lz");
@@ -1953,16 +1956,22 @@ void GuiInspectorType3DValue::constructEditControlChildren(GuiControl* retCtrl, 
 
    mCtrlZ->setPosition(Point2I(labelWidth, 0));
 
-   char szBuffer[512];
-   dSprintf(szBuffer, 512, "%d.apply(%d.getText() SPC %d.getText() SPC %d.getText());", getId(), mCtrlX->getId(), mCtrlY->getId(), mCtrlZ->getId());
+   char szXCBuffer[512];
+   dSprintf(szXCBuffer, 512, "%d.applyWord(0, %d.getText());", getId(), mCtrlX->getId());
 
-   mCtrlX->setField("AltCommand", szBuffer);
-   mCtrlY->setField("AltCommand", szBuffer);
-   mCtrlZ->setField("AltCommand", szBuffer);
+   char szYCBuffer[512];
+   dSprintf(szYCBuffer, 512, "%d.applyWord(1, %d.getText());", getId(), mCtrlY->getId());
 
-   mCtrlX->setField("Validate", szBuffer);
-   mCtrlY->setField("Validate", szBuffer);
-   mCtrlZ->setField("Validate", szBuffer);
+   char szZCBuffer[512];
+   dSprintf(szZCBuffer, 512, "%d.applyWord(2, %d.getText());", getId(), mCtrlZ->getId());
+
+   mCtrlX->setField("AltCommand", szXCBuffer);
+   mCtrlY->setField("AltCommand", szYCBuffer);
+   mCtrlZ->setField("AltCommand", szZCBuffer);
+
+   mCtrlX->setField("Validate", szXCBuffer);
+   mCtrlY->setField("Validate", szYCBuffer);
+   mCtrlZ->setField("Validate", szZCBuffer);
 
    mContainerZ = new GuiControl();
    mContainerZ->setDataField(StringTable->insert("profile"), NULL, "GuiInspectorTextEditProfile");
@@ -2057,18 +2066,27 @@ void GuiInspectorType4DValue::constructEditControlChildren(GuiControl* retCtrl, 
 
    mCtrlW->setPosition(Point2I(labelWidth, 0));
 
-   char szBuffer[512];
-   dSprintf(szBuffer, 512, "%d.apply(%d.getText() SPC %d.getText() SPC %d.getText() SPC %d.getText());", getId(), mCtrlX->getId(), mCtrlY->getId(), mCtrlZ->getId(), mCtrlW->getId());
+   char szXCBuffer[512];
+   dSprintf(szXCBuffer, 512, "%d.applyWord(0, %d.getText());", getId(), mCtrlX->getId());
 
-   mCtrlX->setField("AltCommand", szBuffer);
-   mCtrlY->setField("AltCommand", szBuffer);
-   mCtrlZ->setField("AltCommand", szBuffer);
-   mCtrlW->setField("AltCommand", szBuffer);
+   char szYCBuffer[512];
+   dSprintf(szYCBuffer, 512, "%d.applyWord(1, %d.getText());", getId(), mCtrlY->getId());
 
-   mCtrlX->setField("Validate", szBuffer);
-   mCtrlY->setField("Validate", szBuffer);
-   mCtrlZ->setField("Validate", szBuffer);
-   mCtrlW->setField("Validate", szBuffer);
+   char szZCBuffer[512];
+   dSprintf(szZCBuffer, 512, "%d.applyWord(2, %d.getText());", getId(), mCtrlZ->getId());
+
+   char szWCBuffer[512];
+   dSprintf(szZCBuffer, 512, "%d.applyWord(3, %d.getText());", getId(), mCtrlW->getId());
+
+   mCtrlX->setField("AltCommand", szXCBuffer);
+   mCtrlY->setField("AltCommand", szYCBuffer);
+   mCtrlZ->setField("AltCommand", szZCBuffer);
+   mCtrlW->setField("AltCommand", szWCBuffer);
+
+   mCtrlX->setField("Validate", szXCBuffer);
+   mCtrlY->setField("Validate", szYCBuffer);
+   mCtrlZ->setField("Validate", szZCBuffer);
+   mCtrlW->setField("Validate", szWCBuffer);
 
    GuiControl* mContainerW = new GuiControl();
    mContainerW->setDataField(StringTable->insert("profile"), NULL, "GuiInspectorTextEditProfile");
