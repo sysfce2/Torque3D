@@ -266,11 +266,36 @@ void GuiInspectorField::onRightMouseUp( const GuiEvent &event )
 //-----------------------------------------------------------------------------
 void GuiInspectorField::setWordData(const S32& wordIndex, const char* data, bool callbacks)
 {
+
    if (mSpecialEditField)
    {
       if (mTargetObject != nullptr && mVariableName != StringTable->EmptyString())
       {
          const char* fieldData = mTargetObject->getDataField(mVariableName, NULL);
+         const char* wordData = StringUnit::getUnit(fieldData, wordIndex, " \t\n");
+
+         S32 type = mField->type;
+         if (type == TypeS8 || type == TypeS32 || type == TypeF32 || type == TypeS32Vector
+            || type == TypeF32Vector
+            || type == TypeColorI
+            || type == TypeColorF
+            || type == TypePoint2I
+            || type == TypePoint2F
+            || type == TypePoint3F
+            || type == TypePoint4F
+            || type == TypeRectI
+            || type == TypeRectF
+            || type == TypeMatrixPosition
+            || type == TypeMatrixRotation
+            || type == TypeBox3F
+            || type == TypeRectUV
+            || type == TypeRotationF)
+         {
+            if (dAtof(wordData) != dAtof(data))
+               return;
+         }
+         else if(dStrEqual(wordData, data))
+            return;
 
          StringBuilder newFieldData;
          const U32 wordCount = StringUnit::getUnitCount(fieldData, " \t\n");
@@ -295,6 +320,30 @@ void GuiInspectorField::setWordData(const S32& wordIndex, const char* data, bool
       else if (mVariableName != StringTable->EmptyString())
       {
          const char* fieldData = Con::getVariable(mVariableName, "");
+         const char* wordData = StringUnit::getUnit(fieldData, wordIndex, " \t\n");
+
+         S32 type = mField->type;
+         if (type == TypeS8 || type == TypeS32 || type == TypeF32 || type == TypeS32Vector
+            || type == TypeF32Vector
+            || type == TypeColorI
+            || type == TypeColorF
+            || type == TypePoint2I
+            || type == TypePoint2F
+            || type == TypePoint3F
+            || type == TypePoint4F
+            || type == TypeRectI
+            || type == TypeRectF
+            || type == TypeMatrixPosition
+            || type == TypeMatrixRotation
+            || type == TypeBox3F
+            || type == TypeRectUV
+            || type == TypeRotationF)
+         {
+            if (dAtof(wordData) != dAtof(data))
+               return;
+         }
+         else if (dStrEqual(wordData, data))
+            return;
 
          StringBuilder newFieldData;
          const U32 wordCount = StringUnit::getUnitCount(fieldData, " \t\n");
@@ -325,6 +374,59 @@ void GuiInspectorField::setWordData(const S32& wordIndex, const char* data, bool
    {
       String strData = data;
       const U32 numTargets = mInspector->getNumInspectObjects();
+
+      bool changed = false;
+      for (U32 i = 0; i < numTargets; ++i)
+      {
+         //For now, for simplicity's sake, you can only edit the components in a simple edit
+         SimObject* target = NULL;
+         if (numTargets == 1)
+         {
+            target = mTargetObject;
+
+            if (!target)
+               target = mInspector->getInspectObject(i);
+         }
+         else
+         {
+            target = mInspector->getInspectObject(i);
+         }
+
+         const char* fieldData = target->getDataField(mField->pFieldname, mFieldArrayIndex);
+         const char* wordData = StringUnit::getUnit(fieldData, wordIndex, " \t\n");
+
+         S32 type = mField->type;
+         if (type == TypeS8 || type == TypeS32 || type == TypeF32 || type == TypeS32Vector
+            || type == TypeF32Vector
+            || type == TypeColorI
+            || type == TypeColorF
+            || type == TypePoint2I
+            || type == TypePoint2F
+            || type == TypePoint3F
+            || type == TypePoint4F
+            || type == TypeRectI
+            || type == TypeRectF
+            || type == TypeMatrixPosition
+            || type == TypeMatrixRotation
+            || type == TypeBox3F
+            || type == TypeRectUV
+            || type == TypeRotationF)
+         {
+            if (dAtof(wordData) != dAtof(data))
+            {
+               changed = true;
+               break;
+            }
+         }
+         else if (!dStrEqual(wordData, data))
+         {
+            changed = true;
+            break;
+         }
+      }
+
+      if(!changed)
+         return;
 
       if (callbacks && numTargets > 1)
          Con::executef(mInspector, "onBeginCompoundEdit");
