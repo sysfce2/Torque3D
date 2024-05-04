@@ -44,6 +44,35 @@
 
 #include "sim/netObject.h"
 
+ImplementBitfieldType(GameTypeMasksType,
+   "The type of animation effect to apply to this material.\n"
+   "@ingroup GFX\n\n")
+{ SceneObjectTypes::StaticObjectType, "StaticObjectType", "Static Objects.\n" },
+{ SceneObjectTypes::EnvironmentObjectType, "EnvironmentObjectType" , "Objects considered part of the background or environment of a level.\n" },
+{ SceneObjectTypes::TerrainObjectType, "TerrainObjectType" , "Terrain Objects.\n" },
+{ SceneObjectTypes::WaterObjectType, "WaterObjectType", "Water Objects.\n" },
+{ SceneObjectTypes::TriggerObjectType, "TriggerObjectType", "Interactive Trigger Objects.\n" },
+{ SceneObjectTypes::MarkerObjectType, "MarkerObjectType", "Marker Objects, utilized primarily for tooling.\n" },
+{ SceneObjectTypes::GameBaseObjectType, "GameBaseObjectType", "Any Gamebase-based Objects. Objects generally associated to gameplay functionality.\n" },
+{ SceneObjectTypes::ShapeBaseObjectType, "ShapeBaseObjectType", "Any Gamebase-based Objects. Objects generally associated to gameplay functionality.\n" },
+{ SceneObjectTypes::CameraObjectType, "CameraObjectType", "Camera Objects.\n" },
+{ SceneObjectTypes::StaticShapeObjectType, "StaticShapeObjectType", "Static Shape Objects. Distinct from StaticObjectType in that Static Shapes have additional functionality and behaviors.\n" },
+{ SceneObjectTypes::DynamicShapeObjectType, "DynamicShapeObjectType", "Any sort of Dynamic Object.\n" },
+{ SceneObjectTypes::PlayerObjectType, "PlayerObjectType", "Player Objects.\n" },
+{ SceneObjectTypes::ItemObjectType, "ItemObjectType", "Item Objects.\n" },
+{ SceneObjectTypes::VehicleObjectType, "VehicleObjectType", "Any sort of Vehicle Object.\n" },
+{ SceneObjectTypes::VehicleBlockerObjectType, "VehicleBlockerObjectType", "\n" },
+{ SceneObjectTypes::ProjectileObjectType, "ProjectileObjectType", "Projectiles.\n" },
+{ SceneObjectTypes::ExplosionObjectType, "ExplosionObjectType", "Explosion and Effects.\n" },
+{ SceneObjectTypes::CorpseObjectType, "CorpseObjectType", "Corpses of controlled objects.\n" },
+{ SceneObjectTypes::DebrisObjectType, "DebrisObjectType", "Debris or debris-like things such as shell casings.\n" },
+{ SceneObjectTypes::PhysicalZoneObjectType, "PhysicalZoneObjectType", "Physical Zones. Distinct from triggers in that they have physics forces applications.\n" },
+{ SceneObjectTypes::LightObjectType, "LightObjectType", "Lights.\n" },
+{ SceneObjectTypes::PathShapeObjectType, "PathShapeObjectType", "Path-following Objects.\n" },
+{ SceneObjectTypes::TurretObjectType, "TurretObjectType", "Turret Objects.\n" },
+
+EndImplementBitfieldType;
+
 IMPLEMENT_CONOBJECT( SimObject );
 
 // See full description in the new CHM manual

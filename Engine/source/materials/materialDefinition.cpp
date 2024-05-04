@@ -77,7 +77,13 @@ ImplementBitfieldType(MaterialAnimType,
 { Material::Rotate, "Rotate" , "Rotate the material around a point.\n" },
 { Material::Wave, "Wave" , "Warps the material with an animation using Sin, Triangle or Square mathematics.\n" },
 { Material::Scale, "Scale", "Scales the material larger and smaller with a pulsing effect.\n" },
-{ Material::Sequence, "Sequence", "Enables the material to have multiple frames of animation in its imagemap.\n" }
+{ Material::Sequence, "Sequence", "Enables the material to have multiple frames of animation in its imagemap.\n" },
+{ Material::Sequence, "SequenceA", "Enables the material to have multiple frames of animation in its imagemap.\n" },
+{ Material::Sequence, "SequenceB", "Enables the material to have multiple frames of animation in its imagemap.\n" },
+{ Material::Sequence, "SequenceC", "Enables the material to have multiple frames of animation in its imagemap.\n" },
+{ Material::Sequence, "SequenceD", "Enables the material to have multiple frames of animation in its imagemap.\n" },
+{ Material::Sequence, "SequenceE", "Enables the material to have multiple frames of animation in its imagemap.\n" },
+{ Material::Sequence, "SequenceF", "Enables the material to have multiple frames of animation in its imagemap.\n" }
 EndImplementBitfieldType;
 
 ImplementEnumType(MaterialBlendOp,
@@ -357,7 +363,7 @@ void Material::initPersistFields()
    endGroup("Lighting Properties");
 
    addGroup("Animation Properties");
-      addField("animFlags", TYPEID< AnimType >(), Offset(mAnimFlags, Material), MAX_STAGES,
+      addField("animFlags", TypeMaterialAnimType, Offset(mAnimFlags, Material), MAX_STAGES,
          "The types of animation to play on this material.");
 
       addField("scrollDir", TypePoint2F, Offset(mScrollDir, Material), MAX_STAGES,
