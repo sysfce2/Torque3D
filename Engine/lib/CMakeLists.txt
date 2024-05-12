@@ -189,7 +189,7 @@ mark_as_advanced(PNG_PREFIX)
 add_subdirectory(tinyxml ${TORQUE_LIB_TARG_DIRECTORY}/tinyxml EXCLUDE_FROM_ALL)
 add_subdirectory(opcode ${TORQUE_LIB_TARG_DIRECTORY}/opcode EXCLUDE_FROM_ALL)
 add_subdirectory(pcre ${TORQUE_LIB_TARG_DIRECTORY}/pcre EXCLUDE_FROM_ALL)
-add_subdirectory(convexDecomp ${TORQUE_LIB_TARG_DIRECTORY}/convexDecomp EXCLUDE_FROM_ALL)
+
 add_subdirectory(squish ${TORQUE_LIB_TARG_DIRECTORY}/squish EXCLUDE_FROM_ALL)
 add_subdirectory(collada ${TORQUE_LIB_TARG_DIRECTORY}/collada EXCLUDE_FROM_ALL)
 add_subdirectory(glad ${TORQUE_LIB_TARG_DIRECTORY}/glad EXCLUDE_FROM_ALL)
