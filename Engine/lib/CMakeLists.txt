@@ -112,6 +112,7 @@ mark_as_advanced(SDL_XINPUT)
 add_subdirectory(sdl ${TORQUE_LIB_TARG_DIRECTORY}/sdl2 EXCLUDE_FROM_ALL)
 
 add_subdirectory(nativeFileDialogs ${TORQUE_LIB_TARG_DIRECTORY}/nfd EXCLUDE_FROM_ALL)
+add_subdirectory(convexMath ${TORQUE_LIB_TARG_DIRECTORY}/convexMath EXCLUDE_FROM_ALL)
 
 # Assimp
 advanced_option(ASSIMP_HUNTER_ENABLED "Enable Hunter package manager support" OFF)

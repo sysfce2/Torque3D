@@ -29,6 +29,7 @@
 #define ENABLE_VHACD_IMPLEMENTATION 1
 #define VHACD_DISABLE_THREADING 0
 #include <VHACD.H>
+#include <FloatMath.h>
 
 //-----------------------------------------------------------------------------
 
@@ -102,18 +103,18 @@ public:
 
    void fitBox( U32 vertCount, const F32* verts )
    {
-      //FLOAT_MATH::fm_computeBestFitOBB( vertCount, verts, sizeof(F32)*3, (F32*)mBoxSides, (F32*)mBoxTransform, false );
+      FLOAT_MATH::fm_computeBestFitOBB( vertCount, verts, sizeof(F32)*3, (F32*)mBoxSides, (F32*)mBoxTransform, false );
       mBoxTransform.transpose();
    }
 
    void fitSphere( U32 vertCount, const F32* verts )
    {
-      //mSphereRadius = FLOAT_MATH::fm_computeBestFitSphere( vertCount, verts, sizeof(F32)*3, (F32*)mSphereCenter );
+      mSphereRadius = FLOAT_MATH::fm_computeBestFitSphere( vertCount, verts, sizeof(F32)*3, (F32*)mSphereCenter );
    }
 
    void fitCapsule( U32 vertCount, const F32* verts )
    {
-      //FLOAT_MATH::fm_computeBestFitCapsule( vertCount, verts, sizeof(F32)*3, mCapRadius, mCapHeight, (F32*)mCapTransform );
+      FLOAT_MATH::fm_computeBestFitCapsule( vertCount, verts, sizeof(F32)*3, mCapRadius, mCapHeight, (F32*)mCapTransform );
       mCapTransform.transpose();
    }
 };
@@ -696,23 +697,39 @@ void MeshFit::fitConvexHulls( U32 depth, F32 mergeThreshold, F32 concavityThresh
       if (( boxMaxError > 0 ) || ( sphereMaxError > 0 ) || ( capsuleMaxError > 0 ))
       {
          // Compute error between actual mesh and fitted primitives
-         F32 meshVolume = 10.0f; // FLOAT_MATH::fm_computeMeshVolume((F32*)&ch.m_points, ch.m_triangles.size(), (U32*)&ch.m_triangles);
+         F32* points = new F32[ch.m_points.size() * 3];
+         for (U32 i = 0; i < ch.m_points.size(); i++)
+         {
+            points[i * 3 + 0] = ch.m_points[i].mX;
+            points[i * 3 + 1] = ch.m_points[i].mY;
+            points[i * 3 + 2] = ch.m_points[i].mZ;
+         }
+
+         U32* indices = new U32[ch.m_triangles.size() * 3];
+         for (U32 i = 0; i < ch.m_triangles.size(); i++)
+         {
+            indices[i * 3 + 0] = ch.m_triangles[i].mI0;
+            indices[i * 3 + 1] = ch.m_triangles[i].mI1;
+            indices[i * 3 + 2] = ch.m_triangles[i].mI2;
+         }
+
+         F32 meshVolume = FLOAT_MATH::fm_computeMeshVolume(points, ch.m_triangles.size(), indices);
          PrimFit primFitter;
 
          F32 boxError = 100.0f, sphereError = 100.0f, capsuleError = 100.0f;
          if ( boxMaxError > 0 )
          {
-            primFitter.fitBox(ch.m_points.size(), (F32*)&ch.m_points);
+            primFitter.fitBox(ch.m_points.size(), points);
             boxError = 100.0f * ( 1.0f - ( meshVolume / primFitter.getBoxVolume() ) );
          }
          if ( sphereMaxError > 0 )
          {
-            primFitter.fitSphere(ch.m_points.size(), (F32*)&ch.m_points);
+            primFitter.fitSphere(ch.m_points.size(), points);
             sphereError = 100.0f * ( 1.0f - ( meshVolume / primFitter.getSphereVolume() ) );
          }
          if ( capsuleMaxError > 0 )
          {
-            primFitter.fitCapsule(ch.m_points.size(), (F32*)&ch.m_points);
+            primFitter.fitCapsule(ch.m_points.size(), points);
             capsuleError = 100.0f * ( 1.0f - ( meshVolume / primFitter.getCapsuleVolume() ) );
          }
 
