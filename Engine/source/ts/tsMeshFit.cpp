@@ -633,23 +633,23 @@ void MeshFit::fitK_DOP( const Vector<Point3F>& planes )
    lastMesh.transform.identity();
 
    U32* indices = new U32[ch.m_triangles.size() * 3];
-   for (U32 i = 0; i < ch.m_triangles.size(); i++)
+   for (U32 ind = 0; ind < ch.m_triangles.size(); ind++)
    {
-      indices[i * 3 + 0] = ch.m_triangles[i].mI0;
-      indices[i * 3 + 1] = ch.m_triangles[i].mI1;
-      indices[i * 3 + 2] = ch.m_triangles[i].mI2;
+      indices[ind * 3 + 0] = ch.m_triangles[ind].mI0;
+      indices[ind * 3 + 1] = ch.m_triangles[ind].mI1;
+      indices[ind * 3 + 2] = ch.m_triangles[ind].mI2;
    }
 
    F32* resultPts = new F32[ch.m_points.size() * 3];
-   for (U32 i = 0; i < ch.m_points.size(); i++)
+   for (U32 pts = 0; pts < ch.m_points.size(); pts++)
    {
-      resultPts[i * 3 + 0] = ch.m_points[i].mX;
-      resultPts[i * 3 + 1] = ch.m_points[i].mY;
-      resultPts[i * 3 + 2] = ch.m_points[i].mZ;
+      resultPts[pts * 3 + 0] = ch.m_points[pts].mX;
+      resultPts[pts * 3 + 1] = ch.m_points[pts].mY;
+      resultPts[pts * 3 + 2] = ch.m_points[pts].mZ;
    }
 
-   lastMesh.tsmesh = createTriMesh(resultPts, ch.m_points.size(),
-                                    indices, ch.m_triangles.size());
+   lastMesh.tsmesh = createTriMesh(resultPts, (S32)ch.m_points.size(),
+                                    indices, (S32)ch.m_triangles.size());
    lastMesh.tsmesh->computeBounds();
 
    iface->Release();
@@ -663,9 +663,6 @@ void MeshFit::fitK_DOP( const Vector<Point3F>& planes )
 void MeshFit::fitConvexHulls( U32 depth, F32 mergeThreshold, F32 concavityThreshold, U32 maxHullVerts,
                               F32 boxMaxError, F32 sphereMaxError, F32 capsuleMaxError )
 {
-   const F32 SkinWidth      = 0.0f;
-   const F32 SplitThreshold = 2.0f;
-
    VHACD::IVHACD::Parameters p;
    p.m_fillMode = VHACD::FillMode::FLOOD_FILL;
    p.m_maxNumVerticesPerCH = maxHullVerts;
@@ -698,25 +695,25 @@ void MeshFit::fitConvexHulls( U32 depth, F32 mergeThreshold, F32 concavityThresh
       {
          // Compute error between actual mesh and fitted primitives
          F32* points = new F32[ch.m_points.size() * 3];
-         for (U32 i = 0; i < ch.m_points.size(); i++)
+         for (U32 pt = 0; pt < ch.m_points.size(); pt++)
          {
-            points[i * 3 + 0] = ch.m_points[i].mX;
-            points[i * 3 + 1] = ch.m_points[i].mY;
-            points[i * 3 + 2] = ch.m_points[i].mZ;
+            points[pt * 3 + 0] = ch.m_points[pt].mX;
+            points[pt * 3 + 1] = ch.m_points[pt].mY;
+            points[pt * 3 + 2] = ch.m_points[pt].mZ;
          }
 
          U32* indices = new U32[ch.m_triangles.size() * 3];
-         for (U32 i = 0; i < ch.m_triangles.size(); i++)
+         for (U32 ind = 0; ind < ch.m_triangles.size(); ind++)
          {
-            indices[i * 3 + 0] = ch.m_triangles[i].mI0;
-            indices[i * 3 + 1] = ch.m_triangles[i].mI1;
-            indices[i * 3 + 2] = ch.m_triangles[i].mI2;
+            indices[ind * 3 + 0] = ch.m_triangles[ind].mI0;
+            indices[ind * 3 + 1] = ch.m_triangles[ind].mI1;
+            indices[ind * 3 + 2] = ch.m_triangles[ind].mI2;
          }
 
          F32 meshVolume = FLOAT_MATH::fm_computeMeshVolume(points, ch.m_triangles.size(), indices);
          PrimFit primFitter;
 
-         F32 boxError = 100.0f, sphereError = 100.0f, capsuleError = 100.0f;
+         F32 boxError = 100.0f, sphereError = 100.0f, capsuleError = 100.0;
          if ( boxMaxError > 0 )
          {
             primFitter.fitBox(ch.m_points.size(), points);
@@ -759,6 +756,10 @@ void MeshFit::fitConvexHulls( U32 depth, F32 mergeThreshold, F32 concavityThresh
          else if ( meshType == MeshFit::Capsule )
             addCapsule( primFitter.mCapRadius, primFitter.mCapHeight, primFitter.mCapTransform );
          // else fall through to Hull processing
+         
+         // cleanup
+         delete[] points;
+         delete[] indices;
       }
 
       if ( meshType == MeshFit::Hull )
@@ -770,19 +771,19 @@ void MeshFit::fitConvexHulls( U32 depth, F32 mergeThreshold, F32 concavityThresh
          lastMesh.transform.identity();
 
          U32* indices = new U32[ch.m_triangles.size() * 3];
-         for (U32 i = 0; i < ch.m_triangles.size(); i++)
+         for (U32 ind = 0; ind < ch.m_triangles.size(); ind++)
          {
-            indices[i * 3 + 0] = ch.m_triangles[i].mI0;
-            indices[i * 3 + 1] = ch.m_triangles[i].mI1;
-            indices[i * 3 + 2] = ch.m_triangles[i].mI2;
+            indices[ind * 3 + 0] = ch.m_triangles[ind].mI0;
+            indices[ind * 3 + 1] = ch.m_triangles[ind].mI1;
+            indices[ind * 3 + 2] = ch.m_triangles[ind].mI2;
          }
 
          F32* points = new F32[ch.m_points.size() * 3];
-         for (U32 i = 0; i < ch.m_points.size(); i++)
+         for (U32 pt = 0; pt < ch.m_points.size(); pt++)
          {
-            points[i * 3 + 0] = ch.m_points[i].mX;
-            points[i * 3 + 1] = ch.m_points[i].mY;
-            points[i * 3 + 2] = ch.m_points[i].mZ;
+            points[pt * 3 + 0] = ch.m_points[pt].mX;
+            points[pt * 3 + 1] = ch.m_points[pt].mY;
+            points[pt * 3 + 2] = ch.m_points[pt].mZ;
          }
 
          lastMesh.tsmesh = createTriMesh(points, ch.m_points.size(), indices, ch.m_triangles.size());
