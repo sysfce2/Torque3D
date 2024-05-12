@@ -28,7 +28,7 @@
 
 #define ENABLE_VHACD_IMPLEMENTATION 1
 #define VHACD_DISABLE_THREADING 0
-#include <VHACD.H>
+#include "ts/vhacd/VHACD.h"
 #include <FloatMath.h>
 
 //-----------------------------------------------------------------------------
