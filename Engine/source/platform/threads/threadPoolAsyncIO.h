@@ -54,7 +54,7 @@
 ///
 /// @param T Type of elements being streamed.
 template< typename T, class Stream >
-class AsyncIOItem : public ThreadPool::WorkItem
+class AsyncIOItem : public TorqueThreadPool::WorkItem
 {
    public:
 

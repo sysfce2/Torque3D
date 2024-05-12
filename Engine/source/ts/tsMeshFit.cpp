@@ -26,11 +26,11 @@
 #include "ts/tsShapeConstruct.h"
 #include "console/engineAPI.h"
 
-//-----------------------------------------------------------------------------
-
 #define ENABLE_VHACD_IMPLEMENTATION 1
 #define VHACD_DISABLE_THREADING 0
 #include <VHACD.H>
+
+//-----------------------------------------------------------------------------
 
 static const Point3F sFacePlanes[] = {
    Point3F( -1.0f,  0.0f,  0.0f ),
@@ -613,7 +613,7 @@ void MeshFit::fitK_DOP( const Vector<Point3F>& planes )
 
    VHACD::IVHACD* iface = VHACD::CreateVHACD();
 
-   iface->Compute((F32*)points.address(), points.size(), (U32*)pointIndices.address(), pointIndices.size(), p);
+   iface->Compute((F32*)points.address(), points.size(), (U32*)pointIndices.address(), pointIndices.size() / 3, p);
 
    // safety loop.
    while (!iface->IsReady())
@@ -630,11 +630,31 @@ void MeshFit::fitK_DOP( const Vector<Point3F>& planes )
    MeshFit::Mesh& lastMesh = mMeshes.last();
    lastMesh.type = MeshFit::Hull;
    lastMesh.transform.identity();
-   lastMesh.tsmesh = createTriMesh((F32*)&ch.m_points, ch.m_points.size(),
-                                    (U32*)&ch.m_triangles, ch.m_triangles.size());
+
+   U32* indices = new U32[ch.m_triangles.size() * 3];
+   for (U32 i = 0; i < ch.m_triangles.size(); i++)
+   {
+      indices[i * 3 + 0] = ch.m_triangles[i].mI0;
+      indices[i * 3 + 1] = ch.m_triangles[i].mI1;
+      indices[i * 3 + 2] = ch.m_triangles[i].mI2;
+   }
+
+   F32* resultPts = new F32[ch.m_points.size() * 3];
+   for (U32 i = 0; i < ch.m_points.size(); i++)
+   {
+      resultPts[i * 3 + 0] = ch.m_points[i].mX;
+      resultPts[i * 3 + 1] = ch.m_points[i].mY;
+      resultPts[i * 3 + 2] = ch.m_points[i].mZ;
+   }
+
+   lastMesh.tsmesh = createTriMesh(resultPts, ch.m_points.size(),
+                                    indices, ch.m_triangles.size());
    lastMesh.tsmesh->computeBounds();
 
    iface->Release();
+
+   delete[] resultPts;
+   delete[] indices;
 }
 
 //---------------------------
@@ -654,9 +674,9 @@ void MeshFit::fitConvexHulls( U32 depth, F32 mergeThreshold, F32 concavityThresh
    p.m_resolution = 10000;
    p.m_maxConvexHulls = depth;
 
-   VHACD::IVHACD* iface = VHACD::CreateVHACD();
+   VHACD::IVHACD* iface = VHACD::CreateVHACD_ASYNC();
 
-   iface->Compute((F32*)mVerts.address(), mVerts.size(), (U32*)mIndices.address(), mIndices.size(), p);
+   iface->Compute((F32*)mVerts.address(), mVerts.size(), mIndices.address(), mIndices.size() / 3, p);
 
    // safety loop.
    while (!iface->IsReady())
@@ -731,8 +751,28 @@ void MeshFit::fitConvexHulls( U32 depth, F32 mergeThreshold, F32 concavityThresh
          MeshFit::Mesh& lastMesh = mMeshes.last();
          lastMesh.type = MeshFit::Hull;
          lastMesh.transform.identity();
-         lastMesh.tsmesh = createTriMesh((F32*)&ch.m_points, ch.m_points.size(), (U32*)&ch.m_triangles, ch.m_triangles.size());
+
+         U32* indices = new U32[ch.m_triangles.size() * 3];
+         for (U32 i = 0; i < ch.m_triangles.size(); i++)
+         {
+            indices[i * 3 + 0] = ch.m_triangles[i].mI0;
+            indices[i * 3 + 1] = ch.m_triangles[i].mI1;
+            indices[i * 3 + 2] = ch.m_triangles[i].mI2;
+         }
+
+         F32* points = new F32[ch.m_points.size() * 3];
+         for (U32 i = 0; i < ch.m_points.size(); i++)
+         {
+            points[i * 3 + 0] = ch.m_points[i].mX;
+            points[i * 3 + 1] = ch.m_points[i].mY;
+            points[i * 3 + 2] = ch.m_points[i].mZ;
+         }
+
+         lastMesh.tsmesh = createTriMesh(points, ch.m_points.size(), indices, ch.m_triangles.size());
          lastMesh.tsmesh->computeBounds();
+
+         delete[] points;
+         delete[] indices;
       }
    }
 

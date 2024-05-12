@@ -107,7 +107,7 @@ class AsyncBufferedInputStream : public IInputStreamFilter< T, Stream >,
       ElementList mBufferedElements;
 
       /// The thread pool to which read items are queued.
-      ThreadPool* mThreadPool;
+      TorqueThreadPool* mThreadPool;
 
       /// The thread context used for prioritizing read items in the pool.
       ThreadContext* mThreadContext;
@@ -132,7 +132,7 @@ class AsyncBufferedInputStream : public IInputStreamFilter< T, Stream >,
                                  U32 numSourceElementsToRead = 0,
                                  U32 numReadAhead = DEFAULT_STREAM_LOOKAHEAD,
                                  bool isLooping = false,
-                                 ThreadPool* pool = &ThreadPool::GLOBAL(),
+                                 TorqueThreadPool* pool = &TorqueThreadPool::GLOBAL(),
                                  ThreadContext* context = ThreadContext::ROOT_CONTEXT() );
 
       virtual ~AsyncBufferedInputStream();
@@ -162,7 +162,7 @@ AsyncBufferedInputStream< T, Stream >::AsyncBufferedInputStream
             U32 numSourceElementsToRead,
             U32 numReadAhead,
             bool isLooping,
-            ThreadPool* threadPool,
+            TorqueThreadPool* threadPool,
             ThreadContext* threadContext )
    : Parent( stream ),
      mIsLooping( isLooping ),
@@ -321,7 +321,7 @@ class AsyncBufferedReadItem : public ThreadWorkItem
       ///
       AsyncBufferedReadItem(
          const AsyncStreamRef& asyncStream,
-         ThreadPool::Context* context = NULL
+         TorqueThreadPool::Context* context = NULL
       )
          : Parent( context ),
            mAsyncStream( asyncStream ),
@@ -376,7 +376,7 @@ class AsyncSingleBufferedInputStream : public AsyncBufferedInputStream< T, Strea
                                        U32 numSourceElementsToRead = 0,
                                        U32 numReadAhead = Parent::DEFAULT_STREAM_LOOKAHEAD,
                                        bool isLooping = false,
-                                       ThreadPool* pool = &ThreadPool::GLOBAL(),
+                                       TorqueThreadPool* pool = &TorqueThreadPool::GLOBAL(),
                                        ThreadContext* context = ThreadContext::ROOT_CONTEXT() )
          : Parent(   stream,
                      numSourceElementsToRead,

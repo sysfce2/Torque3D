@@ -358,11 +358,11 @@ enum
 /// @note Don't use this directly but rather use THREAD_POOL() instead.
 ///   This way, the sound code may be easily switched to using a common
 ///   pool later on.
-class SFXThreadPool : public ThreadPool, public ManagedSingleton< SFXThreadPool >
+class SFXThreadPool : public TorqueThreadPool, public ManagedSingleton< SFXThreadPool >
 {
    public:
    
-      typedef ThreadPool Parent;
+      typedef TorqueThreadPool Parent;
       
       /// Create a ThreadPool called "SFX" with two threads.
       SFXThreadPool()
@@ -399,7 +399,7 @@ extern ThreadSafeRef< SFXBufferProcessList > gBufferUpdateList;
 extern ThreadSafeDeque< SFXBuffer* > gDeadBufferList;
 
 /// Return the thread pool used for SFX work.
-inline ThreadPool& THREAD_POOL()
+inline TorqueThreadPool& THREAD_POOL()
 {
    return *( SFXThreadPool::instance() );
 }

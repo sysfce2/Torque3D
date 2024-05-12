@@ -51,7 +51,7 @@ torqueAddSourceDirectories("app" "app/net")
 # Handle console
 torqueAddSourceDirectories("console")
 torqueAddSourceDirectories("console/torquescript")
-
+set(TORQUE_INCLUDE_DIRECTORIES ${TORQUE_INCLUDE_DIRECTORIES} "ts/vhacd")
 # Handle Platform
 torqueAddSourceDirectories("platform" "platform/threads" "platform/async"
                                   "platform/input" "platform/output")
@@ -86,7 +86,6 @@ torqueAddSourceDirectories("gfx" "gfx/Null" "gfx/test" "gfx/bitmap" "gfx/bitmap/
 
 # add the stb headers
 set(TORQUE_INCLUDE_DIRECTORIES ${TORQUE_INCLUDE_DIRECTORIES} "gfx/bitmap/loaders/stb")
-set(TORQUE_INCLUDE_DIRECTORIES ${TORQUE_INCLUDE_DIRECTORIES} "ts/vhacd")
 
 if (TORQUE_OPENGL)
   torqueAddSourceDirectories("gfx/gl" "gfx/gl/sdl" "gfx/gl/tGL")

@@ -65,7 +65,7 @@ namespace ImageUtil
    }
 
    //Thread work job for compression
-   struct CompressJob : public ThreadPool::WorkItem
+   struct CompressJob : public TorqueThreadPool::WorkItem
    {
       S32 width;
       S32 height;
@@ -124,7 +124,7 @@ namespace ImageUtil
       srcDDS->mFlags.set(DDSFile::CompressedData);
 
       //grab global thread pool
-      ThreadPool* pThreadPool = &ThreadPool::GLOBAL();
+      TorqueThreadPool* pThreadPool = &TorqueThreadPool::GLOBAL();
 
       if (cubemap)
       {

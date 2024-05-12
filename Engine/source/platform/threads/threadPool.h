@@ -70,7 +70,7 @@
 ///   automatically being released once the last concurrent work item has been
 ///   processed or discarded.
 ///
-class ThreadPool
+class TorqueThreadPool
 {
    public:
    
@@ -298,9 +298,9 @@ class ThreadPool
       /// will be based on the number of CPU cores available.
       ///
       /// @param numThreads Number of threads to create or zero for default.
-      ThreadPool( const char* name, U32 numThreads = 0 );
+      TorqueThreadPool( const char* name, U32 numThreads = 0 );
       
-      ~ThreadPool();
+      ~TorqueThreadPool();
 
       /// Manually shutdown threads outside of static destructors.
       void shutdown();
@@ -397,16 +397,16 @@ class ThreadPool
       }
 
       /// Return the global thread pool singleton.
-      static ThreadPool& GLOBAL();
+      static TorqueThreadPool& GLOBAL();
 };
 
-typedef ThreadPool::Context ThreadContext;
-typedef ThreadPool::WorkItem ThreadWorkItem;
+typedef TorqueThreadPool::Context ThreadContext;
+typedef TorqueThreadPool::WorkItem ThreadWorkItem;
 
 
-struct ThreadPool::GlobalThreadPool : public ThreadPool, public ManagedSingleton< GlobalThreadPool >
+struct TorqueThreadPool::GlobalThreadPool : public TorqueThreadPool, public ManagedSingleton< GlobalThreadPool >
 {
-   typedef ThreadPool Parent;
+   typedef TorqueThreadPool Parent;
    
    GlobalThreadPool()
       : Parent( "GLOBAL" ) {}
@@ -415,7 +415,7 @@ struct ThreadPool::GlobalThreadPool : public ThreadPool, public ManagedSingleton
    static const char* getSingletonName() { return "GlobalThreadPool"; }
 };
 
-inline ThreadPool& ThreadPool::GLOBAL()
+inline TorqueThreadPool& TorqueThreadPool::GLOBAL()
 {
    return *( GlobalThreadPool::instance() );
 }
