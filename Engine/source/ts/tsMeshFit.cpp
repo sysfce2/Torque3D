@@ -443,12 +443,27 @@ void MeshFit::addSphere( F32 radius, const Point3F& center )
    if ( !mesh )
       return;
 
-   for ( S32 i = 0; i < mesh->mVertexData.size(); i++ )
+   if (mesh->mVerts.size() > 0)
    {
-      TSMesh::__TSMeshVertexBase &vdata = mesh->mVertexData.getBase(i);
-      Point3F v = vdata.vert();
-      vdata.vert( v * radius );
+      for (S32 i = 0; i < mesh->mVerts.size(); i++)
+      {
+         Point3F v = mesh->mVerts[i];
+         mesh->mVerts[i] = v * radius;
+      }
+
+      mesh->mVertexData.setReady(false);
    }
+   else
+   {
+      for (S32 i = 0; i < mesh->mVertexData.size(); i++)
+      {
+         TSMesh::__TSMeshVertexBase& vdata = mesh->mVertexData.getBase(i);
+         Point3F v = vdata.vert();
+         vdata.vert(v * radius);
+      }
+   }
+
+
    mesh->computeBounds();
 
    mMeshes.increment();
@@ -477,12 +492,28 @@ void MeshFit::addCapsule( F32 radius, F32 height, const MatrixF& mat )
    // Translate and scale the mesh verts
    height = mMax( 0, height );
    F32 offset = ( height / ( 2 * radius ) ) - 0.5f;
-   for ( S32 i = 0; i < mesh->mVertexData.size(); i++ )
+   if (mesh->mVerts.size() > 0)
    {
-      Point3F v = mesh->mVertexData.getBase(i).vert();
-      v.y += ( ( v.y > 0 ) ? offset : -offset );
-      mesh->mVertexData.getBase(i).vert( v * radius );
+      for (S32 i = 0; i < mesh->mVerts.size(); i++)
+      {
+         Point3F v = mesh->mVerts[i];
+         v.y += ((v.y > 0) ? offset : -offset);
+         mesh->mVerts[i] = v * radius;
+      }
+
+      mesh->mVertexData.setReady(false);
    }
+   else
+   {
+      for (S32 i = 0; i < mesh->mVertexData.size(); i++)
+      {
+         TSMesh::__TSMeshVertexBase& vdata = mesh->mVertexData.getBase(i);
+         Point3F v = vdata.vert();
+         v.y += ((v.y > 0) ? offset : -offset);
+         vdata.vert(v * radius);
+      }
+   }
+
    mesh->computeBounds();
 
    mMeshes.increment();
@@ -722,7 +753,7 @@ void MeshFit::fitConvexHulls( U32 depth, F32 mergeThreshold, F32 concavityThresh
          if ( sphereMaxError > 0 )
          {
             primFitter.fitSphere(ch.m_points.size(), points);
-            sphereError = 100.0f * ( 1.0f - ( meshVolume / primFitter.getSphereVolume() ) );
+            sphereError = 100.0f * ( 1.0f - ( meshVolume / primFitter.getSphereVolume()));
          }
          if ( capsuleMaxError > 0 )
          {
