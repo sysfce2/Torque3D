@@ -34,11 +34,11 @@
 //    ThreadPool::Context.
 //=============================================================================
 
-TorqueThreadPool::Context TorqueThreadPool::Context::smRootContext( "ROOT", NULL, 1.0 );
+ThreadPool::Context ThreadPool::Context::smRootContext( "ROOT", NULL, 1.0 );
 
 //--------------------------------------------------------------------------
 
-TorqueThreadPool::Context::Context( const char* name, TorqueThreadPool::Context* parent, F32 priorityBias )
+ThreadPool::Context::Context( const char* name, ThreadPool::Context* parent, F32 priorityBias )
    : mParent( parent ),
      mName( name ),
      mChildren( 0 ),
@@ -55,7 +55,7 @@ TorqueThreadPool::Context::Context( const char* name, TorqueThreadPool::Context*
 
 //--------------------------------------------------------------------------
 
-TorqueThreadPool::Context::~Context()
+ThreadPool::Context::~Context()
 {
    if( mParent )
       for( Context* context = mParent->mChildren, *prev = 0; context != 0; prev = context, context = context->mSibling )
@@ -70,7 +70,7 @@ TorqueThreadPool::Context::~Context()
 
 //--------------------------------------------------------------------------
 
-TorqueThreadPool::Context* TorqueThreadPool::Context::getChild( const char* name )
+ThreadPool::Context* ThreadPool::Context::getChild( const char* name )
 {
    for( Context* child = getChildren(); child != 0; child = child->getSibling() )
       if( dStricmp( child->getName(), name ) == 0 )
@@ -80,7 +80,7 @@ TorqueThreadPool::Context* TorqueThreadPool::Context::getChild( const char* name
 
 //--------------------------------------------------------------------------
 
-F32 TorqueThreadPool::Context::getAccumulatedPriorityBias()
+F32 ThreadPool::Context::getAccumulatedPriorityBias()
 {
    if( !mAccumulatedPriorityBias )
       updateAccumulatedPriorityBiases();
@@ -89,7 +89,7 @@ F32 TorqueThreadPool::Context::getAccumulatedPriorityBias()
 
 //--------------------------------------------------------------------------
 
-void TorqueThreadPool::Context::setPriorityBias( F32 value )
+void ThreadPool::Context::setPriorityBias( F32 value )
 {
    mPriorityBias = value;
    mAccumulatedPriorityBias = 0.0;
@@ -97,7 +97,7 @@ void TorqueThreadPool::Context::setPriorityBias( F32 value )
 
 //--------------------------------------------------------------------------
 
-void TorqueThreadPool::Context::updateAccumulatedPriorityBiases()
+void ThreadPool::Context::updateAccumulatedPriorityBiases()
 {
    // Update our own priority bias.
 
@@ -117,7 +117,7 @@ void TorqueThreadPool::Context::updateAccumulatedPriorityBiases()
 
 //--------------------------------------------------------------------------
 
-void TorqueThreadPool::WorkItem::process()
+void ThreadPool::WorkItem::process()
 {
    execute();
    mExecuted = true;
@@ -125,14 +125,14 @@ void TorqueThreadPool::WorkItem::process()
 
 //--------------------------------------------------------------------------
 
-bool TorqueThreadPool::WorkItem::isCancellationRequested()
+bool ThreadPool::WorkItem::isCancellationRequested()
 {
    return false;
 }
 
 //--------------------------------------------------------------------------
 
-bool TorqueThreadPool::WorkItem::cancellationPoint()
+bool ThreadPool::WorkItem::cancellationPoint()
 {
    if( isCancellationRequested() )
    {
@@ -145,7 +145,7 @@ bool TorqueThreadPool::WorkItem::cancellationPoint()
 
 //--------------------------------------------------------------------------
 
-F32 TorqueThreadPool::WorkItem::getPriority()
+F32 ThreadPool::WorkItem::getPriority()
 {
    return 1.0;
 }
@@ -160,7 +160,7 @@ F32 TorqueThreadPool::WorkItem::getPriority()
 /// @see ThreadSafePriorityQueueWithUpdate
 /// @see ThreadPool::WorkItem
 ///
-struct TorqueThreadPool::WorkItemWrapper : public ThreadSafeRef< WorkItem >
+struct ThreadPool::WorkItemWrapper : public ThreadSafeRef< WorkItem >
 {
    typedef ThreadSafeRef< WorkItem > Parent;
 
@@ -172,7 +172,7 @@ struct TorqueThreadPool::WorkItemWrapper : public ThreadSafeRef< WorkItem >
    F32            getPriority();
 };
 
-inline bool TorqueThreadPool::WorkItemWrapper::isAlive()
+inline bool ThreadPool::WorkItemWrapper::isAlive()
 {
    WorkItem* item = ptr();
    if( !item )
@@ -186,7 +186,7 @@ inline bool TorqueThreadPool::WorkItemWrapper::isAlive()
       return true;
 }
 
-inline F32 TorqueThreadPool::WorkItemWrapper::getPriority()
+inline F32 ThreadPool::WorkItemWrapper::getPriority()
 {
    WorkItem* item = ptr();
    AssertFatal( item != 0, "ThreadPool::WorkItemWrapper::getPriority - called on dead item" );
@@ -201,20 +201,20 @@ inline F32 TorqueThreadPool::WorkItemWrapper::getPriority()
 
 ///
 ///
-struct TorqueThreadPool::WorkerThread : public Thread
+struct ThreadPool::WorkerThread : public Thread
 {
-   WorkerThread( TorqueThreadPool* pool, U32 index );
+   WorkerThread( ThreadPool* pool, U32 index );
 
    WorkerThread*     getNext();
    void      run( void* arg = 0 ) override;
 
 private:
    U32               mIndex;
-   TorqueThreadPool*       mPool;
+   ThreadPool*       mPool;
    WorkerThread*     mNext;
 };
 
-TorqueThreadPool::WorkerThread::WorkerThread( TorqueThreadPool* pool, U32 index )
+ThreadPool::WorkerThread::WorkerThread( ThreadPool* pool, U32 index )
    : mIndex( index ),
      mPool( pool )
 {
@@ -224,12 +224,12 @@ TorqueThreadPool::WorkerThread::WorkerThread( TorqueThreadPool* pool, U32 index 
    pool->mThreads = this;
 }
 
-inline TorqueThreadPool::WorkerThread* TorqueThreadPool::WorkerThread::getNext()
+inline ThreadPool::WorkerThread* ThreadPool::WorkerThread::getNext()
 {
    return mNext;
 }
 
-void TorqueThreadPool::WorkerThread::run( void* arg )
+void ThreadPool::WorkerThread::run( void* arg )
 {
    #ifdef TORQUE_DEBUG
    {
@@ -300,13 +300,13 @@ void TorqueThreadPool::WorkerThread::run( void* arg )
 //    ThreadPool.
 //=============================================================================
 
-bool                          TorqueThreadPool::smForceAllMainThread;
-U32                           TorqueThreadPool::smMainThreadTimeMS;
-TorqueThreadPool::QueueType         TorqueThreadPool::smMainThreadQueue;
+bool                          ThreadPool::smForceAllMainThread;
+U32                           ThreadPool::smMainThreadTimeMS;
+ThreadPool::QueueType         ThreadPool::smMainThreadQueue;
 
 //--------------------------------------------------------------------------
 
-TorqueThreadPool::TorqueThreadPool( const char* name, U32 numThreads )
+ThreadPool::ThreadPool( const char* name, U32 numThreads )
    : mName( name ),
      mNumThreads( numThreads ),
      mNumThreadsAwake( 0 ),
@@ -347,14 +347,14 @@ TorqueThreadPool::TorqueThreadPool( const char* name, U32 numThreads )
 
 //--------------------------------------------------------------------------
 
-TorqueThreadPool::~TorqueThreadPool()
+ThreadPool::~ThreadPool()
 {
 	shutdown();
 }
 
 //--------------------------------------------------------------------------
 
-void TorqueThreadPool::shutdown()
+void ThreadPool::shutdown()
 {
    const U32 numThreads = mNumThreads;
    
@@ -387,7 +387,7 @@ void TorqueThreadPool::shutdown()
 
 //--------------------------------------------------------------------------
 
-void TorqueThreadPool::queueWorkItem( WorkItem* item )
+void ThreadPool::queueWorkItem( WorkItem* item )
 {
    bool executeRightAway = ( getForceAllMainThread() );
 #ifdef DEBUG_SPEW
@@ -410,7 +410,7 @@ void TorqueThreadPool::queueWorkItem( WorkItem* item )
 
 //--------------------------------------------------------------------------
 
-void TorqueThreadPool::flushWorkItems( S32 timeOut )
+void ThreadPool::flushWorkItems( S32 timeOut )
 {
    AssertFatal( mNumThreads, "ThreadPool::flushWorkItems() - no worker threads in pool" );
    
@@ -432,7 +432,7 @@ void TorqueThreadPool::flushWorkItems( S32 timeOut )
    }
 }
 
-void TorqueThreadPool::waitForAllItems( S32 timeOut )
+void ThreadPool::waitForAllItems( S32 timeOut )
 {
    U32 endTime = 0;
    if( timeOut != -1 )
@@ -454,14 +454,14 @@ void TorqueThreadPool::waitForAllItems( S32 timeOut )
 
 //--------------------------------------------------------------------------
 
-void TorqueThreadPool::queueWorkItemOnMainThread( WorkItem* item )
+void ThreadPool::queueWorkItemOnMainThread( WorkItem* item )
 {
    smMainThreadQueue.insert( item->getPriority(), item );
 }
 
 //--------------------------------------------------------------------------
 
-void TorqueThreadPool::processMainThreadWorkItems()
+void ThreadPool::processMainThreadWorkItems()
 {
    AssertFatal( ThreadManager::isMainThread(),
       "ThreadPool::processMainThreadWorkItems - this function must only be called on the main thread" );

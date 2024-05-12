@@ -177,7 +177,7 @@ class TheoraTexture : private IOutputStream< TheoraTextureFrame* >,
          
             ///
             FrameReadItem( AsyncBufferedInputStream< TheoraTextureFrame*, IInputStream< OggTheoraFrame* >* >* stream,
-                           TorqueThreadPool::Context* context );
+                           ThreadPool::Context* context );
       };
       
       /// Stream filter that turns a stream of OggTheoraFrames into a buffered background stream of TheoraTextureFrame

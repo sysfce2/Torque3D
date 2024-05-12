@@ -30,7 +30,7 @@ FIXTURE(ThreadPool)
 public:
    // Represents a single unit of work. In this test we just set an element in
    // a result vector.
-   struct TestItem : public TorqueThreadPool::WorkItem
+   struct TestItem : public ThreadPool::WorkItem
    {
       U32 mIndex;
       Vector<U32>& mResults;
@@ -46,7 +46,7 @@ public:
 
    // A worker that delays for some time. We'll use this to test the ThreadPool's
    // synchronous and asynchronous operations.
-   struct DelayItem : public TorqueThreadPool::WorkItem
+   struct DelayItem : public ThreadPool::WorkItem
    {
       U32 ms;
       DelayItem(U32 _ms) : ms(_ms) {}
@@ -69,7 +69,7 @@ TEST_FIX(ThreadPool, BasicAPI)
       results[i] = U32(-1);
 
    // Launch the work items.
-   TorqueThreadPool* pool = &TorqueThreadPool::GLOBAL();
+   ThreadPool* pool = &ThreadPool::GLOBAL();
    for (U32 i = 0; i < numItems; i++)
    {
       ThreadSafeRef<TestItem> item(new TestItem(i, results));
@@ -89,7 +89,7 @@ TEST_FIX(ThreadPool, Asynchronous)
    const U32 delay = 500; //ms
 
    // Launch a single delaying work item.
-   TorqueThreadPool* pool = &TorqueThreadPool::GLOBAL();
+   ThreadPool* pool = &ThreadPool::GLOBAL();
    ThreadSafeRef<DelayItem> item(new DelayItem(delay));
    pool->queueWorkItem(item);
 
@@ -107,7 +107,7 @@ TEST_FIX(ThreadPool, Synchronous)
    const U32 delay = 500; //ms
 
    // Launch a single delaying work item.
-   TorqueThreadPool* pool = &TorqueThreadPool::GLOBAL();
+   ThreadPool* pool = &ThreadPool::GLOBAL();
    ThreadSafeRef<DelayItem> item(new DelayItem(delay));
    pool->queueWorkItem(item);
 

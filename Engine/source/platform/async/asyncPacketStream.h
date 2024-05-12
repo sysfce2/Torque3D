@@ -113,7 +113,7 @@ class AsyncPacketBufferedInputStream : public AsyncBufferedInputStream< Packet*,
             PacketReadItem( const ThreadSafeRef< AsyncPacketBufferedInputStream< Stream, Packet > >& asyncStream,
                             PacketType* packet,
                             U32 numElements,
-                            TorqueThreadPool::Context* context = NULL )
+                            ThreadPool::Context* context = NULL )
                : Parent( asyncStream->getSourceStream(), numElements, 0, *packet, false, 0, context ),
                  mAsyncStream( asyncStream ),
                  mPacket( packet ) {}
@@ -227,7 +227,7 @@ class AsyncPacketBufferedInputStream : public AsyncBufferedInputStream< Packet*,
                               U32 numSourceElementsToRead = 0,
                               U32 numReadAhead = Parent::DEFAULT_STREAM_LOOKAHEAD,
                               bool isLooping = false,
-                              TorqueThreadPool* pool = &TorqueThreadPool::GLOBAL(),
+                              ThreadPool* pool = &ThreadPool::GLOBAL(),
                               ThreadContext* context = ThreadContext::ROOT_CONTEXT() );
       
       /// @return the size of stream packets returned by this stream in number of elements.
@@ -241,7 +241,7 @@ AsyncPacketBufferedInputStream< Stream, Packet >::AsyncPacketBufferedInputStream
             U32 numSourceElementsToRead,
             U32 numReadAhead,
             bool isLooping,
-            TorqueThreadPool* threadPool,
+            ThreadPool* threadPool,
             ThreadContext* threadContext )
    : Parent( stream, numSourceElementsToRead, numReadAhead, isLooping, threadPool, threadContext ),
      mPacketSize( packetSize ),

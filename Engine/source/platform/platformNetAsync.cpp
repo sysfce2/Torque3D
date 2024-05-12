@@ -65,11 +65,11 @@ struct NetAsync::NameLookupRequest
 
 /// Work item issued to the thread pool for each lookup request.
 
-struct NetAsync::NameLookupWorkItem : public TorqueThreadPool::WorkItem
+struct NetAsync::NameLookupWorkItem : public ThreadPool::WorkItem
 {
-   typedef TorqueThreadPool::WorkItem Parent;
+   typedef ThreadPool::WorkItem Parent;
 
-   NameLookupWorkItem( NameLookupRequest& request, TorqueThreadPool::Context* context = 0 )
+   NameLookupWorkItem( NameLookupRequest& request, ThreadPool::Context* context = 0 )
       : Parent( context ),
         mRequest( request )
    {
@@ -133,7 +133,7 @@ void NetAsync::queueLookup(const char* remoteAddr, NetSocket socket)
    dStrncpy(lookupRequest.remoteAddr, remoteAddr, sizeof(lookupRequest.remoteAddr));
 
    ThreadSafeRef< NameLookupWorkItem > workItem( new NameLookupWorkItem( lookupRequest ) );
-   TorqueThreadPool::GLOBAL().queueWorkItem( workItem );
+   ThreadPool::GLOBAL().queueWorkItem( workItem );
 }
 
 bool NetAsync::checkLookup(NetSocket socket, void* out_h_addr, 

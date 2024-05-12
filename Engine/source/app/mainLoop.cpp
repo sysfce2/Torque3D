@@ -262,7 +262,7 @@ void StandardMainLoop::init()
    RedBook::init();
    Platform::initConsole();
    
-   TorqueThreadPool::GlobalThreadPool::createSingleton();
+   ThreadPool::GlobalThreadPool::createSingleton();
 
    // Set engineAPI initialized to true
    engineAPI::gIsInitialized = true;
@@ -293,7 +293,7 @@ void StandardMainLoop::init()
 
    Con::setVariable("TorqueScriptFileExtension", TORQUE_SCRIPT_EXTENSION);
 
-   Con::addVariable( "_forceAllMainThread", TypeBool, &TorqueThreadPool::getForceAllMainThread(), "Force all work items to execute on main thread. turns this into a single-threaded system. Primarily useful to find whether malfunctions are caused by parallel execution or not.\n"
+   Con::addVariable( "_forceAllMainThread", TypeBool, &ThreadPool::getForceAllMainThread(), "Force all work items to execute on main thread. turns this into a single-threaded system. Primarily useful to find whether malfunctions are caused by parallel execution or not.\n"
 	   "@ingroup platform" );
 
 #if defined( TORQUE_MINIDUMP ) && defined( TORQUE_RELEASE )
@@ -351,7 +351,7 @@ void StandardMainLoop::shutdown()
    
    EngineModuleManager::shutdownSystem();
    
-   TorqueThreadPool::GlobalThreadPool::deleteSingleton();
+   ThreadPool::GlobalThreadPool::deleteSingleton();
 
 #ifdef TORQUE_ENABLE_VFS
    closeEmbeddedVFSArchive();
@@ -636,7 +636,7 @@ bool StandardMainLoop::doMainLoop()
       if(!Process::processEvents())
          keepRunning = false;
 
-      TorqueThreadPool::processMainThreadWorkItems();
+      ThreadPool::processMainThreadWorkItems();
       Sampler::endFrame();
       ConsoleValue::resetConversionBuffer();
       PROFILE_END_NAMED(MainLoop);
