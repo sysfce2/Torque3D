@@ -87,6 +87,6 @@ jobs:
             - name: Test Reporter
               uses: phoenix-actions/test-reporting@v14
               with:
-                name: ${{matrix.config.name}}
-                path: "**/My Projects/Torque3D/game/test_detail.xml"
+                name: Linux test results
+                path: "${{github.workspace}}/My Projects/Torque3D/game/test_detail.xml"
                 reporter: java-junit
