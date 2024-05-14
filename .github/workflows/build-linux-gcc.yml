@@ -84,8 +84,9 @@ jobs:
                 cd "${{github.workspace}}/My Projects/Torque3D/game"
                 ./Torque3D runTests.tscript
 
-            - name: Upload Artifact
-              uses: ./.github/actions/upload-artifact
+            - name: Test Reporter
+              uses: phoenix-actions/test-reporting@v14
               with:
-                name: torque3dLinuxGCCUnitTest
-                path: "${{github.workspace}}/My Projects/Torque3D/game/test_detail.xml"
+                name: ${{matrix.config.name}}
+                path: "**/My Projects/Torque3D/game/test_detail.xml"
+                reporter: java-junit
