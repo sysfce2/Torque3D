@@ -451,16 +451,16 @@ void GuiInspectorField::setWordData(const S32& wordIndex, const char* data, bool
 
          StringBuilder newFieldData;
          const U32 wordCount = StringUnit::getUnitCount(fieldData, " \t\n");
-         for (U32 i = 0; i < wordCount; i++)
+         for (U32 wc = 0; wc < wordCount; wc++)
          {
-            if (i != 0)
+            if (wc != 0)
                newFieldData.append(" ");
 
-            if (i == wordIndex)
+            if (wc == wordIndex)
                newFieldData.append(data);
             else
             {
-               newFieldData.append(StringUnit::getUnit(fieldData, i, " \t\n"));
+               newFieldData.append(StringUnit::getUnit(fieldData, wc, " \t\n"));
             }
          }
 
