@@ -1081,32 +1081,35 @@ function ActionEditCollision::updateCollision( %this, %type, %target, %depth, %m
 {
    %colDetailSize = -1;
    %colNode = "Col" @ %colDetailSize;
-
+   %colData = ShapeEdColWindow.lastColSettings;
+   %oldTarget = getField( %colData, 1 );
    // TreeView items are case sensitive, but TSShape names are not, so fixup case
    // if needed
    %index = ShapeEditor.shape.getNodeIndex( %colNode );
    if ( %index != -1 )
       %colNode = ShapeEditor.shape.getNodeName( %index );
 
-   // First remove the old detail and collision nodes
-   %meshList = ShapeEditor.getDetailMeshList( %colDetailSize );
-   %meshCount = getFieldCount( %meshList );
-   if ( %meshCount > 0 )
+   if(%target $= "Bounds" || %oldTarget $= "Bounds" || %target $= %oldTarget)
    {
-      ShapeEditor.shape.removeDetailLevel( %colDetailSize );
-      for ( %i = 0; %i < %meshCount; %i++ )
-         ShapeEdPropWindow.update_onMeshRemoved( getField( %meshList, %i ) );
-   }
+      // First remove the old detail and collision nodes
+      %meshList = ShapeEditor.getDetailMeshList( %colDetailSize );
+      %meshCount = getFieldCount( %meshList );
+      if ( %meshCount > 0 )
+      {
+         ShapeEditor.shape.removeDetailLevel( %colDetailSize );
+         for ( %i = 0; %i < %meshCount; %i++ )
+            ShapeEdPropWindow.update_onMeshRemoved( getField( %meshList, %i ) );
+      }
 
-   %nodeList = ShapeEditor.getNodeNames( %colNode, "" );
-   %nodeCount = getFieldCount( %nodeList );
-   if ( %nodeCount > 0 )
-   {
-      for ( %i = 0; %i < %nodeCount; %i++ )
-         ShapeEditor.shape.removeNode( getField( %nodeList, %i ) );
-      ShapeEdPropWindow.update_onNodeRemoved( %nodeList, %nodeCount );
+      %nodeList = ShapeEditor.getNodeNames( %colNode, "" );
+      %nodeCount = getFieldCount( %nodeList );
+      if ( %nodeCount > 0 )
+      {
+         for ( %i = 0; %i < %nodeCount; %i++ )
+            ShapeEditor.shape.removeNode( getField( %nodeList, %i ) );
+         ShapeEdPropWindow.update_onNodeRemoved( %nodeList, %nodeCount );
+      }
    }
-
    // Add the new node and geometry
    if ( %type $= "" )
       return;

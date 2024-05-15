@@ -1032,9 +1032,28 @@ DefineTSShapeConstructorMethod( addCollisionDetail, bool, ( S32 size, const char
          default:                objName = "ColConvex";    break;
       }
 
-      for ( S32 suffix = i; suffix != 0; suffix /= 26 )
-         objName += ('A' + ( suffix % 26 ) );
-      String meshName = objName + String::ToString( "%d", size );
+      S32 suffix = i;
+      while (true)
+      {
+         String tempName = objName;
+         if (suffix == 0)
+            suffix = 1;
+
+         for (S32 s = suffix; s != 0; s /= 26) {
+            tempName += ('A' + (s % 26));
+         }
+
+         if (mShape->findName(tempName) == -1)
+            break;
+
+         suffix++;
+      }
+
+      for (S32 s = suffix; s != 0; s /= 26) {
+         objName += ('A' + (s % 26));
+      }
+
+      String meshName = objName + String::ToString("%d", size);
 
       mShape->addMesh( mesh->tsmesh, meshName );
 
