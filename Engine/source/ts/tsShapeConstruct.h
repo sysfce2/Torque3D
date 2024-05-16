@@ -142,6 +142,7 @@ public:
       bool addCmd_setBounds(const Command& newCmd);
 
       bool addCmd_renameDetailLevel(const Command& newCmd);
+      bool addCmd_addDetailLevel(const Command& newCmd);
       bool addCmd_removeDetailLevel(const Command& newCmd);
       bool addCmd_setDetailSize(const Command& newCmd);
       bool addCmd_addImposter(const Command& newCmd);
@@ -253,6 +254,7 @@ public:
 
    /// @name Nodes
    ///@{
+   void cleanTargetNodes(const char* detail, const char* target);
    S32 getNodeCount();
    S32 getNodeIndex(const char* name);
    const char* getNodeName(S32 index);
@@ -265,7 +267,7 @@ public:
    TransformF getNodeTransform(const char* name, bool isWorld = false);
    bool setNodeTransform(const char* name, TransformF txfm, bool isWorld = false);
    bool renameNode(const char* oldName, const char* newName);
-   bool addNode(const char* name, const char* parentName, TransformF txfm = TransformF::Identity, bool isWorld = false);
+   bool addNode(const char* name, const char* parentName, const char* target = "", TransformF txfm = TransformF::Identity, bool isWorld = false);
    bool removeNode(const char* name);
    ///@}
 

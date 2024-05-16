@@ -1021,6 +1021,9 @@ DefineTSShapeConstructorMethod( addCollisionDetail, bool, ( S32 size, const char
       mShape->getNodeWorldTransform( nodeIndex, &mat );
       if ( !mat.isIdentity() )
          setNodeTransform( colNodeName, TransformF::Identity );
+
+      // clean node commands that are related to this target.
+      cleanTargetNodes(colNodeName, target);
    }
 
    // Add the meshes to the shape => 
@@ -1064,15 +1067,8 @@ DefineTSShapeConstructorMethod( addCollisionDetail, bool, ( S32 size, const char
       mShape->addMesh( mesh->tsmesh, meshName );
 
       // Add a node for this object if needed (non-identity transform)
-      if ( mesh->transform.isIdentity() )
-      {
-         mShape->setObjectNode( objName, colNodeName );
-      }
-      else
-      {
-         addNode( meshName, colNodeName, TransformF( mesh->transform ) );
-         mShape->setObjectNode( objName, meshName );
-      }
+      addNode( meshName, colNodeName, target, TransformF( mesh->transform ) );
+      mShape->setObjectNode( objName, meshName );
    }
 
    mShape->init();
