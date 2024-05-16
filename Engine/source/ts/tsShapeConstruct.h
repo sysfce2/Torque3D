@@ -267,7 +267,7 @@ public:
    TransformF getNodeTransform(const char* name, bool isWorld = false);
    bool setNodeTransform(const char* name, TransformF txfm, bool isWorld = false);
    bool renameNode(const char* oldName, const char* newName);
-   bool addNode(const char* name, const char* parentName, const char* target = "", TransformF txfm = TransformF::Identity, bool isWorld = false);
+   bool addNode(const char* name, const char* parentName, TransformF txfm = TransformF::Identity, bool isWorld = false, const char* target = "");
    bool removeNode(const char* name);
    ///@}
 

@@ -165,15 +165,15 @@ public:
 
    // Box
    void addBox( const Point3F& sides, const MatrixF& mat );
-   void fitOBB();
+   void fitOBB(const char* target);
 
    // Sphere
    void addSphere( F32 radius, const Point3F& center );
-   void fitSphere();
+   void fitSphere(const char* target);
 
    // Capsule
    void addCapsule( F32 radius, F32 height, const MatrixF& mat );
-   void fitCapsule();
+   void fitCapsule(const char* target);
 
    // k-DOP
    void fit10_DOP_X();
@@ -183,7 +183,7 @@ public:
    void fit26_DOP();
 
    // Convex Hulls
-   void fitConvexHulls( U32 depth, U32 fillType, F32 minPercentage, U32 maxHulls, U32 maxHullVerts,
+   void fitConvexHulls( const char* target, U32 depth, U32 fillType, F32 minPercentage, U32 maxHulls, U32 maxHullVerts,
                         F32 boxMaxError, F32 sphereMaxError, F32 capsuleMaxError );
 };
 
@@ -404,6 +404,7 @@ void MeshFit::addBox( const Point3F& sides, const MatrixF& mat )
       {
          Point3F v = mesh->mVerts[i];
          v.convolve(sides);
+         mat.mulP(v);
          mesh->mVerts[i] = v;
       }
 
@@ -416,23 +417,27 @@ void MeshFit::addBox( const Point3F& sides, const MatrixF& mat )
          TSMesh::__TSMeshVertexBase &vdata = mesh->mVertexData.getBase(i);
          Point3F v = vdata.vert();
          v.convolve(sides);
+         mat.mulP(v);
          vdata.vert(v);
       }
    }
 
    mesh->computeBounds();
-
-   mMeshes.increment();
    mMeshes.last().type = MeshFit::Box;
-   mMeshes.last().transform = mat;
    mMeshes.last().tsmesh = mesh;
 }
 
-void MeshFit::fitOBB()
+void MeshFit::fitOBB(const char* target)
 {
+   mMeshes.increment();
+   MatrixF worldtrans;
+   worldtrans.identity();
+   mShape->getNodeWorldTransform(mShape->findNode(target), &worldtrans);
+   mMeshes.last().transform = worldtrans;
+
    PrimFit primFitter;
    primFitter.fitBox( mVerts.size(), (F32*)mVerts.address() );
-   addBox( primFitter.mBoxSides, primFitter.mBoxTransform );
+   addBox( primFitter.mBoxSides, worldtrans.inverse() * primFitter.mBoxTransform );
 }
 
 //---------------------------
@@ -443,11 +448,15 @@ void MeshFit::addSphere( F32 radius, const Point3F& center )
    if ( !mesh )
       return;
 
+   MatrixF sphereMat(true);
+   sphereMat.setPosition(center);
+
    if (mesh->mVerts.size() > 0)
    {
       for (S32 i = 0; i < mesh->mVerts.size(); i++)
       {
          Point3F v = mesh->mVerts[i];
+         sphereMat.mulP(v);
          mesh->mVerts[i] = v * radius;
       }
 
@@ -459,26 +468,30 @@ void MeshFit::addSphere( F32 radius, const Point3F& center )
       {
          TSMesh::__TSMeshVertexBase& vdata = mesh->mVertexData.getBase(i);
          Point3F v = vdata.vert();
+         sphereMat.mulP(v);
          vdata.vert(v * radius);
       }
    }
 
 
    mesh->computeBounds();
-
-   mMeshes.increment();
-   MeshFit::Mesh& lastMesh = mMeshes.last();
-   lastMesh.type = MeshFit::Sphere;
-   lastMesh.transform.identity();
-   lastMesh.transform.setPosition(center);
-   lastMesh.tsmesh = mesh;
+   mMeshes.last().type = MeshFit::Sphere;
+   mMeshes.last().tsmesh = mesh;
 }
 
-void MeshFit::fitSphere()
+void MeshFit::fitSphere(const char* target)
 {
+   mMeshes.increment();
+   MatrixF worldtrans;
+   worldtrans.identity();
+   mShape->getNodeWorldTransform(mShape->findNode(target), &worldtrans);
+   mMeshes.last().transform = worldtrans;
+
    PrimFit primFitter;
    primFitter.fitSphere( mVerts.size(), (F32*)mVerts.address() );
-   addSphere( primFitter.mSphereRadius, primFitter.mSphereCenter );
+   worldtrans.inverse();
+   worldtrans.mulP(primFitter.mSphereCenter);
+   addSphere( primFitter.mSphereRadius, primFitter.mSphereCenter);
 }
 
 //---------------------------
@@ -489,6 +502,7 @@ void MeshFit::addCapsule( F32 radius, F32 height, const MatrixF& mat )
    if ( !mesh )
       return;
 
+   MatrixF capTrans = mMeshes.last().transform * mat;
    // Translate and scale the mesh verts
    height = mMax( 0, height );
    F32 offset = ( height / ( 2 * radius ) ) - 0.5f;
@@ -498,6 +512,7 @@ void MeshFit::addCapsule( F32 radius, F32 height, const MatrixF& mat )
       {
          Point3F v = mesh->mVerts[i];
          v.y += ((v.y > 0) ? offset : -offset);
+         capTrans.mulP(v);
          mesh->mVerts[i] = v * radius;
       }
 
@@ -510,22 +525,29 @@ void MeshFit::addCapsule( F32 radius, F32 height, const MatrixF& mat )
          TSMesh::__TSMeshVertexBase& vdata = mesh->mVertexData.getBase(i);
          Point3F v = vdata.vert();
          v.y += ((v.y > 0) ? offset : -offset);
+         capTrans.mulP(v);
          vdata.vert(v * radius);
       }
    }
 
    mesh->computeBounds();
 
-   mMeshes.increment();
+  
    mMeshes.last().type = MeshFit::Capsule;
-   mMeshes.last().transform = mat;
    mMeshes.last().tsmesh = mesh;
 }
 
-void MeshFit::fitCapsule()
+void MeshFit::fitCapsule(const char* target)
 {
+   mMeshes.increment();
+   MatrixF worldtrans;
+   worldtrans.identity();
+   mShape->getNodeWorldTransform(mShape->findNode(target), &worldtrans);
+   mMeshes.last().transform = worldtrans;
+
    PrimFit primFitter;
    primFitter.fitCapsule( mVerts.size(), (F32*)mVerts.address() );
+
    addCapsule( primFitter.mCapRadius, primFitter.mCapHeight, primFitter.mCapTransform );
 }
 
@@ -691,7 +713,7 @@ void MeshFit::fitK_DOP( const Vector<Point3F>& planes )
 
 //---------------------------
 // Best-fit set of convex hulls
-void MeshFit::fitConvexHulls( U32 depth, U32 fillType,  F32 minPercentage, U32 maxHulls, U32 maxHullVerts,
+void MeshFit::fitConvexHulls(const char* target, U32 depth, U32 fillType,  F32 minPercentage, U32 maxHulls, U32 maxHullVerts,
                               F32 boxMaxError, F32 sphereMaxError, F32 capsuleMaxError )
 {
    VHACD::IVHACD::Parameters p;
@@ -718,29 +740,37 @@ void MeshFit::fitConvexHulls( U32 depth, U32 fillType,  F32 minPercentage, U32 m
    {
       VHACD::IVHACD::ConvexHull ch;
       iface->GetConvexHull(i, ch);
-
+      mMeshes.increment();
+      MeshFit::Mesh& lastMesh = mMeshes.last();
       eMeshType meshType = MeshFit::Hull;
+      MatrixF worldtrans;
+      worldtrans.identity();
+      mShape->getNodeWorldTransform(mShape->findNode(target), &worldtrans);
+      lastMesh.transform = worldtrans;
+
+      worldtrans.inverse();
+      // Compute error between actual mesh and fitted primitives
+      F32* points = new F32[ch.m_points.size() * 3];
+      for (U32 pt = 0; pt < ch.m_points.size(); pt++)
+      {
+         Point3F point(ch.m_points[pt].mX, ch.m_points[pt].mY, ch.m_points[pt].mZ);
+         worldtrans.mulP(point);
+         points[pt * 3 + 0] = point.x;
+         points[pt * 3 + 1] = point.y;
+         points[pt * 3 + 2] = point.z;
+      }
+
+      U32* indices = new U32[ch.m_triangles.size() * 3];
+      for (U32 ind = 0; ind < ch.m_triangles.size(); ind++)
+      {
+         indices[ind * 3 + 0] = ch.m_triangles[ind].mI0;
+         indices[ind * 3 + 1] = ch.m_triangles[ind].mI1;
+         indices[ind * 3 + 2] = ch.m_triangles[ind].mI2;
+      }
 
       // Check if we can use a box, sphere or capsule primitive for this hull
       if (( boxMaxError > 0 ) || ( sphereMaxError > 0 ) || ( capsuleMaxError > 0 ))
       {
-         // Compute error between actual mesh and fitted primitives
-         F32* points = new F32[ch.m_points.size() * 3];
-         for (U32 pt = 0; pt < ch.m_points.size(); pt++)
-         {
-            points[pt * 3 + 0] = ch.m_points[pt].mX;
-            points[pt * 3 + 1] = ch.m_points[pt].mY;
-            points[pt * 3 + 2] = ch.m_points[pt].mZ;
-         }
-
-         U32* indices = new U32[ch.m_triangles.size() * 3];
-         for (U32 ind = 0; ind < ch.m_triangles.size(); ind++)
-         {
-            indices[ind * 3 + 0] = ch.m_triangles[ind].mI0;
-            indices[ind * 3 + 1] = ch.m_triangles[ind].mI1;
-            indices[ind * 3 + 2] = ch.m_triangles[ind].mI2;
-         }
-
          F32 meshVolume = FLOAT_MATH::fm_computeMeshVolume(points, ch.m_triangles.size(), indices);
          PrimFit primFitter;
 
@@ -787,42 +817,19 @@ void MeshFit::fitConvexHulls( U32 depth, U32 fillType,  F32 minPercentage, U32 m
          else if ( meshType == MeshFit::Capsule )
             addCapsule( primFitter.mCapRadius, primFitter.mCapHeight, primFitter.mCapTransform );
          // else fall through to Hull processing
-         
-         // cleanup
-         delete[] points;
-         delete[] indices;
       }
 
       if ( meshType == MeshFit::Hull )
       {
          // Create TSMesh from convex hull
-         mMeshes.increment();
-         MeshFit::Mesh& lastMesh = mMeshes.last();
          lastMesh.type = MeshFit::Hull;
-         lastMesh.transform.identity();
-
-         U32* indices = new U32[ch.m_triangles.size() * 3];
-         for (U32 ind = 0; ind < ch.m_triangles.size(); ind++)
-         {
-            indices[ind * 3 + 0] = ch.m_triangles[ind].mI0;
-            indices[ind * 3 + 1] = ch.m_triangles[ind].mI1;
-            indices[ind * 3 + 2] = ch.m_triangles[ind].mI2;
-         }
-
-         F32* points = new F32[ch.m_points.size() * 3];
-         for (U32 pt = 0; pt < ch.m_points.size(); pt++)
-         {
-            points[pt * 3 + 0] = ch.m_points[pt].mX;
-            points[pt * 3 + 1] = ch.m_points[pt].mY;
-            points[pt * 3 + 2] = ch.m_points[pt].mZ;
-         }
-
          lastMesh.tsmesh = createTriMesh(points, ch.m_points.size(), indices, ch.m_triangles.size());
          lastMesh.tsmesh->computeBounds();
 
-         delete[] points;
-         delete[] indices;
       }
+
+      delete[] points;
+      delete[] indices;
    }
 
    iface->Release();
@@ -929,7 +936,7 @@ DefineTSShapeConstructorMethod( addPrimitive, bool, ( const char* meshName, cons
    return true;
 }}
 
-DefineTSShapeConstructorMethod( addCollisionDetail, bool, ( S32 size, const char* type, const char* target, const char* fillMode, S32 depth, F32 minPercentage, S32 maxHulls, S32 maxVerts, F32 boxMaxError, F32 sphereMaxError, F32 capsuleMaxError ), ( "flood fill", 4, 10, 30, 32, 0, 0, 0),
+DefineTSShapeConstructorMethod( addCollisionDetail, bool, ( S32 size, const char* type, const char* target, const char* fillMode, S32 depth, F32 minPercentage, S32 maxHulls, S32 maxVerts, F32 boxMaxError, F32 sphereMaxError, F32 capsuleMaxError ), ( "bounds", "flood fill", 4, 10, 30, 32, 0, 0, 0),
    ( size, type, target, fillMode, depth, minPercentage, maxHulls, maxVerts, boxMaxError, sphereMaxError, capsuleMaxError ), false,
    "Autofit a mesh primitive or set of convex hulls to the shape geometry. Hulls "
    "may optionally be converted to boxes, spheres and/or capsules based on their "
@@ -950,8 +957,8 @@ DefineTSShapeConstructorMethod( addCollisionDetail, bool, ( S32 size, const char
    "@return true if successful, false otherwise\n\n"
    "@tsexample\n"
    "%this.addCollisionDetail( -1, \"box\", \"bounds\" );\n"
-   "%this.addCollisionDetail( -1, \"convex hulls\", \"bounds\", 4, 30, 30, 32, 0, 0, 0 );\n"
-   "%this.addCollisionDetail( -1, \"convex hulls\", \"bounds\",\"flood fill\", 4, 30, 30, 32, 50, 50, 50 );\n"
+   "%this.addCollisionDetail( -1, \"convex hulls\", \"bounds\", 4, 10, 30, 32, 0, 0, 0 );\n"
+   "%this.addCollisionDetail( -1, \"convex hulls\", \"bounds\",\"flood fill\", 4, 10, 30, 32, 50, 50, 50 );\n"
    "@endtsexample\n" )
 {
    MeshFit fit( mShape );
@@ -964,11 +971,11 @@ DefineTSShapeConstructorMethod( addCollisionDetail, bool, ( S32 size, const char
    }
 
    if ( !dStricmp( type, "box" ) )
-      fit.fitOBB();
+      fit.fitOBB(target);
    else if ( !dStricmp( type, "sphere" ) )
-      fit.fitSphere();
+      fit.fitSphere(target);
    else if ( !dStricmp( type, "capsule" ) )
-      fit.fitCapsule();
+      fit.fitCapsule(target);
    else if ( !dStricmp( type, "10-dop x" ) )
       fit.fit10_DOP_X();
    else if ( !dStricmp( type, "10-dop y" ) )
@@ -987,7 +994,7 @@ DefineTSShapeConstructorMethod( addCollisionDetail, bool, ( S32 size, const char
          fillType = 1;
       if (!dStricmp(fillMode, "raycast fill"))
          fillType = 2;
-      fit.fitConvexHulls( depth, fillType, minPercentage, maxHulls, maxVerts,
+      fit.fitConvexHulls( target, depth, fillType, minPercentage, maxHulls, maxVerts,
                            boxMaxError, sphereMaxError, capsuleMaxError );
    }
    else
@@ -1042,8 +1049,6 @@ DefineTSShapeConstructorMethod( addCollisionDetail, bool, ( S32 size, const char
       while (true)
       {
          String tempName = objName;
-         if (suffix == 0)
-            suffix = 1;
 
          for (S32 s = suffix; s != 0; s /= 26) {
             tempName += ('A' + (s % 26));
@@ -1064,7 +1069,7 @@ DefineTSShapeConstructorMethod( addCollisionDetail, bool, ( S32 size, const char
       mShape->addMesh( mesh->tsmesh, meshName );
 
       // Add a node for this object if needed (non-identity transform)
-      addNode( meshName, colNodeName, target, TransformF( mesh->transform ) );
+      addNode( meshName, colNodeName, TransformF( mesh->transform ), false, target);
       mShape->setObjectNode( objName, meshName );
    }
 
