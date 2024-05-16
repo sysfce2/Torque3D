@@ -936,8 +936,8 @@ DefineTSShapeConstructorMethod( addPrimitive, bool, ( const char* meshName, cons
    return true;
 }}
 
-DefineTSShapeConstructorMethod( addCollisionDetail, bool, ( S32 size, const char* type, const char* target, const char* fillMode, S32 depth, F32 minPercentage, S32 maxHulls, S32 maxVerts, F32 boxMaxError, F32 sphereMaxError, F32 capsuleMaxError ), ( "bounds", "flood fill", 4, 10, 30, 32, 0, 0, 0),
-   ( size, type, target, fillMode, depth, minPercentage, maxHulls, maxVerts, boxMaxError, sphereMaxError, capsuleMaxError ), false,
+DefineTSShapeConstructorMethod( addCollisionDetail, bool, ( S32 size, const char* type, const char* target, S32 depth, F32 minPercentage, S32 maxHulls, S32 maxVerts, F32 boxMaxError, F32 sphereMaxError, F32 capsuleMaxError, const char* fillMode), ( "bounds", 4, 10, 30, 32, 0, 0, 0, "flood fill"),
+   ( size, type, target, depth, minPercentage, maxHulls, maxVerts, boxMaxError, sphereMaxError, capsuleMaxError, fillMode), false,
    "Autofit a mesh primitive or set of convex hulls to the shape geometry. Hulls "
    "may optionally be converted to boxes, spheres and/or capsules based on their "
    "volume.\n"
@@ -946,7 +946,6 @@ DefineTSShapeConstructorMethod( addCollisionDetail, bool, ( S32 size, const char
       "26-dop, convex hulls. See the Shape Editor documentation for more details "
       "about these types.\n"
    "@param target geometry to fit collision mesh(es) to; either \"bounds\" (for the whole shape), or the name of an object in the shape\n"
-   "@param fillMode method for filling the voxels in the volume (hulls only)\n"
    "@param depth maximum split recursion depth (hulls only)\n"
    "@param minPercentage volume % error threshold (hulls only)\n"
    "@param maxHulls allowed to be generated (hulls only)\n"
@@ -954,6 +953,7 @@ DefineTSShapeConstructorMethod( addCollisionDetail, bool, ( S32 size, const char
    "@param boxMaxError max % volume difference for a hull to be converted to a box (hulls only)\n"
    "@param sphereMaxError max % volume difference for a hull to be converted to a sphere (hulls only)\n"
    "@param capsuleMaxError max % volume difference for a hull to be converted to a capsule (hulls only)\n"
+   "@param fillMode method for filling the voxels in the volume (hulls only)\n"
    "@return true if successful, false otherwise\n\n"
    "@tsexample\n"
    "%this.addCollisionDetail( -1, \"box\", \"bounds\" );\n"

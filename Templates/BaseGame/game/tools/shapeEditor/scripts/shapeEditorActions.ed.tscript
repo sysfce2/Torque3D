@@ -1055,18 +1055,17 @@ function ShapeEditor::doEditCollision( %this, %type, %target, %fillMode, %depth,
 
    %action.oldType = getField( %colData, 0 );
    %action.oldTarget = getField( %colData, 1 );
-   %action.oldFillMode = getField(%colData, 2);
-   %action.oldDepth = getField( %colData, 3 );
-   %action.oldMerge = getField( %colData, 4 );
-   %action.oldConcavity = getField( %colData, 5 );
-   %action.oldMaxVerts = getField( %colData, 6 );
-   %action.oldBoxMax = getField( %colData, 7 );
-   %action.oldSphereMax = getField( %colData, 8 );
-   %action.oldCapsuleMax = getField( %colData, 9 );
+   %action.oldDepth = getField( %colData, 2 );
+   %action.oldMerge = getField( %colData, 3 );
+   %action.oldConcavity = getField( %colData, 4 );
+   %action.oldMaxVerts = getField( %colData, 5 );
+   %action.oldBoxMax = getField( %colData, 6 );
+   %action.oldSphereMax = getField( %colData, 7 );
+   %action.oldCapsuleMax = getField( %colData, 8 );
+   %action.oldFillMode = getField(%colData, 9);
 
    %action.newType = %type;
    %action.newTarget = %target;
-   %action.newFillMode = %fillMode;
    %action.newDepth = %depth;
    %action.newMerge = %merge;
    %action.newConcavity = %concavity;
@@ -1074,6 +1073,7 @@ function ShapeEditor::doEditCollision( %this, %type, %target, %fillMode, %depth,
    %action.newBoxMax = %boxMax;
    %action.newSphereMax = %sphereMax;
    %action.newCapsuleMax = %capsuleMax;
+   %action.newFillMode = %fillMode;
 
    %this.doAction( %action );
 }
@@ -1095,9 +1095,9 @@ function ActionEditCollision::updateCollision( %this, %type, %target, %fillMode,
    if ( %type $= "" )
       return;
    
-   if ( !ShapeEditor.shape.addCollisionDetail( %colDetailSize, %type, %target, %fillMode,
+   if ( !ShapeEditor.shape.addCollisionDetail( %colDetailSize, %type, %target,
                                                 %depth, %merge, %concavity, %maxVerts,
-                                                %boxMax, %sphereMax, %capsuleMax ) )
+                                                %boxMax, %sphereMax, %capsuleMax, %fillMode) )
       return false;
       
    // Update UI
@@ -1107,8 +1107,8 @@ function ActionEditCollision::updateCollision( %this, %type, %target, %fillMode,
    for ( %i = 0; %i < %count; %i++ )
       ShapeEdPropWindow.update_onMeshAdded( getField( %meshList, %i ) );
 
-   ShapeEdColWindow.lastColSettings = %type TAB %target TAB %fillMode TAB %depth TAB %merge TAB
-      %concavity TAB %maxVerts TAB %boxMax TAB %sphereMax TAB %capsuleMax;
+   ShapeEdColWindow.lastColSettings = %type TAB %target TAB %depth TAB %merge TAB
+      %concavity TAB %maxVerts TAB %boxMax TAB %sphereMax TAB %capsuleMax TAB %fillMode ;
    ShapeEdColWindow.update_onCollisionChanged();
 
    return true;
