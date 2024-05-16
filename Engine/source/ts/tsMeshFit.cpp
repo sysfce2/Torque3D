@@ -183,7 +183,7 @@ public:
    void fit26_DOP();
 
    // Convex Hulls
-   void fitConvexHulls( U32 depth, F32 minPercentage, U32 maxHulls, U32 maxHullVerts,
+   void fitConvexHulls( U32 depth, U32 fillType, F32 minPercentage, U32 maxHulls, U32 maxHullVerts,
                         F32 boxMaxError, F32 sphereMaxError, F32 capsuleMaxError );
 };
 
@@ -691,11 +691,11 @@ void MeshFit::fitK_DOP( const Vector<Point3F>& planes )
 
 //---------------------------
 // Best-fit set of convex hulls
-void MeshFit::fitConvexHulls( U32 depth,  F32 minPercentage, U32 maxHulls, U32 maxHullVerts,
+void MeshFit::fitConvexHulls( U32 depth, U32 fillType,  F32 minPercentage, U32 maxHulls, U32 maxHullVerts,
                               F32 boxMaxError, F32 sphereMaxError, F32 capsuleMaxError )
 {
    VHACD::IVHACD::Parameters p;
-   p.m_fillMode = VHACD::FillMode::FLOOD_FILL;
+   p.m_fillMode = (VHACD::FillMode)fillType;
    p.m_maxNumVerticesPerCH = maxHullVerts;
    p.m_shrinkWrap = true;
    p.m_maxRecursionDepth = depth;
@@ -929,8 +929,8 @@ DefineTSShapeConstructorMethod( addPrimitive, bool, ( const char* meshName, cons
    return true;
 }}
 
-DefineTSShapeConstructorMethod( addCollisionDetail, bool, ( S32 size, const char* type, const char* target, S32 depth, F32 minPercentage, S32 maxHulls, S32 maxVerts, F32 boxMaxError, F32 sphereMaxError, F32 capsuleMaxError ), ( 4, 30, 30, 32, 0, 0, 0 ),
-   ( size, type, target, depth, minPercentage, maxHulls, maxVerts, boxMaxError, sphereMaxError, capsuleMaxError ), false,
+DefineTSShapeConstructorMethod( addCollisionDetail, bool, ( S32 size, const char* type, const char* target, const char* fillMode, S32 depth, F32 minPercentage, S32 maxHulls, S32 maxVerts, F32 boxMaxError, F32 sphereMaxError, F32 capsuleMaxError ), ( "flood fill", 4, 10, 30, 32, 0, 0, 0),
+   ( size, type, target, fillMode, depth, minPercentage, maxHulls, maxVerts, boxMaxError, sphereMaxError, capsuleMaxError ), false,
    "Autofit a mesh primitive or set of convex hulls to the shape geometry. Hulls "
    "may optionally be converted to boxes, spheres and/or capsules based on their "
    "volume.\n"
@@ -984,7 +984,13 @@ DefineTSShapeConstructorMethod( addCollisionDetail, bool, ( S32 size, const char
       fit.fit26_DOP();
    else if ( !dStricmp( type, "convex hulls" ) )
    {
-      fit.fitConvexHulls( depth, minPercentage, maxHulls, maxVerts,
+
+      U32 fillType = 0;
+      if (!dStricmp(fillMode, "surface only"))
+         fillType = 1;
+      if (!dStricmp(fillMode, "raycast fill"))
+         fillType = 2;
+      fit.fitConvexHulls( depth, fillType, minPercentage, maxHulls, maxVerts,
                            boxMaxError, sphereMaxError, capsuleMaxError );
    }
    else

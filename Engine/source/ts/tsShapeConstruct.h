@@ -100,7 +100,7 @@ public:
       {
          eCommandType      type;       // Command type
          StringTableEntry  name;       // Command name
-         static const U32 MAX_ARGS = 10;
+         static const U32 MAX_ARGS = 11;
          String            argv[MAX_ARGS];   // Command arguments
          S32               argc;       // Number of arguments
          Command() : type(CmdInvalid), name(0), argc(0) { }
@@ -315,7 +315,7 @@ public:
    const char* getImposterSettings(S32 index);
    S32 addImposter(S32 size, S32 equatorSteps, S32 polarSteps, S32 dl, S32 dim, bool includePoles, F32 polarAngle);
    bool removeImposter();
-   bool addCollisionDetail(S32 size, const char* type, const char* target, S32 depth = 4, F32 minPercentage = 10.0f, S32 maxHull = 30, S32 maxVerts = 32, F32 boxMaxError = 0, F32 sphereMaxError = 0, F32 capsuleMaxError = 0);
+   bool addCollisionDetail(S32 size, const char* type, const char* target, const char* fillMode = "flood fill", S32 depth = 4, F32 minPercentage = 10.0f, S32 maxHull = 30, S32 maxVerts = 32, F32 boxMaxError = 0, F32 sphereMaxError = 0, F32 capsuleMaxError = 0);
    ///@}
 
    /// @name Sequences
