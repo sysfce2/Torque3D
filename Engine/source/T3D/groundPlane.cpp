@@ -299,10 +299,8 @@ void GroundPlane::buildConvex( const Box3F& box, Convex* convex )
    {
       Point3F queryCenter = box.getCenter();
 
-      planeConvex->mCenter      = Point3F( queryCenter.x, queryCenter.y, 0 );
-      planeConvex->mSize        = Point3F( box.getExtents().x,
-                                         box.getExtents().y,
-                                         0 );
+      planeConvex->mCenter = Point3F( queryCenter.x, queryCenter.y, 0 );
+      planeConvex->mSize   = Point3F( box.getExtents().x, box.getExtents().y, 0 );
    }
 }
 
