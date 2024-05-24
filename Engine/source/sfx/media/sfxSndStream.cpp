@@ -139,13 +139,22 @@ U32 SFXSndStream::read(U8* buffer, U32 length)
       return 0;
    }
 
-   if (framesRead != sfinfo.frames)
+   if (framesRead != framesToRead)
    {
       Con::errorf("SFXSndStream - read: %s", sf_strerror(sndFile));
    }
 
-   // reset stream
-   setPosition(0);
+   // make sure we are more than 0 position.
+   if (getPosition() > 0)
+   {
+      // (convert to frames) == number of frames available?
+      if ((getPosition() / mFormat.getBytesPerSample()) == sfinfo.frames)
+      {
+         // reset stream
+         setPosition(0);
+      }
+   }
+   
 
    return framesRead * mFormat.getBytesPerSample();
 }
