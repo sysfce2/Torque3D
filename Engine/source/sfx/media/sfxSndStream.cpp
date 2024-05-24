@@ -59,12 +59,16 @@ bool SFXSndStream::_readHeader()
    case SF_FORMAT_PCM_16:
       bitsPerSample = 16;
       break;
+   case SF_FORMAT_VORBIS:
+      bitsPerSample = 16;
+      sf_command(sndFile, SFC_SET_SCALE_FLOAT_INT_READ, NULL, SF_TRUE);
+      sf_command(sndFile, SFC_SET_NORM_FLOAT, NULL, SF_TRUE);
+      break;
    case SF_FORMAT_PCM_24:
       bitsPerSample = 24;
       break;
    case SF_FORMAT_PCM_32:
    case SF_FORMAT_FLOAT:
-   case SF_FORMAT_VORBIS:
       bitsPerSample = 32;
       break;
    default:
@@ -121,6 +125,7 @@ U32 SFXSndStream::read(U8* buffer, U32 length)
       framesRead = sf_readf_int(sndFile, reinterpret_cast<int*>(buffer), framesToRead);
       break;
    case SF_FORMAT_PCM_16:
+   case SF_FORMAT_VORBIS:
       framesRead = sf_readf_short(sndFile, reinterpret_cast<short*>(buffer), framesToRead);
       break;
    case SF_FORMAT_PCM_24:
@@ -128,7 +133,6 @@ U32 SFXSndStream::read(U8* buffer, U32 length)
       break;
    case SF_FORMAT_PCM_32:
    case SF_FORMAT_FLOAT:
-   case SF_FORMAT_VORBIS:
       framesRead = sf_readf_float(sndFile, reinterpret_cast<float*>(buffer), framesToRead);
       break;
    default:
