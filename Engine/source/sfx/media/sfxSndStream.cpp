@@ -57,8 +57,11 @@ bool SFXSndStream::_readHeader()
       bitsPerSample = 8;
       break;
    case SF_FORMAT_PCM_16:
+      bitsPerSample = 16;
+      break;
    case SF_FORMAT_VORBIS:
       bitsPerSample = 16;
+      sf_command(sndFile, SFC_SET_SCALE_FLOAT_INT_READ, NULL, SF_TRUE);
       break;
    case SF_FORMAT_PCM_24:
       bitsPerSample = 24;
