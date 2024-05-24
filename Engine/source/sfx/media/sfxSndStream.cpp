@@ -62,7 +62,6 @@ bool SFXSndStream::_readHeader()
    case SF_FORMAT_VORBIS:
       bitsPerSample = 16;
       sf_command(sndFile, SFC_SET_SCALE_FLOAT_INT_READ, NULL, SF_TRUE);
-      sf_command(sndFile, SFC_SET_NORM_FLOAT, NULL, SF_TRUE);
       break;
    case SF_FORMAT_PCM_24:
       bitsPerSample = 24;
@@ -148,8 +147,8 @@ U32 SFXSndStream::read(U8* buffer, U32 length)
    // make sure we are more than 0 position.
    if (getPosition() > 0)
    {
-      // (convert to frames) == number of frames available?
-      if ((getPosition() / mFormat.getBytesPerSample()) == sfinfo.frames)
+      // (convert to frames) - number of frames available < MAX_BUFFER?
+      if (((getPosition() / mFormat.getBytesPerSample()) - sfinfo.frames) < MAX_BUFFER)
       {
          // reset stream
          setPosition(0);
