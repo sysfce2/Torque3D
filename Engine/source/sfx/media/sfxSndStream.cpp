@@ -105,13 +105,44 @@ void SFXSndStream::reset()
 
 U32 SFXSndStream::read(U8* buffer, U32 length)
 {
+   if (!sndFile)
+   {
+      Con::errorf("SFXSndStream - read: Called on uninitialized stream.");
+      return 0;
+   }
+
+   U32 framesToRead = length / mFormat.getBytesPerSample();
    U32 framesRead = 0;
 
-   framesRead = sf_readf_short(sndFile, (short*)buffer, sfinfo.frames);
+   switch (sfinfo.format & SF_FORMAT_SUBMASK)
+   {
+   case SF_FORMAT_PCM_S8:
+   case SF_FORMAT_PCM_U8:
+      framesRead = sf_readf_int(sndFile, reinterpret_cast<int*>(buffer), framesToRead);
+      break;
+   case SF_FORMAT_PCM_16:
+   case SF_FORMAT_VORBIS:
+      framesRead = sf_readf_short(sndFile, reinterpret_cast<short*>(buffer), framesToRead);
+      break;
+   case SF_FORMAT_PCM_24:
+      framesRead = sf_readf_int(sndFile, reinterpret_cast<int*>(buffer), framesToRead); // 24-bit usually stored in 32-bit containers
+      break;
+   case SF_FORMAT_PCM_32:
+   case SF_FORMAT_FLOAT:
+      framesRead = sf_readf_float(sndFile, reinterpret_cast<float*>(buffer), framesToRead);
+      break;
+   default:
+      Con::errorf("SFXSndStream - read: Unsupported format.");
+      return 0;
+   }
+
    if (framesRead != sfinfo.frames)
    {
       Con::errorf("SFXSndStream - read: %s", sf_strerror(sndFile));
    }
+
+   // reset stream
+   setPosition(0);
 
    return framesRead * mFormat.getBytesPerSample();
 }
