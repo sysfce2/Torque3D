@@ -60,13 +60,11 @@ bool SFXSndStream::_readHeader()
       bitsPerSample = 16;
       break;
    case SF_FORMAT_VORBIS:
-      bitsPerSample = 16;
-      sf_command(sndFile, SFC_SET_SCALE_FLOAT_INT_READ, NULL, SF_TRUE);
-      break;
    case SF_FORMAT_PCM_24:
    case SF_FORMAT_PCM_32:
    case SF_FORMAT_FLOAT:
-      bitsPerSample = 32;
+      bitsPerSample = 16;
+      sf_command(sndFile, SFC_SET_SCALE_FLOAT_INT_READ, NULL, SF_TRUE);
       break;
    default:
       // missed, set it to 16 anyway.
@@ -119,18 +117,14 @@ U32 SFXSndStream::read(U8* buffer, U32 length)
    {
    case SF_FORMAT_PCM_S8:
    case SF_FORMAT_PCM_U8:
-      framesRead = sf_readf_int(sndFile, reinterpret_cast<int*>(buffer), framesToRead);
+      framesRead = sf_readf_int(sndFile, (int*)buffer, framesToRead);
       break;
    case SF_FORMAT_PCM_16:
-      framesRead = sf_readf_short(sndFile, reinterpret_cast<short*>(buffer), framesToRead);
-      break;
    case SF_FORMAT_VORBIS:
-      framesRead = sf_readf_short(sndFile, reinterpret_cast<short*>(buffer), framesToRead);
-      break;
    case SF_FORMAT_PCM_24:
    case SF_FORMAT_PCM_32:
    case SF_FORMAT_FLOAT:
-      framesRead = sf_readf_float(sndFile, reinterpret_cast<float*>(buffer), framesToRead);
+      framesRead = sf_readf_short(sndFile, (short*)buffer, framesToRead);
       break;
    default:
       Con::errorf("SFXSndStream - read: Unsupported format.");
@@ -142,15 +136,11 @@ U32 SFXSndStream::read(U8* buffer, U32 length)
       Con::errorf("SFXSndStream - read: %s", sf_strerror(sndFile));
    }
 
-   // make sure we are more than 0 position.
-   if (getPosition() > 0)
+   // (convert to frames) - number of frames available < MAX_BUFFER? reset
+   if (((getPosition() / mFormat.getBytesPerSample()) - sfinfo.frames) < MAX_BUFFER)
    {
-      // (convert to frames) - number of frames available < MAX_BUFFER?
-      if (((getPosition() / mFormat.getBytesPerSample()) - sfinfo.frames) < MAX_BUFFER)
-      {
-         // reset stream
-         setPosition(0);
-      }
+      // reset stream
+      setPosition(0);
    }
    
 
