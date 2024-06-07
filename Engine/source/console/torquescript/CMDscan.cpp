@@ -2742,6 +2742,7 @@ void CMDSetScanBuffer(const char *sb, const char *fn)
    fileName = fn;
    scanIndex = 0;
    yylineno = 1;
+   lines.clear();
 }
 
 int CMDgetc()

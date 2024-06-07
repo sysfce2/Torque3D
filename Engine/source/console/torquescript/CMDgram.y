@@ -645,15 +645,18 @@ yyreport_syntax_error (const yypcontext_t *ctx)
          output += String::ToString("%s %s", i == 0 ? ": expected" : "or", yysymbol_name(expected[i]));
    }
 
-   if (lines.size() > 0) 
+   if(CMDGetCurrentFile())
    {
-      output += "\n";
-      for (int i = 0; i < lines.size(); i++)
+      if (lines.size() > 0) 
       {
-         int line = lines.size() - i;
-         output += String::ToString("%5d | ", loc->first_line - (line-1)) + lines[i] + "\n";
+         output += "\n";
+         for (int i = 0; i < lines.size(); i++)
+         {
+            int line = lines.size() - i;
+            output += String::ToString("%5d | ", loc->first_line - (line-1)) + lines[i] + "\n";
+         }
+         output += String::ToString("%5s | %*s", "", loc->first_column, "^");
       }
-      output += String::ToString("%5s | %*s", "", loc->first_column, "^");
    }
 
    yyerror(output.c_str());
