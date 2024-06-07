@@ -116,7 +116,8 @@ HEXDIGIT [a-fA-F0-9]
 ("///"([^/\n\r][^\n\r]*)?[\n\r]+)+ { return(Sc_ScanDocBlock()); }
 "//"[^\n\r]*   ;
 [\r]        ;
-\n.*        { yycolumn = 1;
+\n.*        { 
+   yycolumn = 1;
    lines.push_back(String::ToString("%s", yytext+1));
    if (lines.size() > Con::getIntVariable("$scriptErrorLineCount", 10))
       lines.erase(lines.begin());
