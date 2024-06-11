@@ -4014,9 +4014,9 @@ void Player::updateActionThread()
       mActionAnimation.callbackTripped = true;
    }
 
-   if ((mActionAnimation.action == PlayerData::NullAnimation) ||
-       ((!mActionAnimation.waitForEnd || mActionAnimation.atEnd) &&
-       (!mActionAnimation.holdAtEnd && (mActionAnimation.delayTicks -= !mMountPending) <= 0)))
+   if (mActionAnimation.action == PlayerData::NullAnimation || //no animation
+      ((!mActionAnimation.waitForEnd || (mActionAnimation.atEnd && !mActionAnimation.holdAtEnd) && //either not waiting till the end, or not holding that state
+         (mActionAnimation.delayTicks -= mMountPending) <= 0))) //not waiting to mount
    {
       pickActionAnimation();
    }
