@@ -377,6 +377,18 @@ static int Sc_ScanString(int ret)
    if(!collapseEscape(CMDtext+1))
       return -1;
 
+   const char* scannedStr = CMDtext + 1;
+
+   if (dStrcmp(scannedStr, "true") == 0) {
+      CMDlval.i = MakeToken<int>(1, yylineno);
+      return INTCONST;
+   }
+
+   if (dStrcmp(scannedStr, "false") == 0) {
+      CMDlval.i = MakeToken<int>(0, yylineno);
+      return INTCONST;
+   }
+
    dsize_t bufferLen = dStrlen( CMDtext );
    char* buffer = ( char* ) consoleAlloc( bufferLen );
    dStrcpy( buffer, CMDtext + 1, bufferLen );
