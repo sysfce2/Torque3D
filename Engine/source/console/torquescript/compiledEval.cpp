@@ -1163,6 +1163,14 @@ Con::EvalResult CodeBlock::exec(U32 ip, const char* functionName, Namespace* thi
          }
          ip = code[ip];
          break;
+      case OP_JMPSTRING:
+         if (stack[_STK--].getBool())
+         {
+            ip++;
+            break;
+         }
+         ip = code[ip];
+         break;
       case OP_JMPIFNOT_NP:
          if (stack[_STK].getInt())
          {

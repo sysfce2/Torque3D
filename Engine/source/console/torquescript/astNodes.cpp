@@ -211,10 +211,10 @@ U32 IfStmtNode::compileStmt(CodeStream& codeStream, U32 ip)
       integer = false;
    }
 
-   if (testType == TypeReqString)
+   if (testType == TypeReqString || testType == TypeReqNone)
    {
       ip = testExpr->compile(codeStream, ip, TypeReqString);
-      codeStream.emit(OP_JMPIFNOT);
+      codeStream.emit(OP_JMPSTRING);
    }
    else
    {

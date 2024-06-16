@@ -245,16 +245,7 @@ public:
       if (type == ConsoleValueType::cvSTEntry)
          return s == StringTable->EmptyString() ? 0 : dAtoi(s);
       if (type == ConsoleValueType::cvString)
-      {
-         if (dStricmp(s, "false") == 0) {
-            return 0;
-         }
-         else if (dStricmp(s, "true") == 0) {
-            return 1;
-         }
-
-         return dIsdigit(*s) ? dAtoi(s) : s == StringTable->EmptyString() ? 0 : 1;
-      }
+         return dStrcmp(s, "") == 0 ? 0 : dAtoi(s);
 
       return dAtoi(getConsoleData());
    }
