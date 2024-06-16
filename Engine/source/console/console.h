@@ -246,10 +246,10 @@ public:
          return s == StringTable->EmptyString() ? 0 : dAtoi(s);
       if (type == ConsoleValueType::cvString)
       {
-         if (dStrcmp(s, "false") == 0) {
+         if (dStricmp(s, "false") == 0) {
             return 0;
          }
-         else if (dStrcmp(s, "true") == 0) {
+         else if (dStricmp(s, "true") == 0) {
             return 1;
          }
 
