@@ -1147,6 +1147,14 @@ Con::EvalResult CodeBlock::exec(U32 ip, const char* functionName, Namespace* thi
 
          ip = code[ip];
          break;
+      case OP_JMPNOTSTRING:
+         if (stack[_STK--].getBool())
+         {
+            ip++;
+            break;
+         }
+         ip = code[ip];
+         break;
       case OP_JMPIFF:
          if (!stack[_STK--].getFloat())
          {
@@ -1157,14 +1165,6 @@ Con::EvalResult CodeBlock::exec(U32 ip, const char* functionName, Namespace* thi
          break;
       case OP_JMPIF:
          if (!stack[_STK--].getFloat())
-         {
-            ip++;
-            break;
-         }
-         ip = code[ip];
-         break;
-      case OP_JMPSTRING:
-         if (stack[_STK--].getBool())
          {
             ip++;
             break;
