@@ -107,21 +107,6 @@ function GameMenu::openGameMenu(%this, %menuName)
    %this.syncGui();
 }
 
-function openPauseMenuOptions()
-{
-   GameMenu.pushPage(OptionsMenu);
-}
-
-function pauseMenuExitToMenu()
-{
-   MessageBoxOKCancel("Exit?", "Do you wish to exit to the Main Menu?", "escapeFromGame();", "");
-}
-
-function pauseMenuExitToDesktop()
-{
-   MessageBoxOKCancel("Exit?", "Do you wish to exit to the desktop?", "quit();", "");
-}
-
 function GameMenuPrevMenu(%val)
 {
    if(%val)
