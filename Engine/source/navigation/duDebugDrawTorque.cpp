@@ -203,7 +203,6 @@ void duDebugDrawTorque::renderBuffer(Buffer &b)
          break;
             
        default:
-         PrimBuild::end();
          break;
       }
    }
