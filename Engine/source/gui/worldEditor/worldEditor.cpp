@@ -868,7 +868,7 @@ void WorldEditor::terrainSnapSelection(Selection* sel, U8 modifier, Point3F gizm
                rot.set(mDegToRad(-90.0f), 0.0f, mDegToRad(180.0f));
                break;
                
-            case default:
+            default:
                break;
          }
 

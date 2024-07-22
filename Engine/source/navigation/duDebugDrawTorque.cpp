@@ -202,8 +202,9 @@ void duDebugDrawTorque::renderBuffer(Buffer &b)
                             buf[i].data.color.a);
          break;
             
-         case default:
-            break;
+       default:
+         PrimBuild::end();
+         break;
       }
    }
    PrimBuild::end();
