@@ -2806,11 +2806,11 @@ DefineEngineFunction(getTimestamp, const char*, (), ,
 #ifdef TORQUE_TOOLS
 DefineEngineFunction(systemCommand, S32, (const char* commandLineAction, const char* callBackFunction), (""), "")
 {
-   if (callBackFunction[0] != '\0')
+   if (commandLineAction && commandLineAction[0] != '\0')
    {
       S32 result = system(commandLineAction);
 
-      if (callBackFunction[0])
+      if (callBackFunction && callBackFunction[0] != '\0')
       {
          if (Con::isFunction(callBackFunction))
             Con::executef(callBackFunction, result);
