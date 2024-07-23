@@ -153,8 +153,6 @@ static void format_token(char *target, const xuuid_t *u)
             u->node[0], u->node[1], u->node[2],
             u->node[3], u->node[4], u->node[5]);
    
-   target = (char*)dMalloc(len+1);
-   
    snprintf(target, len, "%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x",
             u->time_low, u->time_mid, u->time_hi_and_version,
             u->clock_seq_hi_and_reserved, u->clock_seq_low,
