@@ -146,7 +146,7 @@ static void create_uuid_state(uuid_state *st)
  */
 static void format_token(char *target, const xuuid_t *u)
 {
-   snprintf(target, sizeof(target), "%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x",
+   snprintf(target, strlen(target), "%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x",
             u->time_low, u->time_mid, u->time_hi_and_version,
             u->clock_seq_hi_and_reserved, u->clock_seq_low,
             u->node[0], u->node[1], u->node[2],
