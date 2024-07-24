@@ -88,12 +88,12 @@ function UI::initClient(%this)
 
 function UI::onCreateClientConnection(%this)
 {
-   GameMenuActionMap.push();
+   GameMenuToggleActionMap.push();
 }
 
 function UI::onDestroyClientConnection(%this)
 {
-   GameMenuActionMap.pop();
+   GameMenuToggleActionMap.pop();
 }
 
 function UI::registerGameMenus(%this, %menusArrayObj)
