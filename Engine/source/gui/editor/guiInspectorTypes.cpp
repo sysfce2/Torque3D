@@ -1520,7 +1520,7 @@ StringTableEntry GuiInspectorTypeBitMask32::getValue()
 
 void GuiInspectorTypeBitMask32::setValue( StringTableEntry value )
 {
-   U32 mask = dAtoui( value, 0 );
+   U32 mask = dAtoui( value );
 
    for ( U32 i = 0; i < mArrayCtrl->size(); i++ )
    {

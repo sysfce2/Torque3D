@@ -867,6 +867,9 @@ void WorldEditor::terrainSnapSelection(Selection* sel, U8 modifier, Point3F gizm
             case AlignNegZ:
                rot.set(mDegToRad(-90.0f), 0.0f, mDegToRad(180.0f));
                break;
+               
+            default:
+               break;
          }
 
          MatrixF mat = MathUtils::createOrientFromDir(ri.normal);
@@ -1999,7 +2002,7 @@ void WorldEditor::on3DMouseMove(const Gui3DMouseEvent & event)
    if ( !mHitObject )
    {
       SceneObject *hitObj = NULL;
-      if ( collide(event, &hitObj) && !hitObj->isDeleted() && hitObj->isSelectionEnabled() && !objClassIgnored(hitObj) )
+      if ( collide(event, &hitObj) && hitObj && !hitObj->isDeleted() && hitObj->isSelectionEnabled() && !objClassIgnored(hitObj) )
       {
          mHitObject = hitObj;
       }
@@ -2060,7 +2063,7 @@ void WorldEditor::on3DMouseDown(const Gui3DMouseEvent & event)
    }   
 
    SceneObject *hitObj = NULL;
-   if ( collide( event, &hitObj ) && hitObj->isSelectionEnabled() && !objClassIgnored( hitObj ) )
+   if ( collide( event, &hitObj ) && hitObj && hitObj->isSelectionEnabled() && !objClassIgnored( hitObj ) )
    {
       mPossibleHitObject = hitObj;
       mNoMouseDrag = true;
