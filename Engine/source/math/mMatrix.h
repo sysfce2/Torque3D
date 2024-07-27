@@ -620,4 +620,283 @@ inline void mTransformPlane(const MatrixF& mat, const Point3F& scale, const Plan
    m_matF_x_scale_x_planeF(mat, &scale.x, &plane.x, &result->x);
 }
 
+//------------------------------------
+// Templatized matrix class to replace MATRIXF above
+// row-major for now, since torque says it uses that
+// but in future could cut down on transpose calls if
+// we switch to column major.
+//------------------------------------
+
+template<typename DATA_TYPE, U32 rows, U32 cols>
+class Matrix {
+   friend class MatrixTemplateExport;
+private:
+   DATA_TYPE data[rows * cols];
+
+public:
+
+   static_assert(rows >= 2 && cols >= 2, "Matrix must have at least 2 rows and 2 cols.");
+
+   // ------ Setters and initializers ------
+   explicit Matrix(bool identity = false) {
+      std::fill(data, data + (rows * cols), DATA_TYPE(0));
+
+      if (identity) {
+         for (U32 i = 0; i < rows; i++) {
+            for (U32 j = 0; j < cols; j++) {
+               // others already get filled with 0
+               if (j == i)
+                  (*this)(i, j) = static_cast<DATA_TYPE>(1);
+            }
+         }
+      }
+   }
+
+   explicit Matrix(const EulerF& e);
+   /// Make this an identity matrix.
+   Matrix<DATA_TYPE, rows, cols>& identity();
+
+   Matrix<DATA_TYPE, rows, cols>& set(const EulerF& e);
+
+   Matrix(const EulerF& e, const Point3F p);
+   Matrix<DATA_TYPE, rows, cols>& set(const EulerF& e, const Point3F p);
+
+   Matrix<DATA_TYPE, rows, cols>& inverse();
+   Matrix<DATA_TYPE, rows, cols>& transpose();
+   void invert();
+
+   Matrix<DATA_TYPE, rows, cols>& setCrossProduct(const Point3F& p);
+   Matrix<DATA_TYPE, rows, cols>& setTensorProduct(const Point3F& p, const Point3F& q);
+
+   /// M * Matrix(p) -> M
+   Matrix<DATA_TYPE, rows, cols>& scale(const Point3F& s);
+   Matrix<DATA_TYPE, rows, cols>& scale(DATA_TYPE s) { return scale(Point3F(s, s, s)); }
+
+   // ------ Getters ------
+   bool isAffine() const;
+   Point3F getScale() const;
+   EulerF toEuler() const;
+
+   Point3F getPosition() const;
+
+   void getColumn(S32 col, Point4F* cptr) const;
+   Point4F getColumn4F(S32 col) const { Point4F ret; getColumn(col, &ret); return ret; }
+
+   void getColumn(S32 col, Point3F* cptr) const;
+   Point3F getColumn3F(S32 col) const { Point3F ret; getColumn(col, &ret); return ret; }
+
+   void getRow(S32 row, Point4F* cptr) const;
+   Point4F getRow4F(S32 row) const { Point4F ret; getRow(row, &ret); return ret; }
+
+   void getRow(S32 row, Point3F* cptr) const;
+   Point3F getRow3F(S32 row) const { Point3F ret; getRow(row, &ret); return ret; }
+
+   DATA_TYPE* getData() {
+      return data;
+   }
+
+   const DATA_TYPE* getData() const {
+      return data;
+   }
+
+   void dumpMatrix(const char* caption = NULL) const;
+   // Static identity matrix
+   static const Matrix Identity;
+
+   // ------ Operators ------
+
+   operator DATA_TYPE* () { return (data); }
+   operator const DATA_TYPE* () const { return (DATA_TYPE*)(data); }
+
+   DATA_TYPE& operator()(U32 row, U32 col) {
+      if (row >= rows || col >= cols)
+         AssertFatal(false, "Matrix indices out of range");
+
+      return data[col * rows + row];
+   }
+
+   const DATA_TYPE& operator()(U32 row, U32 col) const {
+      if (row >= rows || col >= cols)
+         AssertFatal(false, "Matrix indices out of range");
+
+      return data[col * rows + row];
+   }
+
+};
+
+//--------------------------------------------
+// INLINE FUNCTIONS
+//--------------------------------------------
+template<typename DATA_TYPE, U32 rows, U32 cols>
+inline Matrix<DATA_TYPE, rows, cols>& Matrix<DATA_TYPE, rows, cols>::transpose()
+{
+   // square matrices can just swap, non square requires a temp mat.
+   if (rows == cols) {
+      for (U32 i = 0; i < rows; i++) {
+         for (U32 j = 0; j < cols; j++) {
+            std::swap((*this)(j, i), (*this)(i, j));
+         }
+      }
+   }
+   else {
+      Matrix<DATA_TYPE, rows, cols> result;
+      for (U32 i = 0; i < rows; i++) {
+         for (U32 j = 0; j < cols; j++) {
+            result(j, i) = (*this)(i, j);
+         }
+      }
+      std::copy(std::begin(result.data), std::end(result.data), std::begin(data));
+   }
+
+   return (*this);
+}
+
+template<typename DATA_TYPE, U32 rows, U32 cols>
+inline Matrix<DATA_TYPE, rows, cols>& Matrix<DATA_TYPE, rows, cols>::identity()
+{
+   for (U32 i = 0; i < rows; i++) {
+      for (U32 j = 0; j < cols; j++) {
+         if (j == i)
+            (*this)(i, j) = static_cast<DATA_TYPE>(1);
+         else
+            (*this)(i, j) = static_cast<DATA_TYPE>(0);
+      }
+   }
+
+   return (*this);
+}
+
+template<typename DATA_TYPE, U32 rows, U32 cols>
+inline Matrix<DATA_TYPE, rows, cols>& Matrix<DATA_TYPE, rows, cols>::scale(const Point3F& s)
+{
+   // torques scale applies directly, does not create another matrix to multiply with the translation matrix.
+   AssertFatal(rows >= 3 && cols >= 3, "Scale can only be applied 3x3 or more");
+   for (U32 i = 0; i < 3; i++) {
+      for (U32 j = 0; j < 3; j++) {
+         DATA_TYPE scale = (i == 0) ? s.x : (i == 1) ? s.y : s.z;
+         (*this)(i, j) *= scale;
+      }
+   }
+
+   return (*this);
+}
+
+template<typename DATA_TYPE, U32 rows, U32 cols>
+inline Point3F Matrix<DATA_TYPE, rows, cols>::getScale() const
+{
+   // this function assumes the matrix has scale applied through the scale(const Point3F& s) function.
+   // for now assume float since we have point3F.
+   AssertFatal(rows >= 3 && cols >= 3, "Scale can only be applied 3x3 or more");
+
+   Point3F scale;
+
+   scale.x = mSqrt((*this)(0, 0) * (*this)(0, 0) + (*this)(1, 0) * (*this)(1, 0) + (*this)(2, 0) * (*this)(2, 0));
+   scale.y = mSqrt((*this)(0, 1) * (*this)(0, 1) + (*this)(1, 1) * (*this)(1, 1) + (*this)(2, 1) * (*this)(2, 1));
+   scale.z = mSqrt((*this)(0, 2) * (*this)(0, 2) + (*this)(1, 2) * (*this)(1, 2) + (*this)(2, 2) * (*this)(2, 2));
+
+   return scale;
+}
+
+
+
+template<typename DATA_TYPE, U32 rows, U32 cols>
+inline Point3F Matrix<DATA_TYPE, rows, cols>::getPosition() const
+{
+   Point3F pos;
+   getColumn(3, &pos);
+   return pos;
+}
+
+template<typename DATA_TYPE, U32 rows, U32 cols>
+inline void Matrix<DATA_TYPE, rows, cols>::getColumn(S32 col, Point4F* cptr) const
+{
+   if (rows >= 2)
+   {
+      cptr->x = (*this)(0, col);
+      cptr->y = (*this)(1, col);
+   }
+
+   if (rows >= 3)
+      cptr->z = (*this)(2, col);
+   else
+      cptr->z = 0.0f;
+
+   if (rows >= 4)
+      cptr->w = (*this)(3, col);
+   else
+      cptr->w = 0.0f;
+}
+
+template<typename DATA_TYPE, U32 rows, U32 cols>
+inline void Matrix<DATA_TYPE, rows, cols>::getColumn(S32 col, Point3F* cptr) const
+{
+   if (rows >= 2)
+   {
+      cptr->x = (*this)(0, col);
+      cptr->y = (*this)(1, col);
+   }
+
+   if (rows >= 3)
+      cptr->z = (*this)(2, col);
+   else
+      cptr->z = 0.0f;
+}
+
+template<typename DATA_TYPE, U32 rows, U32 cols>
+inline void Matrix<DATA_TYPE, rows, cols>::getRow(S32 row, Point4F* cptr) const
+{
+   if (cols >= 2)
+   {
+      cptr->x = (*this)(row, 0);
+      cptr->y = (*this)(row, 1);
+   }
+
+   if (cols >= 3)
+      cptr->z = (*this)(row, 2);
+   else
+      cptr->z = 0.0f;
+
+   if (cols >= 4)
+      cptr->w = (*this)(row, 3);
+   else
+      cptr->w = 0.0f;
+}
+
+template<typename DATA_TYPE, U32 rows, U32 cols>
+inline void Matrix<DATA_TYPE, rows, cols>::getRow(S32 row, Point3F* cptr) const
+{
+   if (cols >= 2)
+   {
+      cptr->x = (*this)(row, 0);
+      cptr->y = (*this)(row, 1);
+   }
+
+   if (cols >= 3)
+      cptr->z = (*this)(row, 2);
+   else
+      cptr->z = 0.0f;
+}
+
+//--------------------------------------------
+// INLINE FUNCTIONS END
+//--------------------------------------------
+
+typedef Matrix<F32, 4, 4> Matrix4F;
+
+class MatrixTemplateExport
+{
+public:
+   template <typename T, U32 rows, U32 cols>
+   static EngineFieldTable::Field getMatrixField();
+};
+
+template<typename T, U32 rows, U32 cols>
+inline EngineFieldTable::Field MatrixTemplateExport::getMatrixField()
+{
+   typedef Matrix<T, rows, cols> ThisType;
+   return _FIELD_AS(T, data, data, rows * cols, "");
+}
+
+
+
 #endif //_MMATRIX_H_
