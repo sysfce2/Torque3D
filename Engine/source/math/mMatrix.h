@@ -672,9 +672,17 @@ public:
    Matrix<DATA_TYPE, rows, cols>& scale(const Point3F& s);
    Matrix<DATA_TYPE, rows, cols>& scale(DATA_TYPE s) { return scale(Point3F(s, s, s)); }
 
+   void setColumn(S32 col, const Point4F& cptr);
+   void setColumn(S32 col, const Point3F& cptr);
+   
+   void setRow(S32 row, const Point4F& cptr);
+   void setRow(S32 row, const Point3F& cptr);
+   
    // ------ Getters ------
    bool isAffine() const;
+   bool isIdentity() const;
    Point3F getScale() const;
+   
    EulerF toEuler() const;
 
    Point3F getPosition() const;
@@ -782,6 +790,26 @@ inline Matrix<DATA_TYPE, rows, cols>& Matrix<DATA_TYPE, rows, cols>::scale(const
 }
 
 template<typename DATA_TYPE, U32 rows, U32 cols>
+inline bool Matrix<DATA_TYPE, rows, cols>::isIdentity() const {
+   for (U32 i = 0; i < rows; i++) {
+      for (U32 j = 0; j < cols; j++) {
+         if (j == i) {
+            if((*this)(i, j) != static_cast<DATA_TYPE>(1)) {
+               return false;
+            }
+         }
+         else {
+            if((*this)(i, j) != static_cast<DATA_TYPE>(0)) {
+               return false;
+            }
+         }
+      }
+   }
+   
+   return true;
+}
+
+template<typename DATA_TYPE, U32 rows, U32 cols>
 inline Point3F Matrix<DATA_TYPE, rows, cols>::getScale() const
 {
    // this function assumes the matrix has scale applied through the scale(const Point3F& s) function.
@@ -843,6 +871,34 @@ inline void Matrix<DATA_TYPE, rows, cols>::getColumn(S32 col, Point3F* cptr) con
 }
 
 template<typename DATA_TYPE, U32 rows, U32 cols>
+inline void Matrix<DATA_TYPE, rows, cols>::setColumn(S32 col, const Point4F &cptr) {
+   if(rows >= 2)
+   {
+      (*this)(0, col) = cptr.x;
+      (*this)(1, col) = cptr.y;
+   }
+   
+   if(rows >= 3)
+      (*this)(2, col) = cptr.z;
+   
+   if(rows >= 4)
+      (*this)(3, col) = cptr.w;
+}
+
+template<typename DATA_TYPE, U32 rows, U32 cols>
+inline void Matrix<DATA_TYPE, rows, cols>::setColumn(S32 col, const Point3F &cptr) {
+   if(rows >= 2)
+   {
+      (*this)(0, col) = cptr.x;
+      (*this)(1, col) = cptr.y;
+   }
+   
+   if(rows >= 3)
+      (*this)(2, col) = cptr.z;
+   
+}
+
+template<typename DATA_TYPE, U32 rows, U32 cols>
 inline void Matrix<DATA_TYPE, rows, cols>::getRow(S32 row, Point4F* cptr) const
 {
    if (cols >= 2)
@@ -875,6 +931,34 @@ inline void Matrix<DATA_TYPE, rows, cols>::getRow(S32 row, Point3F* cptr) const
       cptr->z = (*this)(row, 2);
    else
       cptr->z = 0.0f;
+}
+
+template<typename DATA_TYPE, U32 rows, U32 cols>
+inline void Matrix<DATA_TYPE, rows, cols>::setRow(S32 row, const Point4F& cptr) {
+   if(cols >= 2)
+   {
+      (*this)(row, 0) = cptr.x;
+      (*this)(row, 1) = cptr.y;
+   }
+   
+   if(cols >= 3)
+      (*this)(row, 2) = cptr.z;
+   
+   if(cols >= 4)
+      (*this)(row, 3) = cptr.w;
+}
+
+template<typename DATA_TYPE, U32 rows, U32 cols>
+inline void Matrix<DATA_TYPE, rows, cols>::setRow(S32 row, const Point3F& cptr) {
+   if(cols >= 2)
+   {
+      (*this)(row, 0) = cptr.x;
+      (*this)(row, 1) = cptr.y;
+   }
+   
+   if(cols >= 3)
+      (*this)(row, 2) = cptr.z;
+   
 }
 
 //--------------------------------------------
