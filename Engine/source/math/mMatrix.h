@@ -750,8 +750,8 @@ public:
 
       return false;
    }
-   // col * rows + row
-   static U32 idx(U32 i, U32 j) { return (i * rows + j); }
+   // row + col * cols
+   static U32 idx(U32 i, U32 j) { return (i + j * cols); }
    bool isAffine() const;
    bool isIdentity() const;
    /// Take inverse of matrix assuming it is affine (rotation,
@@ -893,14 +893,14 @@ public:
       if (row >= rows || col >= cols)
          AssertFatal(false, "Matrix indices out of range");
 
-      return data[col * rows + row];
+      return data[idx(col,row)];
    }
 
    const DATA_TYPE& operator () (U32 row, U32 col) const {
       if (row >= rows || col >= cols)
          AssertFatal(false, "Matrix indices out of range");
 
-      return data[col * rows + row];
+      return data[idx(col, row)];
    }
 
 };
@@ -911,23 +911,13 @@ public:
 template<typename DATA_TYPE, U32 rows, U32 cols>
 inline Matrix<DATA_TYPE, rows, cols>& Matrix<DATA_TYPE, rows, cols>::transpose()
 {
-   // square matrices can just swap, non square requires a temp mat.
-   if (rows == cols) {
-      for (U32 i = 0; i < rows; i++) {
-         for (U32 j = 0; j < cols; j++) {
-            std::swap((*this)(j, i), (*this)(i, j));
-         }
+   Matrix<DATA_TYPE, rows, cols> result;
+   for (U32 i = 0; i < rows; i++) {
+      for (U32 j = 0; j < cols; j++) {
+         result(j, i) = (*this)(i, j);
       }
    }
-   else {
-      Matrix<DATA_TYPE, rows, cols> result;
-      for (U32 i = 0; i < rows; i++) {
-         for (U32 j = 0; j < cols; j++) {
-            result(j, i) = (*this)(i, j);
-         }
-      }
-      std::copy(std::begin(result.data), std::end(result.data), std::begin(data));
-   }
+   std::copy(std::begin(result.data), std::end(result.data), std::begin(data));
 
    return (*this);
 }
