@@ -796,15 +796,8 @@ public:
       }
    }
 
-   void invertTo(Matrix<DATA_TYPE, cols, rows>* matrix) {
-      Matrix<DATA_TYPE, rows, cols> invMatrix = this->inverse();
-
-      for (U32 i = 0; i < rows; ++i) {
-         for (U32 j = 0; j < cols; ++j) {
-            (*matrix)(j, i) = invMatrix(i, j);
-         }
-      }
-   }
+   void invertTo(Matrix<DATA_TYPE, cols, rows>* matrix) const;
+   void invertTo(Matrix<DATA_TYPE, cols, rows>* matrix);
 
    void dumpMatrix(const char* caption = NULL) const;
    // Static identity matrix
@@ -1155,6 +1148,47 @@ inline VectorF Matrix<DATA_TYPE, rows, cols>::getUpVector() const
    VectorF vec;
    getColumn(2, &vec);
    return vec;
+}
+
+template<typename DATA_TYPE, U32 rows, U32 cols>
+inline void Matrix<DATA_TYPE, rows, cols>::invertTo(Matrix<DATA_TYPE, cols, rows>* matrix) const
+{
+   Matrix<DATA_TYPE, rows, cols> invMatrix;
+   for (U32 i = 0; i < rows; ++i) {
+      for (U32 j = 0; j < cols; ++j) {
+         invMatrix(i, j) = (*this)(i, j);
+      }
+   }
+
+   invMatrix.inverse();
+
+   for (U32 i = 0; i < rows; ++i) {
+      for (U32 j = 0; j < cols; ++j) {
+         (*matrix)(j, i) = invMatrix(i, j);
+      }
+   }
+
+   (*matrix)(3, 0) = (*this)(3, 0);
+   (*matrix)(3, 1) = (*this)(3, 1);
+   (*matrix)(3, 2) = (*this)(3, 2);
+   (*matrix)(3, 3) = (*this)(3, 3);
+}
+
+template<typename DATA_TYPE, U32 rows, U32 cols>
+inline void Matrix<DATA_TYPE, rows, cols>::invertTo(Matrix<DATA_TYPE, cols, rows>* matrix)
+{
+   Matrix<DATA_TYPE, rows, cols> invMatrix = this->inverse();
+
+   for (U32 i = 0; i < rows; ++i) {
+      for (U32 j = 0; j < cols; ++j) {
+         (*matrix)(i, j) = invMatrix(i, j);
+      }
+   }
+
+   (*matrix)(3, 0) = (*this)(3, 0);
+   (*matrix)(3, 1) = (*this)(3, 1);
+   (*matrix)(3, 2) = (*this)(3, 2);
+   (*matrix)(3, 3) = (*this)(3, 3);
 }
 
 template<typename DATA_TYPE, U32 rows, U32 cols>
