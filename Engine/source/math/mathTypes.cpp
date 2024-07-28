@@ -108,6 +108,13 @@ IMPLEMENT_STRUCT( MatrixF,
    MatrixFEngineExport::getMatrixField(),
 
 END_IMPLEMENT_STRUCT;
+IMPLEMENT_STRUCT(Matrix4F,
+   Matrix4F, MathTypes,
+   "")
+
+   MatrixTemplateExport::getMatrixField<F32, 4, 4>(),
+
+   END_IMPLEMENT_STRUCT;
 IMPLEMENT_STRUCT( AngAxisF,
    AngAxisF, MathTypes,
    "" )
