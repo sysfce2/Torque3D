@@ -372,9 +372,9 @@ Matrix<DATA_TYPE, rows, cols>& Matrix<DATA_TYPE, rows, cols>::inverse()
          }
       }
 
-      // Early out if pivot is 0, return a new empty matrix.
+      // Early out if pivot is 0, return identity matrix.
       if (augmentedMatrix(i, i) == static_cast<DATA_TYPE>(0)) {
-         return Matrix<DATA_TYPE, rows, cols>();
+         return Matrix<DATA_TYPE, rows, cols>(true);
       }
 
       DATA_TYPE pivotVal = augmentedMatrix(i, i);
@@ -550,6 +550,27 @@ bool Matrix<DATA_TYPE, rows, cols>::isAffine() const
    return true;
 }
 
+template<typename DATA_TYPE, U32 rows, U32 cols>
+Matrix<DATA_TYPE, rows, cols>& Matrix<DATA_TYPE, rows, cols>::affineInverse()
+{
+   AssertFatal(rows >= 4 && cols >= 4, "affineInverse requires at least 4x4");
+   Matrix<DATA_TYPE, 3, 3> subMatrix;
+
+   for (U32 i = 0; i < 3; i++) {
+      for (U32 j = 0; j < 3; j++) {
+         subMatrix(i, j) = (*this)(i, j);
+      }
+   }
+
+   subMatrix.transpose();
+
+   Point3F pos = getPosition();
+   (*this)(0, 3) = mDot(subMatrix.getColumn3F(0), pos);
+   (*this)(1, 3) = mDot(subMatrix.getColumn3F(1), pos);
+   (*this)(2, 3) = mDot(subMatrix.getColumn3F(2), pos);
+
+   return *this;
+}
 
 template<typename DATA_TYPE, U32 rows, U32 cols>
 EulerF Matrix<DATA_TYPE, rows, cols>::toEuler() const

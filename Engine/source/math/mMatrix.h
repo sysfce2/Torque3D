@@ -653,6 +653,8 @@ public:
    /// Make this an identity matrix.
    Matrix<DATA_TYPE, rows, cols>& identity();
 
+   void normalize();
+
    Matrix<DATA_TYPE, rows, cols>& set(const EulerF& e);
 
    Matrix(const EulerF& e, const Point3F p);
@@ -730,8 +732,14 @@ public:
    void mul(Box3F& box) const;
 
    // ------ Getters ------
+   // col * rows + row
+   // static U32 idx(U32 i, U32 j) { return (i * rows + j); }
    bool isAffine() const;
    bool isIdentity() const;
+   /// Take inverse of matrix assuming it is affine (rotation,
+   /// scale, sheer, translation only).
+   Matrix<DATA_TYPE, rows, cols>& affineInverse();
+
    Point3F getScale() const;
    
    EulerF toEuler() const;
@@ -904,6 +912,26 @@ inline Matrix<DATA_TYPE, rows, cols>& Matrix<DATA_TYPE, rows, cols>::identity()
    }
 
    return (*this);
+}
+
+template<typename DATA_TYPE, U32 rows, U32 cols>
+inline void Matrix<DATA_TYPE, rows, cols>::normalize()
+{
+   AssertFatal(rows >= 3 && cols >= 3, "Normalize can only be applied 3x3 or more");
+   Point3F col0, col1, col2;
+   getColumn(0, &col0);
+   getColumn(1, &col1);
+
+   mCross(col0, col1, &col2);
+   mCross(col2, col0, &col1);
+
+   col0.normalize();
+   col1.normalize();
+   col2.normalize();
+
+   setColumn(0, col0);
+   setColumn(1, col1);
+   setColumn(2, col2);
 }
 
 template<typename DATA_TYPE, U32 rows, U32 cols>
