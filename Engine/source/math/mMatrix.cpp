@@ -212,9 +212,6 @@ EngineFieldTable::Field MatrixFEngineExport::getMatrixField()
 
 //------------------------------------
 // Templatized matrix class to replace MATRIXF above
-// row-major for now, since torque says it uses that
-// but in future could cut down on transpose calls if
-// we switch to column major.
 //------------------------------------
 
 template<typename DATA_TYPE, U32 rows, U32 cols>
