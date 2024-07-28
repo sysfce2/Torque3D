@@ -674,7 +674,61 @@ public:
    
    void setRow(S32 row, const Point4F& cptr);
    void setRow(S32 row, const Point3F& cptr);
-   
+
+   ///< M * a -> M
+   Matrix<DATA_TYPE, rows, cols>& mul(const Matrix<DATA_TYPE, rows, cols>& a)
+   { return *this * a; }
+   ///< a * M -> M
+   Matrix<DATA_TYPE, rows, cols>& mulL(const Matrix<DATA_TYPE, rows, cols>& a)
+   { return *this = a * *this; }
+   ///< a * b -> M
+   Matrix<DATA_TYPE, rows, cols>& mul(const Matrix<DATA_TYPE, rows, cols>& a, const Matrix<DATA_TYPE, rows, cols>& b)
+   { return *this = a * b; }
+   ///< M * a -> M
+   Matrix<DATA_TYPE, rows, cols>& mul(const F32 a)
+   { return *this * a; }
+   ///< a * b -> M
+   Matrix<DATA_TYPE, rows, cols>& mul(const Matrix<DATA_TYPE, rows, cols>& a, const F32 b)
+   { return *this = a * b; }
+
+
+   ///< M * p -> p (full [4x4] * [1x4])
+   void mul(Point4F& p) const { p = *this * p; }
+   ///< M * p -> p (assume w = 1.0f)
+   void mulP(Point3F& p) const { p = *this * p; }
+   ///< M * p -> d (assume w = 1.0f)
+   void mulP(const Point3F& p, Point3F* d) const { *d = *this * p; }
+   ///< M * v -> v (assume w = 0.0f)
+   void mulV(VectorF& v) const
+   {
+      AssertFatal(rows == 4 && cols == 4, "Multiplying VectorF with matrix requires 4x4");
+      VectorF result(
+         (*this)(0, 0) * v.x + (*this)(0, 1) * v.y + (*this)(0, 2) * v.z,
+         (*this)(1, 0) * v.x + (*this)(1, 1) * v.y + (*this)(1, 2) * v.z,
+         (*this)(2, 0) * v.x + (*this)(2, 1) * v.y + (*this)(2, 2) * v.z
+      );
+
+      v = result;
+
+   }
+   ///< M * v -> d (assume w = 0.0f)
+   void mulV(const VectorF& v, Point3F* d) const
+   {
+      AssertFatal(rows == 4 && cols == 4, "Multiplying VectorF with matrix requires 4x4");
+      VectorF result(
+         (*this)(0, 0) * v.x + (*this)(0, 1) * v.y + (*this)(0, 2) * v.z,
+         (*this)(1, 0) * v.x + (*this)(1, 1) * v.y + (*this)(1, 2) * v.z,
+         (*this)(2, 0) * v.x + (*this)(2, 1) * v.y + (*this)(2, 2) * v.z
+      );
+
+      d->x = result.x;
+      d->y = result.y;
+      d->z = result.z;
+   }
+
+   ///< Axial box -> Axial Box (too big a function to be inline)
+   void mul(Box3F& box) const;
+
    // ------ Getters ------
    bool isAffine() const;
    bool isIdentity() const;
@@ -710,17 +764,98 @@ public:
 
    // ------ Operators ------
 
+   Matrix<DATA_TYPE, rows, cols> operator * (const Matrix<DATA_TYPE, rows, cols>& other) const {
+      Matrix<DATA_TYPE, rows, cols> result;
+
+      for (U32 i = 0; i < rows; i++) {
+         for (U32 j = 0; j < cols; j++) {
+            result(i, j) = 0;
+            for (U32 k = 0; k < cols; k++) {
+               result(i, j) += (*this)(i, k) * other(k, j);
+            }
+         }
+      }
+
+      return result;
+   }
+
+   Matrix<DATA_TYPE, rows, cols> operator *= (const Matrix<DATA_TYPE, rows, cols>& other) {
+      *this = *this * other;
+      return *this;
+   }
+
+   Matrix<DATA_TYPE, rows, cols> operator * (const DATA_TYPE scalar) const {
+      Matrix<DATA_TYPE, rows, cols> result;
+      for (U32 i = 0; i < rows; i++) {
+         for (U32 j = 0; j < cols; j++) {
+            result(i, j) = (*this)(i, j) * scalar;
+         }
+      }
+
+      return result;
+   }
+   Matrix<DATA_TYPE, rows, cols>& operator *= (const DATA_TYPE scalar) {
+      for (U32 i = 0; i < rows; i++) {
+         for (U32 j = 0; j < cols; j++) {
+            (*this)(i, j) *= scalar;
+         }
+      }
+
+      return *this;
+   }
+
+   Point3F operator*(const Point3F& point) const {
+      AssertFatal(rows == 4 && cols == 4, "Multiplying point3 with matrix requires 4x4");
+      return Point3F(
+         (*this)(0, 0) * point.x + (*this)(0, 1) * point.y + (*this)(0, 2) * point.z + (*this)(0, 3),
+         (*this)(1, 0) * point.x + (*this)(1, 1) * point.y + (*this)(1, 2) * point.z + (*this)(1, 3),
+         (*this)(2, 0) * point.x + (*this)(2, 1) * point.y + (*this)(2, 2) * point.z + (*this)(2, 3)
+      );
+   }
+
+   Point4F operator*(const Point4F& point) const {
+      AssertFatal(rows == 4 && cols == 4, "Multiplying point4 with matrix requires 4x4");
+      return Point4F(
+         (*this)(0, 0) * point.x + (*this)(0, 1) * point.y + (*this)(0, 2) * point.z + (*this)(0, 3) * point.w,
+         (*this)(1, 0) * point.x + (*this)(1, 1) * point.y + (*this)(1, 2) * point.z + (*this)(1, 3) * point.w,
+         (*this)(2, 0) * point.x + (*this)(2, 1) * point.y + (*this)(2, 2) * point.z + (*this)(2, 3) * point.w,
+         (*this)(3, 0) * point.x + (*this)(3, 1) * point.y + (*this)(3, 2) * point.z + (*this)(3, 3) * point.w
+      );
+   }
+
+   Matrix<DATA_TYPE, rows, cols>& operator = (const Matrix<DATA_TYPE, rows, cols>& other) {
+      if (this != &other) {
+         std::copy(other.data, other.data + rows * cols, this->data);
+      }
+
+      return *this;
+   }
+
+   bool operator == (const Matrix<DATA_TYPE, rows, cols>& other) const {
+      for (U32 i = 0; i < rows; i++) {
+         for (U32 j = 0; j < cols; j++) {
+            if ((*this)(i, j) != other(i, j))
+               return false;
+         }
+      }
+      return true;
+   }
+
+   bool operator != (const Matrix<DATA_TYPE, rows, cols>& other) const {
+      return !(*this == other);
+   }
+
    operator DATA_TYPE* () { return (data); }
    operator const DATA_TYPE* () const { return (DATA_TYPE*)(data); }
 
-   DATA_TYPE& operator()(U32 row, U32 col) {
+   DATA_TYPE& operator () (U32 row, U32 col) {
       if (row >= rows || col >= cols)
          AssertFatal(false, "Matrix indices out of range");
 
       return data[col * rows + row];
    }
 
-   const DATA_TYPE& operator()(U32 row, U32 col) const {
+   const DATA_TYPE& operator () (U32 row, U32 col) const {
       if (row >= rows || col >= cols)
          AssertFatal(false, "Matrix indices out of range");
 

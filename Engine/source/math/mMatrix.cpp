@@ -380,15 +380,15 @@ Matrix<DATA_TYPE, rows, cols>& Matrix<DATA_TYPE, rows, cols>::inverse()
       DATA_TYPE pivotVal = augmentedMatrix(i, i);
 
       // scale the pivot
-      for (U32 j = 0; j < 2 * size; ++j) {
+      for (U32 j = 0; j < 2 * size; j++) {
          augmentedMatrix(i, j) /= pivotVal;
       }
 
       // Eliminate the current column in all other rows
-      for (std::size_t k = 0; k < size; k++) {
+      for (U32 k = 0; k < size; k++) {
          if (k != i) {
             DATA_TYPE factor = augmentedMatrix(k, i);
-            for (std::size_t j = 0; j < 2 * size; ++j) {
+            for (U32 j = 0; j < 2 * size; j++) {
                augmentedMatrix(k, j) -= factor * augmentedMatrix(i, j);
             }
          }
@@ -464,6 +464,40 @@ Matrix<DATA_TYPE, rows, cols>& Matrix<DATA_TYPE, rows, cols>::setTensorProduct(c
    (*this)(3, 3) = 1;
 
    return (*this);
+}
+
+template<typename DATA_TYPE, U32 rows, U32 cols>
+void Matrix<DATA_TYPE, rows, cols>::mul(Box3F& box) const
+{
+   AssertFatal(rows == 4 && cols == 4, "Multiplying Box3F with matrix requires 4x4");
+
+   // Create an array of all 8 corners of the box
+   Point3F corners[8] = {
+       Point3F(box.minExtents.x, box.minExtents.y, box.minExtents.z),
+       Point3F(box.minExtents.x, box.minExtents.y, box.maxExtents.z),
+       Point3F(box.minExtents.x, box.maxExtents.y, box.minExtents.z),
+       Point3F(box.minExtents.x, box.maxExtents.y, box.maxExtents.z),
+       Point3F(box.maxExtents.x, box.minExtents.y, box.minExtents.z),
+       Point3F(box.maxExtents.x, box.minExtents.y, box.maxExtents.z),
+       Point3F(box.maxExtents.x, box.maxExtents.y, box.minExtents.z),
+       Point3F(box.maxExtents.x, box.maxExtents.y, box.maxExtents.z),
+   };
+
+   for (U32 i = 0; i < 8; i++) {
+      corners[i] = (*this) * corners[i];
+   }
+
+   box.minExtents = corners[0];
+   box.maxExtents = corners[0];
+   for (U32 i = 1; i < 8; ++i) {
+      box.minExtents.x = mMin(box.minExtents.x, corners[i].x);
+      box.minExtents.y = mMin(box.minExtents.y, corners[i].y);
+      box.minExtents.z = mMin(box.minExtents.z, corners[i].z);
+
+      box.maxExtents.x = mMax(box.maxExtents.x, corners[i].x);
+      box.maxExtents.y = mMax(box.maxExtents.y, corners[i].y);
+      box.maxExtents.z = mMax(box.maxExtents.z, corners[i].z);
+   }
 }
 
 template<typename DATA_TYPE, U32 rows, U32 cols>
