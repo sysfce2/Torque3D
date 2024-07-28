@@ -1164,14 +1164,9 @@ inline void Matrix<DATA_TYPE, rows, cols>::invertTo(Matrix<DATA_TYPE, cols, rows
 
    for (U32 i = 0; i < rows; ++i) {
       for (U32 j = 0; j < cols; ++j) {
-         (*matrix)(j, i) = invMatrix(i, j);
+         (*matrix)(i, j) = invMatrix(i, j);
       }
    }
-
-   (*matrix)(3, 0) = (*this)(3, 0);
-   (*matrix)(3, 1) = (*this)(3, 1);
-   (*matrix)(3, 2) = (*this)(3, 2);
-   (*matrix)(3, 3) = (*this)(3, 3);
 }
 
 template<typename DATA_TYPE, U32 rows, U32 cols>
@@ -1184,11 +1179,6 @@ inline void Matrix<DATA_TYPE, rows, cols>::invertTo(Matrix<DATA_TYPE, cols, rows
          (*matrix)(i, j) = invMatrix(i, j);
       }
    }
-
-   (*matrix)(3, 0) = (*this)(3, 0);
-   (*matrix)(3, 1) = (*this)(3, 1);
-   (*matrix)(3, 2) = (*this)(3, 2);
-   (*matrix)(3, 3) = (*this)(3, 3);
 }
 
 template<typename DATA_TYPE, U32 rows, U32 cols>
