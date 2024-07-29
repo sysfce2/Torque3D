@@ -664,7 +664,10 @@ public:
       }
    }
 
-   explicit Matrix(const EulerF& e);
+   explicit Matrix(const EulerF& e) {
+      set(e);
+   }
+
    /// Make this an identity matrix.
    Matrix<DATA_TYPE, rows, cols>& identity();
    void reverseProjection();
@@ -768,7 +771,7 @@ public:
    bool isIdentity() const;
    /// Take inverse of matrix assuming it is affine (rotation,
    /// scale, sheer, translation only).
-   Matrix<DATA_TYPE, rows, cols> affineInverse();
+   Matrix<DATA_TYPE, rows, cols>& affineInverse();
 
    Point3F getScale() const;
    
@@ -816,15 +819,17 @@ public:
    static const Matrix Identity;
 
    // ------ Operators ------
-
-   Matrix<DATA_TYPE, rows, cols> operator * (const Matrix<DATA_TYPE, rows, cols>& other) const {
+   friend Matrix<DATA_TYPE, rows, cols> operator*(const Matrix<DATA_TYPE, rows, cols>& m1, const Matrix<DATA_TYPE, rows, cols>& m2) {
       Matrix<DATA_TYPE, rows, cols> result;
 
-      for (U32 i = 0; i < rows; i++) {
-         for (U32 j = 0; j < cols; j++) {
-            result(i, j) = 0;
-            for (U32 k = 0; k < cols; k++) {
-               result(i, j) += (*this)(i, k) * other(k, j);
+      for (U32 i = 0; i < rows; ++i)
+      {
+         for (U32 j = 0; j < cols; ++j)
+         {
+            result(i, j) = 0; // Initialize result element to 0
+            for (U32 k = 0; k < cols; ++k)
+            {
+               result(i, j) += m1(i, k) * m2(k, j);
             }
          }
       }
@@ -839,8 +844,10 @@ public:
 
    Matrix<DATA_TYPE, rows, cols> operator * (const DATA_TYPE scalar) const {
       Matrix<DATA_TYPE, rows, cols> result;
-      for (U32 i = 0; i < rows; i++) {
-         for (U32 j = 0; j < cols; j++) {
+      for (U32 i = 0; i < rows; i++)
+      {
+         for (U32 j = 0; j < cols; j++)
+         {
             result(i, j) = (*this)(i, j) * scalar;
          }
       }
@@ -848,8 +855,10 @@ public:
       return result;
    }
    Matrix<DATA_TYPE, rows, cols>& operator *= (const DATA_TYPE scalar) {
-      for (U32 i = 0; i < rows; i++) {
-         for (U32 j = 0; j < cols; j++) {
+      for (U32 i = 0; i < rows; i++)
+      {
+         for (U32 j = 0; j < cols; j++)
+         {
             (*this)(i, j) *= scalar;
          }
       }
@@ -885,8 +894,10 @@ public:
    }
 
    bool operator == (const Matrix<DATA_TYPE, rows, cols>& other) const {
-      for (U32 i = 0; i < rows; i++) {
-         for (U32 j = 0; j < cols; j++) {
+      for (U32 i = 0; i < rows; i++)
+      {
+         for (U32 j = 0; j < cols; j++)
+         {
             if ((*this)(i, j) != other(i, j))
                return false;
          }
@@ -923,22 +934,23 @@ public:
 template<typename DATA_TYPE, U32 rows, U32 cols>
 inline Matrix<DATA_TYPE, rows, cols>& Matrix<DATA_TYPE, rows, cols>::transpose()
 {
-   Matrix<DATA_TYPE, rows, cols> result;
-   for (U32 i = 0; i < rows; i++) {
-      for (U32 j = 0; j < cols; j++) {
-         result(j, i) = (*this)(i, j);
+   AssertFatal(rows == cols, "Transpose can only be performed on square matrices.");
+
+   for (U32 i = 0; i < rows; ++i) {
+      for (U32 j = i + 1; j < cols; ++j) {
+         std::swap((*this)(i, j), (*this)(j, i));
       }
    }
-   std::copy(std::begin(result.data), std::end(result.data), std::begin(data));
-
    return (*this);
 }
 
 template<typename DATA_TYPE, U32 rows, U32 cols>
 inline Matrix<DATA_TYPE, rows, cols>& Matrix<DATA_TYPE, rows, cols>::identity()
 {
-   for (U32 i = 0; i < rows; i++) {
-      for (U32 j = 0; j < cols; j++) {
+   for (U32 i = 0; i < rows; i++)
+   {
+      for (U32 j = 0; j < cols; j++)
+      {
          if (j == i)
             (*this)(i, j) = static_cast<DATA_TYPE>(1);
          else
@@ -973,28 +985,33 @@ template<typename DATA_TYPE, U32 rows, U32 cols>
 inline Matrix<DATA_TYPE, rows, cols>& Matrix<DATA_TYPE, rows, cols>::scale(const Point3F& s)
 {
    // torques scale applies directly, does not create another matrix to multiply with the translation matrix.
-   AssertFatal(rows >= 3 && cols >= 3, "Scale can only be applied 3x3 or more");
-   for (U32 i = 0; i < 3; i++) {
-      for (U32 j = 0; j < 3; j++) {
-         DATA_TYPE scale = (i == 0) ? s.x : (i == 1) ? s.y : s.z;
-         (*this)(i, j) *= scale;
-      }
-   }
+   AssertFatal(rows >= 4 && cols >= 4, "Scale can only be applied 4x4 or more");
+
+   (*this)(0, 0) *= s.x;   (*this)(0, 1) *= s.y;   (*this)(0, 2) *= s.z;
+   (*this)(1, 0) *= s.x;   (*this)(1, 1) *= s.y;   (*this)(1, 2) *= s.z;
+   (*this)(2, 0) *= s.x;   (*this)(2, 1) *= s.y;   (*this)(2, 2) *= s.z;
+   (*this)(3, 0) *= s.x;   (*this)(3, 1) *= s.y;   (*this)(3, 2) *= s.z;
 
    return (*this);
 }
 
 template<typename DATA_TYPE, U32 rows, U32 cols>
 inline bool Matrix<DATA_TYPE, rows, cols>::isIdentity() const {
-   for (U32 i = 0; i < rows; i++) {
-      for (U32 j = 0; j < cols; j++) {
-         if (j == i) {
-            if((*this)(i, j) != static_cast<DATA_TYPE>(1)) {
+   for (U32 i = 0; i < rows; i++)
+   {
+      for (U32 j = 0; j < cols; j++)
+      {
+         if (j == i)
+         {
+            if((*this)(i, j) != static_cast<DATA_TYPE>(1))
+            {
                return false;
             }
          }
-         else {
-            if((*this)(i, j) != static_cast<DATA_TYPE>(0)) {
+         else
+         {
+            if((*this)(i, j) != static_cast<DATA_TYPE>(0))
+            {
                return false;
             }
          }
@@ -1009,7 +1026,7 @@ inline Point3F Matrix<DATA_TYPE, rows, cols>::getScale() const
 {
    // this function assumes the matrix has scale applied through the scale(const Point3F& s) function.
    // for now assume float since we have point3F.
-   AssertFatal(rows >= 3 && cols >= 3, "Scale can only be applied 3x3 or more");
+   AssertFatal(rows >= 4 && cols >= 4, "Scale can only be applied 4x4 or more");
 
    Point3F scale;
 
@@ -1156,16 +1173,20 @@ template<typename DATA_TYPE, U32 rows, U32 cols>
 inline void Matrix<DATA_TYPE, rows, cols>::invertTo(Matrix<DATA_TYPE, cols, rows>* matrix) const
 {
    Matrix<DATA_TYPE, rows, cols> invMatrix;
-   for (U32 i = 0; i < rows; ++i) {
-      for (U32 j = 0; j < cols; ++j) {
+   for (U32 i = 0; i < rows; ++i)
+   {
+      for (U32 j = 0; j < cols; ++j)
+      {
          invMatrix(i, j) = (*this)(i, j);
       }
    }
 
    invMatrix.inverse();
 
-   for (U32 i = 0; i < rows; ++i) {
-      for (U32 j = 0; j < cols; ++j) {
+   for (U32 i = 0; i < rows; ++i)
+   {
+      for (U32 j = 0; j < cols; ++j)
+      {
          (*matrix)(i, j) = invMatrix(i, j);
       }
    }
@@ -1176,8 +1197,10 @@ inline void Matrix<DATA_TYPE, rows, cols>::invertTo(Matrix<DATA_TYPE, cols, rows
 {
    Matrix<DATA_TYPE, rows, cols> invMatrix = this->inverse();
 
-   for (U32 i = 0; i < rows; ++i) {
-      for (U32 j = 0; j < cols; ++j) {
+   for (U32 i = 0; i < rows; ++i)
+   {
+      for (U32 j = 0; j < cols; ++j)
+      {
          (*matrix)(i, j) = invMatrix(i, j);
       }
    }
@@ -1221,7 +1244,7 @@ inline void Matrix<DATA_TYPE, rows, cols>::displace(const Point3F& delta)
 
 
 template<typename DATA_TYPE, U32 rows, U32 cols>
-void Matrix<DATA_TYPE, rows, cols>::reverseProjection()
+inline void Matrix<DATA_TYPE, rows, cols>::reverseProjection()
 {
    AssertFatal(rows == 4 && cols == 4, "reverseProjection requires a 4x4 matrix.");
 
@@ -1238,13 +1261,7 @@ const Matrix<DATA_TYPE, rows, cols> Matrix<DATA_TYPE, rows, cols>::Identity = []
 }();
 
 template<typename DATA_TYPE, U32 rows, U32 cols>
-Matrix<DATA_TYPE, rows, cols>::Matrix(const EulerF& e)
-{
-   set(e);
-}
-
-template<typename DATA_TYPE, U32 rows, U32 cols>
-Matrix<DATA_TYPE, rows, cols>& Matrix<DATA_TYPE, rows, cols>::set(const EulerF& e)
+inline Matrix<DATA_TYPE, rows, cols>& Matrix<DATA_TYPE, rows, cols>::set(const EulerF& e)
 {
    // when the template refactor is done, euler will be able to be setup in different ways
    AssertFatal(rows >= 3 && cols >= 3, "EulerF can only initialize 3x3 or more");
@@ -1313,19 +1330,22 @@ Matrix<DATA_TYPE, rows, cols>& Matrix<DATA_TYPE, rows, cols>::set(const EulerF& 
       break;
    }
 
-   if (rows == 4) {
+   if (rows == 4)
+   {
       (*this)(3, 0) = 0.0f;
       (*this)(3, 1) = 0.0f;
       (*this)(3, 2) = 0.0f;
    }
 
-   if (cols == 4) {
+   if (cols == 4)
+   {
       (*this)(0, 3) = 0.0f;
       (*this)(1, 3) = 0.0f;
       (*this)(2, 3) = 0.0f;
    }
 
-   if (rows == 4 && cols == 4) {
+   if (rows == 4 && cols == 4)
+   {
       (*this)(3, 3) = 1.0f;
    }
 
@@ -1339,7 +1359,7 @@ Matrix<DATA_TYPE, rows, cols>::Matrix(const EulerF& e, const Point3F p)
 }
 
 template<typename DATA_TYPE, U32 rows, U32 cols>
-Matrix<DATA_TYPE, rows, cols>& Matrix<DATA_TYPE, rows, cols>::set(const EulerF& e, const Point3F p)
+inline Matrix<DATA_TYPE, rows, cols>& Matrix<DATA_TYPE, rows, cols>::set(const EulerF& e, const Point3F p)
 {
    AssertFatal(rows >= 3 && cols >= 4, "Euler and Point can only initialize 3x4 or more");
    // call set euler, this already sets the last row if it exists.
@@ -1354,7 +1374,7 @@ Matrix<DATA_TYPE, rows, cols>& Matrix<DATA_TYPE, rows, cols>::set(const EulerF& 
 }
 
 template<typename DATA_TYPE, U32 rows, U32 cols>
-Matrix<DATA_TYPE, rows, cols> Matrix<DATA_TYPE, rows, cols>::inverse()
+inline Matrix<DATA_TYPE, rows, cols> Matrix<DATA_TYPE, rows, cols>::inverse()
 {
    // TODO: insert return statement here
    AssertFatal(rows == cols, "Can only perform inverse on square matrices.");
@@ -1364,18 +1384,22 @@ Matrix<DATA_TYPE, rows, cols> Matrix<DATA_TYPE, rows, cols>::inverse()
    Matrix<DATA_TYPE, size, 2 * size> augmentedMatrix;
    Matrix<DATA_TYPE, size, size> resultMatrix;
 
-   for (U32 i = 0; i < size; i++) {
-      for (U32 j = 0; j < size; j++) {
+   for (U32 i = 0; i < size; i++)
+   {
+      for (U32 j = 0; j < size; j++)
+      {
          augmentedMatrix(i, j) = (*this)(i, j);
          augmentedMatrix(i, j + size) = (i == j) ? static_cast<DATA_TYPE>(1) : static_cast<DATA_TYPE>(0);
       }
    }
 
    // Apply gauss-joran elimination
-   for (U32 i = 0; i < size; i++) {
+   for (U32 i = 0; i < size; i++)
+   {
       U32 pivotRow = i;
 
-      for (U32 k = i + 1; k < size; k++) {
+      for (U32 k = i + 1; k < size; k++)
+      {
          // use std::abs until the templated math functions are in place.
          if (std::abs(augmentedMatrix(k, i)) > std::abs(augmentedMatrix(pivotRow, i))) {
             pivotRow = k;
@@ -1383,37 +1407,46 @@ Matrix<DATA_TYPE, rows, cols> Matrix<DATA_TYPE, rows, cols>::inverse()
       }
 
       // Swap if needed.
-      if (i != pivotRow) {
-         for (U32 j = 0; j < 2 * size; j++) {
+      if (i != pivotRow)
+      {
+         for (U32 j = 0; j < 2 * size; j++)
+         {
             std::swap(augmentedMatrix(i, j), augmentedMatrix(pivotRow, j));
          }
       }
 
       // Early out if pivot is 0, return identity matrix.
-      if (augmentedMatrix(i, i) == static_cast<DATA_TYPE>(0)) {
+      if (augmentedMatrix(i, i) == static_cast<DATA_TYPE>(0))
+      {
          return Matrix<DATA_TYPE, rows, cols>(true);
       }
 
       DATA_TYPE pivotVal = augmentedMatrix(i, i);
 
       // scale the pivot
-      for (U32 j = 0; j < 2 * size; j++) {
+      for (U32 j = 0; j < 2 * size; j++)
+      {
          augmentedMatrix(i, j) /= pivotVal;
       }
 
       // Eliminate the current column in all other rows
-      for (U32 k = 0; k < size; k++) {
-         if (k != i) {
+      for (U32 k = 0; k < size; k++)
+      {
+         if (k != i)
+         {
             DATA_TYPE factor = augmentedMatrix(k, i);
-            for (U32 j = 0; j < 2 * size; j++) {
+            for (U32 j = 0; j < 2 * size; j++)
+            {
                augmentedMatrix(k, j) -= factor * augmentedMatrix(i, j);
             }
          }
       }
    }
 
-   for (U32 i = 0; i < size; i++) {
-      for (U32 j = 0; j < size; j++) {
+   for (U32 i = 0; i < size; i++)
+   {
+      for (U32 j = 0; j < size; j++)
+      {
          resultMatrix(i, j) = augmentedMatrix(i, j + size);
       }
    }
@@ -1500,44 +1533,40 @@ inline void Matrix<DATA_TYPE, rows, cols>::mul(Box3F& box) const
 {
    AssertFatal(rows == 4 && cols == 4, "Multiplying Box3F with matrix requires 4x4");
 
-   // Create an array of all 8 corners of the box
-   Point3F corners[8] = {
-       Point3F(box.minExtents.x, box.minExtents.y, box.minExtents.z),
-       Point3F(box.minExtents.x, box.minExtents.y, box.maxExtents.z),
-       Point3F(box.minExtents.x, box.maxExtents.y, box.minExtents.z),
-       Point3F(box.minExtents.x, box.maxExtents.y, box.maxExtents.z),
-       Point3F(box.maxExtents.x, box.minExtents.y, box.minExtents.z),
-       Point3F(box.maxExtents.x, box.minExtents.y, box.maxExtents.z),
-       Point3F(box.maxExtents.x, box.maxExtents.y, box.minExtents.z),
-       Point3F(box.maxExtents.x, box.maxExtents.y, box.maxExtents.z),
-   };
+   // Save original min and max
+   Point3F originalMin = box.minExtents;
+   Point3F originalMax = box.maxExtents;
 
-   for (U32 i = 0; i < 8; i++) {
-      corners[i] = (*this) * corners[i];
-   }
+   // Initialize min and max with the translation part of the matrix
+   box.minExtents.x = box.maxExtents.x = (*this)(0, 3);
+   box.minExtents.y = box.maxExtents.y = (*this)(1, 3);
+   box.minExtents.z = box.maxExtents.z = (*this)(2, 3);
 
-   box.minExtents = corners[0];
-   box.maxExtents = corners[0];
-   for (U32 i = 1; i < 8; ++i) {
-      box.minExtents.x = mMin(box.minExtents.x, corners[i].x);
-      box.minExtents.y = mMin(box.minExtents.y, corners[i].y);
-      box.minExtents.z = mMin(box.minExtents.z, corners[i].z);
+   for (U32 i = 0; i < 3; ++i) {
+         #define Do_One_Row(j)   {                                            \
+            DATA_TYPE a = ((*this)(i, j) * originalMin[j]);                   \
+            DATA_TYPE b = ((*this)(i, j) * originalMax[j]);                   \
+            if (a < b) { box.minExtents[i] += a;  box.maxExtents[i] += b; }   \
+            else       { box.minExtents[i] += b;  box.maxExtents[i] += a; }  }
 
-      box.maxExtents.x = mMax(box.maxExtents.x, corners[i].x);
-      box.maxExtents.y = mMax(box.maxExtents.y, corners[i].y);
-      box.maxExtents.z = mMax(box.maxExtents.z, corners[i].z);
+      Do_One_Row(0);
+      Do_One_Row(1);
+      Do_One_Row(2);
    }
 }
 
 template<typename DATA_TYPE, U32 rows, U32 cols>
 inline bool Matrix<DATA_TYPE, rows, cols>::isAffine() const
 {
-   if ((*this)(rows - 1, cols - 1) != 1.0f) {
+   if ((*this)(rows - 1, cols - 1) != 1.0f)
+   {
       return false;
    }
 
-   for (U32 col = 0; col < cols - 1; ++col) {
-      if ((*this)(rows - 1, col) != 0.0f) {
+   for (U32 col = 0; col < cols - 1; ++col)
+   {
+      if ((*this)(rows - 1, col) != 0.0f)
+      {
          return false;
       }
    }
@@ -1580,23 +1609,23 @@ inline bool Matrix<DATA_TYPE, rows, cols>::isAffine() const
 }
 
 template<typename DATA_TYPE, U32 rows, U32 cols>
-inline Matrix<DATA_TYPE, rows, cols> Matrix<DATA_TYPE, rows, cols>::affineInverse()
+inline Matrix<DATA_TYPE, rows, cols>& Matrix<DATA_TYPE, rows, cols>::affineInverse()
 {
    AssertFatal(rows >= 4 && cols >= 4, "affineInverse requires at least 4x4");
-   Matrix<DATA_TYPE, 3, 3> subMatrix;
+   Matrix<DATA_TYPE, rows, cols> temp = *this;
 
-   for (U32 i = 0; i < 3; i++) {
-      for (U32 j = 0; j < 3; j++) {
-         subMatrix(i, j) = (*this)(i, j);
-      }
-   }
+   // Transpose rotation part
+   (*this)(0, 1) = temp(1, 0);
+   (*this)(0, 2) = temp(2, 0);
+   (*this)(1, 0) = temp(0, 1);
+   (*this)(1, 2) = temp(2, 1);
+   (*this)(2, 0) = temp(0, 2);
+   (*this)(2, 1) = temp(1, 2);
 
-   subMatrix.transpose();
-
-   Point3F pos = getPosition();
-   (*this)(0, 3) = mDot(subMatrix.getColumn3F(0), pos);
-   (*this)(1, 3) = mDot(subMatrix.getColumn3F(1), pos);
-   (*this)(2, 3) = mDot(subMatrix.getColumn3F(2), pos);
+   // Adjust translation part
+   (*this)(0, 3) = -(temp(0, 0) * temp(0, 3) + temp(0, 1) * temp(1, 3) + temp(0, 2) * temp(2, 3));
+   (*this)(1, 3) = -(temp(1, 0) * temp(0, 3) + temp(1, 1) * temp(1, 3) + temp(1, 2) * temp(2, 3));
+   (*this)(2, 3) = -(temp(2, 0) * temp(0, 3) + temp(2, 1) * temp(1, 3) + temp(2, 2) * temp(2, 3));
 
    return *this;
 }
@@ -1618,11 +1647,13 @@ inline EulerF Matrix<DATA_TYPE, rows, cols>::toEuler() const
    EulerF r;
 
    r.x = mAsin(mClampF(m21, -1.0, 1.0));
-   if (mCos(r.x) != 0.0f) {
+   if (mCos(r.x) != 0.0f)
+   {
       r.y = mAtan2(-m02, m22); // yaw
       r.z = mAtan2(-m10, m11); // roll
    }
-   else {
+   else
+   {
       r.y = 0.0f;
       r.z = mAtan2(m01, m00); // this rolls when pitch is +90 degrees
    }
@@ -1651,12 +1682,15 @@ inline void Matrix<DATA_TYPE, rows, cols>::dumpMatrix(const char* caption) const
 
    StringBuilder str;
    str.format("%s = |", caption);
-   for (U32 i = 0; i < rows; i++) {
-      if (i > 0) {
+   for (U32 i = 0; i < rows; i++)
+   {
+      if (i > 0)
+      {
          str.append(spacerRef);
       }
 
-      for (U32 j = 0; j < cols; j++) {
+      for (U32 j = 0; j < cols; j++)
+      {
          str.format(formatSpec, (*this)(i, j));
       }
       str.append(" |\n");
@@ -1684,24 +1718,44 @@ inline void mTransformPlane(
    invScale(1, 1) = 1.0f / scale.y;
    invScale(2, 2) = 1.0f / scale.z;
 
+   const Point3F shear(mat(0, 3), mat(1, 3), mat(2, 3));
+
+   const Point3F row0 = mat.getRow3F(0);
+   const Point3F row1 = mat.getRow3F(1);
+   const Point3F row2 = mat.getRow3F(2);
+
+   const F32 A = -mDot(row0, shear);
+   const F32 B = -mDot(row1, shear);
+   const F32 C = -mDot(row2, shear);
+
    // Compute the inverse transpose of the matrix
-   MatrixF invTrMatrix = matCopy.transpose().affineInverse() * invScale;
+   MatrixF invTrMatrix = MatrixF::Identity;
+   invTrMatrix(0, 0) = mat(0, 0);
+   invTrMatrix(0, 1) = mat(0, 1);
+   invTrMatrix(0, 2) = mat(0, 2);
+   invTrMatrix(1, 0) = mat(1, 0);
+   invTrMatrix(1, 1) = mat(1, 1);
+   invTrMatrix(1, 2) = mat(1, 2);
+   invTrMatrix(2, 0) = mat(2, 0);
+   invTrMatrix(2, 1) = mat(2, 1);
+   invTrMatrix(2, 2) = mat(2, 2);
+   invTrMatrix(3, 0) = A;
+   invTrMatrix(3, 1) = B;
+   invTrMatrix(3, 2) = C;
+   invTrMatrix.mul(invScale);
 
    // Transform the plane normal
    Point3F norm(plane.x, plane.y, plane.z);
-   norm = invTrMatrix * norm;
-   float normLength = std::sqrt(norm.x * norm.x + norm.y * norm.y + norm.z * norm.z);
-   norm.x /= normLength;
-   norm.y /= normLength;
-   norm.z /= normLength;
+   invTrMatrix.mulP(norm);
+   norm.normalize();
 
    // Transform the plane point
-   Point3F point = norm * (-plane.d);
-   MMatrixF temp = mat;
+   Point3F point = norm * -plane.d;
+   MatrixF temp = mat;
    point.x *= scale.x;
    point.y *= scale.y;
    point.z *= scale.z;
-   point = temp * point;
+   temp.mulP(point);
 
    // Recompute the plane distance
    PlaneF resultPlane(point, norm);
