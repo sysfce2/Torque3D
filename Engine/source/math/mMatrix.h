@@ -39,6 +39,18 @@
 #include "console/engineTypeInfo.h"
 #endif
 
+#ifndef _FRAMEALLOCATOR_H_
+#include "core/frameAllocator.h"
+#endif
+
+#ifndef _STRINGFUNCTIONS_H_
+#include "core/strings/stringFunctions.h"
+#endif
+
+#ifndef _CONSOLE_H_
+#include "console/console.h"
+#endif
+
 #ifndef USE_TEMPLATE_MATRIX
 
 /// 4x4 Matrix Class
@@ -1657,26 +1669,23 @@ inline void Matrix<DATA_TYPE, rows, cols>::dumpMatrix(const char* caption) const
 // Non-member methods
 //------------------------------------
 
-template<typename DATA_TYPE, std::size_t Rows, std::size_t Cols>
 inline void mTransformPlane(
-   const Matrix<DATA_TYPE, Rows, Cols>& mat,
+   const MatrixF& mat,
    const Point3F& scale,
    const PlaneF& plane,
    PlaneF* result
 ) {
-   AssertFatal(Rows == 4 && Cols == 4, "Matrix must be 4x4");
-
    // Create a non-const copy of the matrix
-   Matrix<float, 4, 4> matCopy = mat;
+   MatrixF matCopy = mat;
 
    // Create the inverse scale matrix
-   Matrix<DATA_TYPE, 4, 4> invScale = Matrix<DATA_TYPE, 4, 4>::Identity;
+   MatrixF invScale = MatrixF::Identity;
    invScale(0, 0) = 1.0f / scale.x;
    invScale(1, 1) = 1.0f / scale.y;
    invScale(2, 2) = 1.0f / scale.z;
 
    // Compute the inverse transpose of the matrix
-   Matrix<DATA_TYPE, 4, 4> invTrMatrix = matCopy.transpose().affineInverse() * invScale;
+   MatrixF invTrMatrix = matCopy.transpose().affineInverse() * invScale;
 
    // Transform the plane normal
    Point3F norm(plane.x, plane.y, plane.z);
@@ -1688,7 +1697,7 @@ inline void mTransformPlane(
 
    // Transform the plane point
    Point3F point = norm * (-plane.d);
-   Matrix<DATA_TYPE, 4, 4> temp = mat;
+   MMatrixF temp = mat;
    point.x *= scale.x;
    point.y *= scale.y;
    point.z *= scale.z;
