@@ -109,73 +109,49 @@ TEST(MatrixTest, TestSetTensorProduct)
 TEST(MatrixTest, TestMulFunction)
 {
    MatrixF test(true);
-
-   test(0, 0) = 1.0f; test(0, 1) = 2.0f; test(0, 2) = 3.0f; test(0, 3) = 4.0f;
-   test(1, 0) = 4.0f; test(1, 1) = 1.0f; test(1, 2) = 2.0f; test(1, 3) = 3.0f;
-   test(2, 0) = 3.0f; test(2, 1) = 4.0f; test(2, 2) = 1.0f; test(2, 3) = 2.0f;
-   test(3, 0) = 2.0f; test(3, 1) = 3.0f; test(3, 2) = 4.0f; test(3, 3) = 1.0f;
-
-   MatrixF test2(true);
-
-   test2(0, 0) = 4.0f; test2(0, 1) = 3.0f; test2(0, 2) = 2.0f; test2(0, 3) = 1.0f;
-   test2(1, 0) = 1.0f; test2(1, 1) = 4.0f; test2(1, 2) = 3.0f; test2(1, 3) = 2.0f;
-   test2(2, 0) = 2.0f; test2(2, 1) = 1.0f; test2(2, 2) = 4.0f; test2(2, 3) = 3.0f;
-   test2(3, 0) = 3.0f; test2(3, 1) = 2.0f; test2(3, 2) = 1.0f; test2(3, 3) = 4.0f;
+   test.setPosition(Point3F(5.0f, 2.0f, 1.0f));
+   MatrixF test2(EulerF(1.0f, 0.0f, 1.0f));
 
    test.mul(test2);
 
-   EXPECT_NEAR(test(0, 0), 24.0f, 0.001f);  EXPECT_NEAR(test(0, 1), 22.0f, 0.001f);  EXPECT_NEAR(test(0, 2), 24.0f, 0.001f);  EXPECT_NEAR(test(0, 3), 30.0f, 0.001f);
-   EXPECT_NEAR(test(1, 0), 30.0f, 0.001f);  EXPECT_NEAR(test(1, 1), 24.0f, 0.001f);  EXPECT_NEAR(test(1, 2), 22.0f, 0.001f);  EXPECT_NEAR(test(1, 3), 24.0f, 0.001f);
-   EXPECT_NEAR(test(2, 0), 24.0f, 0.001f);  EXPECT_NEAR(test(2, 1), 30.0f, 0.001f);  EXPECT_NEAR(test(2, 2), 24.0f, 0.001f);  EXPECT_NEAR(test(2, 3), 22.0f, 0.001f);
-   EXPECT_NEAR(test(3, 0), 22.0f, 0.001f);  EXPECT_NEAR(test(3, 1), 24.0f, 0.001f);  EXPECT_NEAR(test(3, 2), 30.0f, 0.001f);  EXPECT_NEAR(test(3, 3), 24.0f, 0.001f);
+   // mulL result
+   /*(null) = | 0.5403 -0.4546  0.7081   0.0000   |
+      | 0.8415   0.2919 -0.4546  0.0000   |
+      | 0.0000   0.8415   0.5403   0.0000   |
+      | 4.3845 -0.8479  3.1714   1.0000 |*/
+
+   EXPECT_NEAR(test(0, 0), 0.5403f, 0.001f);  EXPECT_NEAR(test(0, 1), 0.8415f, 0.001f);  EXPECT_NEAR(test(0, 2), 0.0f, 0.001f);     EXPECT_NEAR(test(0, 3), 5.0f, 0.001f);
+   EXPECT_NEAR(test(1, 0), -0.4546f, 0.001f); EXPECT_NEAR(test(1, 1), 0.2919f, 0.001f);  EXPECT_NEAR(test(1, 2), 0.8415f, 0.001f);  EXPECT_NEAR(test(1, 3), 2.0f, 0.001f);
+   EXPECT_NEAR(test(2, 0), 0.7081f, 0.001f);  EXPECT_NEAR(test(2, 1), -0.4546f, 0.001f); EXPECT_NEAR(test(2, 2), 0.5403f, 0.001f);  EXPECT_NEAR(test(2, 3), 1.0f, 0.001f);
+   EXPECT_NEAR(test(3, 0), 0.0f, 0.001f);     EXPECT_NEAR(test(3, 1), 0.0f, 0.001f);     EXPECT_NEAR(test(3, 2), 0.0f, 0.001f);     EXPECT_NEAR(test(3, 3), 1.0f, 0.001f);
 }
 
 TEST(MatrixTest, TestMulOperator)
 {
    MatrixF test(true);
-
-   test(0, 0) = 1.0f; test(0, 1) = 2.0f; test(0, 2) = 3.0f; test(0, 3) = 4.0f;
-   test(1, 0) = 4.0f; test(1, 1) = 1.0f; test(1, 2) = 2.0f; test(1, 3) = 3.0f;
-   test(2, 0) = 3.0f; test(2, 1) = 4.0f; test(2, 2) = 1.0f; test(2, 3) = 2.0f;
-   test(3, 0) = 2.0f; test(3, 1) = 3.0f; test(3, 2) = 4.0f; test(3, 3) = 1.0f;
-
-   MatrixF test2(true);
-
-   test2(0, 0) = 4.0f; test2(0, 1) = 3.0f; test2(0, 2) = 2.0f; test2(0, 3) = 1.0f;
-   test2(1, 0) = 1.0f; test2(1, 1) = 4.0f; test2(1, 2) = 3.0f; test2(1, 3) = 2.0f;
-   test2(2, 0) = 2.0f; test2(2, 1) = 1.0f; test2(2, 2) = 4.0f; test2(2, 3) = 3.0f;
-   test2(3, 0) = 3.0f; test2(3, 1) = 2.0f; test2(3, 2) = 1.0f; test2(3, 3) = 4.0f;
+   test.setPosition(Point3F(5.0f, 2.0f, 1.0f));
+   MatrixF test2(EulerF(1.0f, 0.0f, 1.0f));
 
    test = test * test2;
 
-   EXPECT_NEAR(test(0, 0), 24.0f, 0.001f);  EXPECT_NEAR(test(0, 1), 22.0f, 0.001f);  EXPECT_NEAR(test(0, 2), 24.0f, 0.001f);  EXPECT_NEAR(test(0, 3), 30.0f, 0.001f);
-   EXPECT_NEAR(test(1, 0), 30.0f, 0.001f);  EXPECT_NEAR(test(1, 1), 24.0f, 0.001f);  EXPECT_NEAR(test(1, 2), 22.0f, 0.001f);  EXPECT_NEAR(test(1, 3), 24.0f, 0.001f);
-   EXPECT_NEAR(test(2, 0), 24.0f, 0.001f);  EXPECT_NEAR(test(2, 1), 30.0f, 0.001f);  EXPECT_NEAR(test(2, 2), 24.0f, 0.001f);  EXPECT_NEAR(test(2, 3), 22.0f, 0.001f);
-   EXPECT_NEAR(test(3, 0), 22.0f, 0.001f);  EXPECT_NEAR(test(3, 1), 24.0f, 0.001f);  EXPECT_NEAR(test(3, 2), 30.0f, 0.001f);  EXPECT_NEAR(test(3, 3), 24.0f, 0.001f);
+   EXPECT_NEAR(test(0, 0), 0.5403f, 0.001f);  EXPECT_NEAR(test(0, 1), 0.8415f, 0.001f);  EXPECT_NEAR(test(0, 2), 0.0f, 0.001f);     EXPECT_NEAR(test(0, 3), 5.0f, 0.001f);
+   EXPECT_NEAR(test(1, 0), -0.4546f, 0.001f); EXPECT_NEAR(test(1, 1), 0.2919f, 0.001f);  EXPECT_NEAR(test(1, 2), 0.8415f, 0.001f);  EXPECT_NEAR(test(1, 3), 2.0f, 0.001f);
+   EXPECT_NEAR(test(2, 0), 0.7081f, 0.001f);  EXPECT_NEAR(test(2, 1), -0.4546f, 0.001f); EXPECT_NEAR(test(2, 2), 0.5403f, 0.001f);  EXPECT_NEAR(test(2, 3), 1.0f, 0.001f);
+   EXPECT_NEAR(test(3, 0), 0.0f, 0.001f);     EXPECT_NEAR(test(3, 1), 0.0f, 0.001f);     EXPECT_NEAR(test(3, 2), 0.0f, 0.001f);     EXPECT_NEAR(test(3, 3), 1.0f, 0.001f);
 }
 
 TEST(MatrixTest, TestMulLFunction)
 {
    MatrixF test(true);
-
-   test(0, 0) = 1.0f; test(0, 1) = 2.0f; test(0, 2) = 3.0f; test(0, 3) = 4.0f;
-   test(1, 0) = 4.0f; test(1, 1) = 1.0f; test(1, 2) = 2.0f; test(1, 3) = 3.0f;
-   test(2, 0) = 3.0f; test(2, 1) = 4.0f; test(2, 2) = 1.0f; test(2, 3) = 2.0f;
-   test(3, 0) = 2.0f; test(3, 1) = 3.0f; test(3, 2) = 4.0f; test(3, 3) = 1.0f;
-
-   MatrixF test2(true);
-
-   test2(0, 0) = 4.0f; test2(0, 1) = 3.0f; test2(0, 2) = 2.0f; test2(0, 3) = 1.0f;
-   test2(1, 0) = 1.0f; test2(1, 1) = 4.0f; test2(1, 2) = 3.0f; test2(1, 3) = 2.0f;
-   test2(2, 0) = 2.0f; test2(2, 1) = 1.0f; test2(2, 2) = 4.0f; test2(2, 3) = 3.0f;
-   test2(3, 0) = 3.0f; test2(3, 1) = 2.0f; test2(3, 2) = 1.0f; test2(3, 3) = 4.0f;
+   test.setPosition(Point3F(5.0f, 2.0f, 1.0f));
+   MatrixF test2(EulerF(1.0f, 0.0f, 1.0f));
 
    test.mulL(test2);
 
-   EXPECT_NEAR(test(0, 0), 24.0f, 0.001f);  EXPECT_NEAR(test(0, 1), 22.0f, 0.001f);  EXPECT_NEAR(test(0, 2), 24.0f, 0.001f);  EXPECT_NEAR(test(0, 3), 30.0f, 0.001f);
-   EXPECT_NEAR(test(1, 0), 30.0f, 0.001f);  EXPECT_NEAR(test(1, 1), 24.0f, 0.001f);  EXPECT_NEAR(test(1, 2), 22.0f, 0.001f);  EXPECT_NEAR(test(1, 3), 24.0f, 0.001f);
-   EXPECT_NEAR(test(2, 0), 24.0f, 0.001f);  EXPECT_NEAR(test(2, 1), 30.0f, 0.001f);  EXPECT_NEAR(test(2, 2), 24.0f, 0.001f);  EXPECT_NEAR(test(2, 3), 22.0f, 0.001f);
-   EXPECT_NEAR(test(3, 0), 22.0f, 0.001f);  EXPECT_NEAR(test(3, 1), 24.0f, 0.001f);  EXPECT_NEAR(test(3, 2), 30.0f, 0.001f);  EXPECT_NEAR(test(3, 3), 24.0f, 0.001f);
+   EXPECT_NEAR(test(0, 0), 0.5403f, 0.001f);  EXPECT_NEAR(test(0, 1), 0.8415f, 0.001f);  EXPECT_NEAR(test(0, 2), 0.0f, 0.001f);     EXPECT_NEAR(test(0, 3), 4.3845f, 0.001f);
+   EXPECT_NEAR(test(1, 0), -0.4546f, 0.001f); EXPECT_NEAR(test(1, 1), 0.2919f, 0.001f);  EXPECT_NEAR(test(1, 2), 0.8415f, 0.001f);  EXPECT_NEAR(test(1, 3), -0.8479f, 0.001f);
+   EXPECT_NEAR(test(2, 0), 0.7081f, 0.001f);  EXPECT_NEAR(test(2, 1), -0.4546f, 0.001f); EXPECT_NEAR(test(2, 2), 0.5403f, 0.001f);  EXPECT_NEAR(test(2, 3), 3.1714, 0.001f);
+   EXPECT_NEAR(test(3, 0), 0.0f, 0.001f);     EXPECT_NEAR(test(3, 1), 0.0f, 0.001f);     EXPECT_NEAR(test(3, 2), 0.0f, 0.001f);     EXPECT_NEAR(test(3, 3), 1.0f, 0.001f);
 }
 
 TEST(MatrixTest, TestMulArgMatrixFunction)
@@ -183,24 +159,14 @@ TEST(MatrixTest, TestMulArgMatrixFunction)
    MatrixF testResult(true);
 
    MatrixF test(true);
-
-   test(0, 0) = 1.0f; test(0, 1) = 2.0f; test(0, 2) = 3.0f; test(0, 3) = 4.0f;
-   test(1, 0) = 4.0f; test(1, 1) = 1.0f; test(1, 2) = 2.0f; test(1, 3) = 3.0f;
-   test(2, 0) = 3.0f; test(2, 1) = 4.0f; test(2, 2) = 1.0f; test(2, 3) = 2.0f;
-   test(3, 0) = 2.0f; test(3, 1) = 3.0f; test(3, 2) = 4.0f; test(3, 3) = 1.0f;
-
-   MatrixF test2(true);
-
-   test2(0, 0) = 4.0f; test2(0, 1) = 3.0f; test2(0, 2) = 2.0f; test2(0, 3) = 1.0f;
-   test2(1, 0) = 1.0f; test2(1, 1) = 4.0f; test2(1, 2) = 3.0f; test2(1, 3) = 2.0f;
-   test2(2, 0) = 2.0f; test2(2, 1) = 1.0f; test2(2, 2) = 4.0f; test2(2, 3) = 3.0f;
-   test2(3, 0) = 3.0f; test2(3, 1) = 2.0f; test2(3, 2) = 1.0f; test2(3, 3) = 4.0f;
+   test.setPosition(Point3F(5.0f, 2.0f, 1.0f));
+   MatrixF test2(EulerF(1.0f, 0.0f, 1.0f));
 
    testResult.mul(test2, test);
 
-   EXPECT_NEAR(testResult(0, 0), 24.0f, 0.001f);  EXPECT_NEAR(testResult(0, 1), 22.0f, 0.001f);  EXPECT_NEAR(testResult(0, 2), 24.0f, 0.001f);  EXPECT_NEAR(testResult(0, 3), 30.0f, 0.001f);
-   EXPECT_NEAR(testResult(1, 0), 30.0f, 0.001f);  EXPECT_NEAR(testResult(1, 1), 24.0f, 0.001f);  EXPECT_NEAR(testResult(1, 2), 22.0f, 0.001f);  EXPECT_NEAR(testResult(1, 3), 24.0f, 0.001f);
-   EXPECT_NEAR(testResult(2, 0), 24.0f, 0.001f);  EXPECT_NEAR(testResult(2, 1), 30.0f, 0.001f);  EXPECT_NEAR(testResult(2, 2), 24.0f, 0.001f);  EXPECT_NEAR(testResult(2, 3), 22.0f, 0.001f);
-   EXPECT_NEAR(testResult(3, 0), 22.0f, 0.001f);  EXPECT_NEAR(testResult(3, 1), 24.0f, 0.001f);  EXPECT_NEAR(testResult(3, 2), 30.0f, 0.001f);  EXPECT_NEAR(testResult(3, 3), 24.0f, 0.001f);
+   EXPECT_NEAR(testResult(0, 0), 0.5403f, 0.001f);  EXPECT_NEAR(testResult(0, 1), 0.8415f, 0.001f);  EXPECT_NEAR(testResult(0, 2), 0.0f, 0.001f);     EXPECT_NEAR(testResult(0, 3), 4.3845f, 0.001f);
+   EXPECT_NEAR(testResult(1, 0), -0.4546f, 0.001f); EXPECT_NEAR(testResult(1, 1), 0.2919f, 0.001f);  EXPECT_NEAR(testResult(1, 2), 0.8415f, 0.001f);  EXPECT_NEAR(testResult(1, 3), -0.8479f, 0.001f);
+   EXPECT_NEAR(testResult(2, 0), 0.7081f, 0.001f);  EXPECT_NEAR(testResult(2, 1), -0.4546f, 0.001f); EXPECT_NEAR(testResult(2, 2), 0.5403f, 0.001f);  EXPECT_NEAR(testResult(2, 3), 3.1714, 0.001f);
+   EXPECT_NEAR(testResult(3, 0), 0.0f, 0.001f);     EXPECT_NEAR(testResult(3, 1), 0.0f, 0.001f);     EXPECT_NEAR(testResult(3, 2), 0.0f, 0.001f);     EXPECT_NEAR(testResult(3, 3), 1.0f, 0.001f);
 }
 
