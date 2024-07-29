@@ -114,12 +114,6 @@ TEST(MatrixTest, TestMulFunction)
 
    test.mul(test2);
 
-   // mulL result
-   /*(null) = | 0.5403 -0.4546  0.7081   0.0000   |
-      | 0.8415   0.2919 -0.4546  0.0000   |
-      | 0.0000   0.8415   0.5403   0.0000   |
-      | 4.3845 -0.8479  3.1714   1.0000 |*/
-
    EXPECT_NEAR(test(0, 0), 0.5403f, 0.001f);  EXPECT_NEAR(test(0, 1), 0.8415f, 0.001f);  EXPECT_NEAR(test(0, 2), 0.0f, 0.001f);     EXPECT_NEAR(test(0, 3), 5.0f, 0.001f);
    EXPECT_NEAR(test(1, 0), -0.4546f, 0.001f); EXPECT_NEAR(test(1, 1), 0.2919f, 0.001f);  EXPECT_NEAR(test(1, 2), 0.8415f, 0.001f);  EXPECT_NEAR(test(1, 3), 2.0f, 0.001f);
    EXPECT_NEAR(test(2, 0), 0.7081f, 0.001f);  EXPECT_NEAR(test(2, 1), -0.4546f, 0.001f); EXPECT_NEAR(test(2, 2), 0.5403f, 0.001f);  EXPECT_NEAR(test(2, 3), 1.0f, 0.001f);
@@ -170,3 +164,18 @@ TEST(MatrixTest, TestMulArgMatrixFunction)
    EXPECT_NEAR(testResult(3, 0), 0.0f, 0.001f);     EXPECT_NEAR(testResult(3, 1), 0.0f, 0.001f);     EXPECT_NEAR(testResult(3, 2), 0.0f, 0.001f);     EXPECT_NEAR(testResult(3, 3), 1.0f, 0.001f);
 }
 
+TEST(MatrixTest, TestInverse)
+{
+   MatrixF test(true);
+   test.setPosition(Point3F(5.0f, 2.0f, 1.0f));
+   MatrixF test2(EulerF(1.0f, 0.0f, 1.0f));
+
+   test.mulL(test2);
+
+   test.inverse();
+
+   EXPECT_NEAR(test(0, 0), 0.5403f, 0.001f);  EXPECT_NEAR(test(0, 1), -0.4546f, 0.001f); EXPECT_NEAR(test(0, 2), 0.7081f, 0.001f);  EXPECT_NEAR(test(0, 3), -5.0f, 0.001f);
+   EXPECT_NEAR(test(1, 0), 0.8415f, 0.001f);  EXPECT_NEAR(test(1, 1), 0.2919f, 0.001f);  EXPECT_NEAR(test(1, 2), -0.4546f, 0.001f); EXPECT_NEAR(test(1, 3), -2.0f, 0.001f);
+   EXPECT_NEAR(test(2, 0), 0.0, 0.001f);      EXPECT_NEAR(test(2, 1), 0.8415f, 0.001f);  EXPECT_NEAR(test(2, 2), 0.5403f, 0.001f);  EXPECT_NEAR(test(2, 3), -1.0f, 0.001f);
+   EXPECT_NEAR(test(3, 0), 0.0f, 0.001f);     EXPECT_NEAR(test(3, 1), 0.0f, 0.001f);     EXPECT_NEAR(test(3, 2), 0.0f, 0.001f);     EXPECT_NEAR(test(3, 3), 1.0f, 0.001f);
+}

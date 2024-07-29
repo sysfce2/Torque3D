@@ -678,7 +678,7 @@ public:
    Matrix(const EulerF& e, const Point3F p);
    Matrix<DATA_TYPE, rows, cols>& set(const EulerF& e, const Point3F p);
 
-   Matrix<DATA_TYPE, rows, cols> inverse();
+   Matrix<DATA_TYPE, rows, cols>& inverse();
    Matrix<DATA_TYPE, rows, cols>& transpose();
    void invert();
 
@@ -1374,7 +1374,7 @@ inline Matrix<DATA_TYPE, rows, cols>& Matrix<DATA_TYPE, rows, cols>::set(const E
 }
 
 template<typename DATA_TYPE, U32 rows, U32 cols>
-inline Matrix<DATA_TYPE, rows, cols> Matrix<DATA_TYPE, rows, cols>::inverse()
+inline Matrix<DATA_TYPE, rows, cols>& Matrix<DATA_TYPE, rows, cols>::inverse()
 {
    // TODO: insert return statement here
    AssertFatal(rows == cols, "Can only perform inverse on square matrices.");
@@ -1382,7 +1382,6 @@ inline Matrix<DATA_TYPE, rows, cols> Matrix<DATA_TYPE, rows, cols>::inverse()
 
    // Create augmented matrix [this | I]
    Matrix<DATA_TYPE, size, 2 * size> augmentedMatrix;
-   Matrix<DATA_TYPE, size, size> resultMatrix;
 
    for (U32 i = 0; i < size; i++)
    {
@@ -1418,7 +1417,8 @@ inline Matrix<DATA_TYPE, rows, cols> Matrix<DATA_TYPE, rows, cols>::inverse()
       // Early out if pivot is 0, return identity matrix.
       if (augmentedMatrix(i, i) == static_cast<DATA_TYPE>(0))
       {
-         return Matrix<DATA_TYPE, rows, cols>(true);
+         this->identity();
+         return *this;
       }
 
       DATA_TYPE pivotVal = augmentedMatrix(i, i);
@@ -1447,11 +1447,11 @@ inline Matrix<DATA_TYPE, rows, cols> Matrix<DATA_TYPE, rows, cols>::inverse()
    {
       for (U32 j = 0; j < size; j++)
       {
-         resultMatrix(i, j) = augmentedMatrix(i, j + size);
+         (*this)(i, j) = augmentedMatrix(i, j + size);
       }
    }
 
-   return resultMatrix;
+   return (*this);
 }
 
 template<typename DATA_TYPE, U32 rows, U32 cols>
