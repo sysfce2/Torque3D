@@ -164,6 +164,20 @@ TEST(MatrixTest, TestMulArgMatrixFunction)
    EXPECT_NEAR(testResult(3, 0), 0.0f, 0.001f);     EXPECT_NEAR(testResult(3, 1), 0.0f, 0.001f);     EXPECT_NEAR(testResult(3, 2), 0.0f, 0.001f);     EXPECT_NEAR(testResult(3, 3), 1.0f, 0.001f);
 }
 
+TEST(MatrixTest, TestMulBox)
+{
+   MatrixF test(true);
+   test.setPosition(Point3F(5.0f, 2.0f, 1.0f));
+   MatrixF test2(EulerF(1.0f, 0.0f, 1.0f));
+
+   Box3F testBox(1.0f);
+
+   test.mul(testBox);
+
+   EXPECT_NEAR(testBox.minExtents.x, 4.5f, 0.001f); EXPECT_NEAR(testBox.minExtents.y, 1.5f, 0.001f); EXPECT_NEAR(testBox.minExtents.z, 0.5f, 0.001f);
+   EXPECT_NEAR(testBox.maxExtents.x, 5.5f, 0.001f); EXPECT_NEAR(testBox.maxExtents.y, 2.5f, 0.001f); EXPECT_NEAR(testBox.maxExtents.z, 1.5f, 0.001f);
+}
+
 TEST(MatrixTest, TestInverse)
 {
    MatrixF test(true);
@@ -178,4 +192,24 @@ TEST(MatrixTest, TestInverse)
    EXPECT_NEAR(test(1, 0), 0.8415f, 0.001f);  EXPECT_NEAR(test(1, 1), 0.2919f, 0.001f);  EXPECT_NEAR(test(1, 2), -0.4546f, 0.001f); EXPECT_NEAR(test(1, 3), -2.0f, 0.001f);
    EXPECT_NEAR(test(2, 0), 0.0, 0.001f);      EXPECT_NEAR(test(2, 1), 0.8415f, 0.001f);  EXPECT_NEAR(test(2, 2), 0.5403f, 0.001f);  EXPECT_NEAR(test(2, 3), -1.0f, 0.001f);
    EXPECT_NEAR(test(3, 0), 0.0f, 0.001f);     EXPECT_NEAR(test(3, 1), 0.0f, 0.001f);     EXPECT_NEAR(test(3, 2), 0.0f, 0.001f);     EXPECT_NEAR(test(3, 3), 1.0f, 0.001f);
+}
+
+TEST(MatrixTest, TestTransformPlane)
+{
+   MatrixF test(true);
+   test.setPosition(Point3F(5.0f, 2.0f, 1.0f));
+   MatrixF test2(EulerF(1.0f, 0.0f, 1.0f));
+
+   test.mulL(test2);
+
+   PlaneF plane(Point3F(0.0f, 0.0f, 0.0f), Point3F(0.0f, 0.0f, 1.0f));
+
+   PlaneF res;
+   mTransformPlane(test, Point3F(1.0f, 1.0f, 1.0f), plane, &res);
+
+   EXPECT_NEAR(res.x, 0.0f, 0.001f);
+   EXPECT_NEAR(res.y, 0.8414f, 0.001f);
+   EXPECT_NEAR(res.z, 0.5403f, 0.001f);
+   EXPECT_NEAR(res.d, -1.0f, 0.001f);
+
 }
