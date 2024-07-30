@@ -8,6 +8,7 @@
 #include "console/engineAPI.h"
 #include "math/mMath.h"
 #include "math/util/frustum.h"
+#include "math/mathUtils.h"
 
 TEST(MatrixTest, TestIdentityInit)
 {
@@ -800,28 +801,47 @@ TEST(MatrixTest, TestMatrixAdd)
 
 }
 
-TEST(MatrixTest, TestReverseProjection)
+TEST(MatrixTest, TestFrustumProjectionMatrix)
 {
    MatrixF test(true);
-   test.setPosition(Point3F(5.0f, 2.0f, 1.0f));
-
-   Frustum testFrustum(false, -1.0f, 1.0f, 1.0f, -1.0f, 0.1f, 100.0f, test);
+   Frustum testFrustum(false, -0.119894862f, 0.119894862f, 0.0767327100f, -0.0767327100f, 0.1f, 1000.0f);
 
    testFrustum.getProjectionMatrix(&test);
 
-
-   // test before and after reverse.
-   EXPECT_NEAR(test(0, 0), 0.1f, 0.001f);  EXPECT_NEAR(test(0, 1), 0.0f, 0.001f);     EXPECT_NEAR(test(0, 2), 0.0f, 0.001f);  EXPECT_NEAR(test(0, 3), 0.0f, 0.001f);
-   EXPECT_NEAR(test(1, 0), 0.0f, 0.001f);  EXPECT_NEAR(test(1, 1), 0.0f, 0.001f);     EXPECT_NEAR(test(1, 2), 0.1, 0.001f);   EXPECT_NEAR(test(1, 3), 0.0f, 0.001f);
-   EXPECT_NEAR(test(2, 0), 0.0f, 0.001f);  EXPECT_NEAR(test(2, 1), -0.001f, 0.001f);  EXPECT_NEAR(test(2, 2), 0.0f, 0.001f);  EXPECT_NEAR(test(2, 3), 0.1001f, 0.001f);
-   EXPECT_NEAR(test(3, 0), 0.0f, 0.001f);  EXPECT_NEAR(test(3, 1), 1.0f, 0.001f);     EXPECT_NEAR(test(3, 2), 0.0f, 0.001f);  EXPECT_NEAR(test(3, 3), 0.0f, 0.001f);
+   EXPECT_NEAR(test(0, 0), 0.8341f, 0.001f); EXPECT_NEAR(test(0, 1), 0.0f, 0.001f);     EXPECT_NEAR(test(0, 2), 0.0f, 0.001f);    EXPECT_NEAR(test(0, 3), 0.0f, 0.001f);
+   EXPECT_NEAR(test(1, 0), 0.0f, 0.001f);    EXPECT_NEAR(test(1, 1), 0.0f, 0.001f);     EXPECT_NEAR(test(1, 2), 1.3032f, 0.001f); EXPECT_NEAR(test(1, 3), 0.0, 0.001f);
+   EXPECT_NEAR(test(2, 0), 0.0f, 0.001f);    EXPECT_NEAR(test(2, 1), -0.0001f, 0.001f); EXPECT_NEAR(test(2, 2), 0.0f, 0.001f);    EXPECT_NEAR(test(2, 3), 0.1f, 0.001f);
+   EXPECT_NEAR(test(3, 0), 0.0f, 0.001f);    EXPECT_NEAR(test(3, 1), 1.0f, 0.001f);     EXPECT_NEAR(test(3, 2), 0.0f, 0.001f);    EXPECT_NEAR(test(3, 3), 0.0f, 0.001f);
 
    test.reverseProjection();
 
-   EXPECT_NEAR(test(0, 0), 0.1f, 0.001f);  EXPECT_NEAR(test(0, 1), 0.0f, 0.001f);   EXPECT_NEAR(test(0, 2), 0.0f, 0.001f); EXPECT_NEAR(test(0, 3), 0.0f, 0.001f);
-   EXPECT_NEAR(test(1, 0), 0.0f, 0.001f);  EXPECT_NEAR(test(1, 1), 0.0f, 0.001f);   EXPECT_NEAR(test(1, 2), 0.1, 0.001f);  EXPECT_NEAR(test(1, 3), 0.0, 0.001f);
-   EXPECT_NEAR(test(2, 0), 0.0f, 0.001f);  EXPECT_NEAR(test(2, 1), 1.001f, 0.001f); EXPECT_NEAR(test(2, 2), 0.0f, 0.001f); EXPECT_NEAR(test(2, 3), -0.1001f, 0.001f);
-   EXPECT_NEAR(test(3, 0), 0.0f, 0.001f);  EXPECT_NEAR(test(3, 1), 1.0f, 0.001f);   EXPECT_NEAR(test(3, 2), 0.0f, 0.001f); EXPECT_NEAR(test(3, 3), 0.0f, 0.001f);
+   EXPECT_NEAR(test(0, 0), 0.8341f, 0.001f); EXPECT_NEAR(test(0, 1), 0.0f, 0.001f);     EXPECT_NEAR(test(0, 2), 0.0f, 0.001f);    EXPECT_NEAR(test(0, 3), 0.0f, 0.001f);
+   EXPECT_NEAR(test(1, 0), 0.0f, 0.001f);    EXPECT_NEAR(test(1, 1), 0.0f, 0.001f);     EXPECT_NEAR(test(1, 2), 1.3032f, 0.001f); EXPECT_NEAR(test(1, 3), 0.0, 0.001f);
+   EXPECT_NEAR(test(2, 0), 0.0f, 0.001f);    EXPECT_NEAR(test(2, 1), 1.0001f, 0.001f);  EXPECT_NEAR(test(2, 2), 0.0f, 0.001f);    EXPECT_NEAR(test(2, 3), -0.1f, 0.001f);
+   EXPECT_NEAR(test(3, 0), 0.0f, 0.001f);    EXPECT_NEAR(test(3, 1), 1.0f, 0.001f);     EXPECT_NEAR(test(3, 2), 0.0f, 0.001f);    EXPECT_NEAR(test(3, 3), 0.0f, 0.001f);
+
+   test.inverse();
+
+   EXPECT_NEAR(test(0, 0), 1.1989f, 0.001f); EXPECT_NEAR(test(0, 1), 0.0f, 0.001f);     EXPECT_NEAR(test(0, 2), 0.0f, 0.001f);    EXPECT_NEAR(test(0, 3), 0.0f, 0.001f);
+   EXPECT_NEAR(test(1, 0), 0.0f, 0.001f);    EXPECT_NEAR(test(1, 1), 0.0f, 0.001f);     EXPECT_NEAR(test(1, 2), 0.9999f, 0.001f); EXPECT_NEAR(test(1, 3), 0.1f, 0.001f);
+   EXPECT_NEAR(test(2, 0), 0.0f, 0.001f);    EXPECT_NEAR(test(2, 1), 0.7673f, 0.001f);  EXPECT_NEAR(test(2, 2), 0.0f, 0.001f);    EXPECT_NEAR(test(2, 3), 0.0f, 0.001f);
+   EXPECT_NEAR(test(3, 0), 0.0f, 0.001f);    EXPECT_NEAR(test(3, 1), 1.0f, 0.001f);     EXPECT_NEAR(test(3, 2), 0.0f, 0.001f);    EXPECT_NEAR(test(3, 3), 0.0f, 0.001f);
+
+}
+
+TEST(MatrixTest, TestUnProjectStack)
+{
+   MatrixF saveModel(true);
+   MatrixF saveProjection(true);
+   RectI renderRect(0 ,0, 1600, 1024);
+
+   Frustum testFrustum(false, -0.119894862f, 0.119894862f, 0.0767327100f, -0.0767327100f, 0.1f, 1000.0f);
+
+   testFrustum.getProjectionMatrix(&saveProjection);
+
+   Point3F dest;
+   MathUtils::mProjectScreenToWorld(Point3F(626.0f, 600.0f, 1.0f), &dest, renderRect, saveModel, saveProjection, 0.1f, 10.0f);
+   EXPECT_NEAR(dest.x, -0.2868f, 0.001f);  EXPECT_NEAR(dest.y, 1.1998f, 0.001f);   EXPECT_NEAR(dest.z, -0.1450f, 0.001f);
 }
 
 TEST(MatrixTest, TestInverse)

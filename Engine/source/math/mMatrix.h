@@ -698,6 +698,17 @@ public:
 
    void setPosition(const Point3F& pos) { setColumn(3, pos); }
 
+   DATA_TYPE determinant() const {
+      AssertFatal(rows == cols, "Determinant is only defined for square matrices.");
+      // For simplicity, only implement for 3x3 matrices
+      AssertFatal(rows >= 3 && cols >= 3, "Determinant only for 3x3 or more"); // Ensure the matrix is 3x3
+      DATA_TYPE det =
+         data[0] * (data[4] * data[8] - data[5] * data[7]) -
+         data[1] * (data[3] * data[8] - data[5] * data[6]) +
+         data[2] * (data[3] * data[7] - data[4] * data[6]);
+      return det;
+   }
+
    ///< M * a -> M
    Matrix<DATA_TYPE, rows, cols>& mul(const Matrix<DATA_TYPE, rows, cols>& a)
    { return *this = *this * a; }
@@ -1406,10 +1417,10 @@ inline Matrix<DATA_TYPE, rows, cols>& Matrix<DATA_TYPE, rows, cols>::inverse()
 {
    // TODO: insert return statement here
    AssertFatal(rows == cols, "Can only perform inverse on square matrices.");
-   const U32 size = rows;
+   const U32 size = rows - 1;
 
    // Create augmented matrix [this | I]
-   Matrix<DATA_TYPE, size, 2 * size> augmentedMatrix;
+   Matrix<DATA_TYPE, size, rows + size> augmentedMatrix;
 
    for (U32 i = 0; i < size; i++)
    {
@@ -1449,12 +1460,12 @@ inline Matrix<DATA_TYPE, rows, cols>& Matrix<DATA_TYPE, rows, cols>::inverse()
          return *this;
       }
 
-      DATA_TYPE pivotVal = augmentedMatrix(i, i);
+      DATA_TYPE pivotVal = 1.0f / augmentedMatrix(i, i);
 
       // scale the pivot
       for (U32 j = 0; j < 2 * size; j++)
       {
-         augmentedMatrix(i, j) /= pivotVal;
+         augmentedMatrix(i, j) *= pivotVal;
       }
 
       // Eliminate the current column in all other rows
@@ -1478,6 +1489,10 @@ inline Matrix<DATA_TYPE, rows, cols>& Matrix<DATA_TYPE, rows, cols>::inverse()
          (*this)(i, j) = augmentedMatrix(i, j + size);
       }
    }
+
+   Point3F pos = -this->getPosition();
+   mulV(pos);
+   this->setPosition(pos);
 
    return (*this);
 }
