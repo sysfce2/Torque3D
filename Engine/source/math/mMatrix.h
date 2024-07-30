@@ -700,9 +700,7 @@ public:
 
    ///< M * a -> M
    Matrix<DATA_TYPE, rows, cols>& mul(const Matrix<DATA_TYPE, rows, cols>& a)
-   {
-      *this = *this * a;  return *this;
-   }
+   { return *this = *this * a; }
    ///< a * M -> M
    Matrix<DATA_TYPE, rows, cols>& mulL(const Matrix<DATA_TYPE, rows, cols>& a)
    { return *this = a * *this; }
@@ -711,7 +709,7 @@ public:
    { return *this = a * b; }
    ///< M * a -> M
    Matrix<DATA_TYPE, rows, cols>& mul(const F32 a)
-   { return *this * a; }
+   { return *this = *this * a; }
    ///< a * b -> M
    Matrix<DATA_TYPE, rows, cols>& mul(const Matrix<DATA_TYPE, rows, cols>& a, const F32 b)
    { return *this = a * b; }
@@ -1634,28 +1632,20 @@ template<typename DATA_TYPE, U32 rows, U32 cols>
 inline EulerF Matrix<DATA_TYPE, rows, cols>::toEuler() const
 {
    AssertFatal(rows >= 3 && cols >= 3, "Euler rotations require at least a 3x3 matrix.");
-   // Extract rotation matrix components
-   const DATA_TYPE m00 = (*this)(0, 0);
-   const DATA_TYPE m01 = (*this)(0, 1);
-   const DATA_TYPE m02 = (*this)(0, 2);
-   const DATA_TYPE m10 = (*this)(1, 0);
-   const DATA_TYPE m11 = (*this)(1, 1);
-   const DATA_TYPE m21 = (*this)(2, 1);
-   const DATA_TYPE m22 = (*this)(2, 2);
 
    // like all others assume float for now.
    EulerF r;
 
-   r.x = mAsin(mClampF(m21, -1.0, 1.0));
+   r.x = mAsin(mClampF((*this)(1,2), -1.0, 1.0));
    if (mCos(r.x) != 0.0f)
    {
-      r.y = mAtan2(-m02, m22); // yaw
-      r.z = mAtan2(-m10, m11); // roll
+      r.y = mAtan2(-(*this)(0, 2), (*this)(2, 2)); // yaw
+      r.z = mAtan2(-(*this)(1, 0), (*this)(1, 1)); // roll
    }
    else
    {
       r.y = 0.0f;
-      r.z = mAtan2(m01, m00); // this rolls when pitch is +90 degrees
+      r.z = mAtan2((*this)(0, 1), (*this)(0, 0)); // this rolls when pitch is +90 degrees
    }
 
    return r;
