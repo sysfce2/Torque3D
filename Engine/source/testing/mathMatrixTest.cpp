@@ -93,6 +93,472 @@ TEST(MatrixTest, TestEulerPointSet)
    EXPECT_NEAR(test(3, 0), 0.0f, 0.001f);      EXPECT_NEAR(test(3, 1), 0.0f, 0.001f);     EXPECT_NEAR(test(3, 2), 0.0f, 0.001f);    EXPECT_NEAR(test(3, 3), 1.0f, 0.001f);
 }
 
+TEST(MatrixTest, TestGetColumn4)
+{
+   MatrixF test(true);
+
+   test.set(EulerF(1.0f, 0.0f, 1.0f), Point3F(5.0f, 0.0f, 1.0f));
+
+   Point4F column;
+
+   test.getColumn(0, &column);
+
+   EXPECT_NEAR(column.x, test(0, 0), 0.001f);
+   EXPECT_NEAR(column.y, test(1, 0), 0.001f);
+   EXPECT_NEAR(column.z, test(2, 0), 0.001f);
+   EXPECT_NEAR(column.w, test(3, 0), 0.001f);
+
+   test.getColumn(1, &column);
+
+   EXPECT_NEAR(column.x, test(0, 1), 0.001f);
+   EXPECT_NEAR(column.y, test(1, 1), 0.001f);
+   EXPECT_NEAR(column.z, test(2, 1), 0.001f);
+   EXPECT_NEAR(column.w, test(3, 1), 0.001f);
+
+   test.getColumn(2, &column);
+
+   EXPECT_NEAR(column.x, test(0, 2), 0.001f);
+   EXPECT_NEAR(column.y, test(1, 2), 0.001f);
+   EXPECT_NEAR(column.z, test(2, 2), 0.001f);
+   EXPECT_NEAR(column.w, test(3, 2), 0.001f);
+
+   test.getColumn(3, &column);
+
+   EXPECT_NEAR(column.x, test(0, 3), 0.001f);
+   EXPECT_NEAR(column.y, test(1, 3), 0.001f);
+   EXPECT_NEAR(column.z, test(2, 3), 0.001f);
+   EXPECT_NEAR(column.w, test(3, 3), 0.001f);
+
+}
+
+TEST(MatrixTest, TestGetRow4)
+{
+   MatrixF test(true);
+
+   test.set(EulerF(1.0f, 0.0f, 1.0f), Point3F(5.0f, 0.0f, 1.0f));
+
+   Point4F column;
+
+   test.getRow(0, &column);
+
+   EXPECT_NEAR(column.x, test(0, 0), 0.001f);
+   EXPECT_NEAR(column.y, test(0, 1), 0.001f);
+   EXPECT_NEAR(column.z, test(0, 2), 0.001f);
+   EXPECT_NEAR(column.w, test(0, 3), 0.001f);
+
+   test.getRow(1, &column);
+
+   EXPECT_NEAR(column.x, test(1, 0), 0.001f);
+   EXPECT_NEAR(column.y, test(1, 1), 0.001f);
+   EXPECT_NEAR(column.z, test(1, 2), 0.001f);
+   EXPECT_NEAR(column.w, test(1, 3), 0.001f);
+
+   test.getRow(2, &column);
+
+   EXPECT_NEAR(column.x, test(2, 0), 0.001f);
+   EXPECT_NEAR(column.y, test(2, 1), 0.001f);
+   EXPECT_NEAR(column.z, test(2, 2), 0.001f);
+   EXPECT_NEAR(column.w, test(2, 3), 0.001f);
+
+   test.getRow(3, &column);
+
+   EXPECT_NEAR(column.x, test(3, 0), 0.001f);
+   EXPECT_NEAR(column.y, test(3, 1), 0.001f);
+   EXPECT_NEAR(column.z, test(3, 2), 0.001f);
+   EXPECT_NEAR(column.w, test(3, 3), 0.001f);
+}
+
+TEST(MatrixTest, TestGetColumn3)
+{
+   MatrixF test(true);
+
+   test.set(EulerF(1.0f, 0.0f, 1.0f), Point3F(5.0f, 0.0f, 1.0f));
+
+   Point3F column;
+
+   test.getColumn(0, &column);
+
+   EXPECT_NEAR(column.x, test(0, 0), 0.001f);
+   EXPECT_NEAR(column.y, test(1, 0), 0.001f);
+   EXPECT_NEAR(column.z, test(2, 0), 0.001f);
+
+   test.getColumn(1, &column);
+
+   EXPECT_NEAR(column.x, test(0, 1), 0.001f);
+   EXPECT_NEAR(column.y, test(1, 1), 0.001f);
+   EXPECT_NEAR(column.z, test(2, 1), 0.001f);
+
+   test.getColumn(2, &column);
+
+   EXPECT_NEAR(column.x, test(0, 2), 0.001f);
+   EXPECT_NEAR(column.y, test(1, 2), 0.001f);
+   EXPECT_NEAR(column.z, test(2, 2), 0.001f);
+
+   test.getColumn(3, &column);
+
+   EXPECT_NEAR(column.x, test(0, 3), 0.001f);
+   EXPECT_NEAR(column.y, test(1, 3), 0.001f);
+   EXPECT_NEAR(column.z, test(2, 3), 0.001f);
+
+}
+
+TEST(MatrixTest, TestGetRow3)
+{
+   MatrixF test(true);
+
+   test.set(EulerF(1.0f, 0.0f, 1.0f), Point3F(5.0f, 0.0f, 1.0f));
+
+   Point3F column;
+
+   test.getRow(0, &column);
+
+   EXPECT_NEAR(column.x, test(0, 0), 0.001f);
+   EXPECT_NEAR(column.y, test(0, 1), 0.001f);
+   EXPECT_NEAR(column.z, test(0, 2), 0.001f);
+
+   test.getRow(1, &column);
+
+   EXPECT_NEAR(column.x, test(1, 0), 0.001f);
+   EXPECT_NEAR(column.y, test(1, 1), 0.001f);
+   EXPECT_NEAR(column.z, test(1, 2), 0.001f);
+
+   test.getRow(2, &column);
+
+   EXPECT_NEAR(column.x, test(2, 0), 0.001f);
+   EXPECT_NEAR(column.y, test(2, 1), 0.001f);
+   EXPECT_NEAR(column.z, test(2, 2), 0.001f);
+
+   test.getRow(3, &column);
+
+   EXPECT_NEAR(column.x, test(3, 0), 0.001f);
+   EXPECT_NEAR(column.y, test(3, 1), 0.001f);
+   EXPECT_NEAR(column.z, test(3, 2), 0.001f);
+}
+
+TEST(MatrixTest, TestGetColumn4F)
+{
+   MatrixF test(true);
+
+   test.set(EulerF(1.0f, 0.0f, 1.0f), Point3F(5.0f, 0.0f, 1.0f));
+
+   Point4F column;
+
+   column = test.getColumn4F(0);
+
+   EXPECT_NEAR(column.x, test(0, 0), 0.001f);
+   EXPECT_NEAR(column.y, test(1, 0), 0.001f);
+   EXPECT_NEAR(column.z, test(2, 0), 0.001f);
+   EXPECT_NEAR(column.w, test(3, 0), 0.001f);
+
+   column = test.getColumn4F(1);
+
+   EXPECT_NEAR(column.x, test(0, 1), 0.001f);
+   EXPECT_NEAR(column.y, test(1, 1), 0.001f);
+   EXPECT_NEAR(column.z, test(2, 1), 0.001f);
+   EXPECT_NEAR(column.w, test(3, 1), 0.001f);
+
+   column = test.getColumn4F(2);
+
+   EXPECT_NEAR(column.x, test(0, 2), 0.001f);
+   EXPECT_NEAR(column.y, test(1, 2), 0.001f);
+   EXPECT_NEAR(column.z, test(2, 2), 0.001f);
+   EXPECT_NEAR(column.w, test(3, 2), 0.001f);
+
+   column = test.getColumn4F(3);
+
+   EXPECT_NEAR(column.x, test(0, 3), 0.001f);
+   EXPECT_NEAR(column.y, test(1, 3), 0.001f);
+   EXPECT_NEAR(column.z, test(2, 3), 0.001f);
+   EXPECT_NEAR(column.w, test(3, 3), 0.001f);
+
+}
+
+TEST(MatrixTest, TestGetRow4F)
+{
+   MatrixF test(true);
+
+   test.set(EulerF(1.0f, 0.0f, 1.0f), Point3F(5.0f, 0.0f, 1.0f));
+
+   Point4F column;
+
+   column = test.getRow4F(0);
+
+   EXPECT_NEAR(column.x, test(0, 0), 0.001f);
+   EXPECT_NEAR(column.y, test(0, 1), 0.001f);
+   EXPECT_NEAR(column.z, test(0, 2), 0.001f);
+   EXPECT_NEAR(column.w, test(0, 3), 0.001f);
+
+   column = test.getRow4F(1);
+
+   EXPECT_NEAR(column.x, test(1, 0), 0.001f);
+   EXPECT_NEAR(column.y, test(1, 1), 0.001f);
+   EXPECT_NEAR(column.z, test(1, 2), 0.001f);
+   EXPECT_NEAR(column.w, test(1, 3), 0.001f);
+
+   column = test.getRow4F(2);
+
+   EXPECT_NEAR(column.x, test(2, 0), 0.001f);
+   EXPECT_NEAR(column.y, test(2, 1), 0.001f);
+   EXPECT_NEAR(column.z, test(2, 2), 0.001f);
+   EXPECT_NEAR(column.w, test(2, 3), 0.001f);
+
+   column = test.getRow4F(3);
+
+   EXPECT_NEAR(column.x, test(3, 0), 0.001f);
+   EXPECT_NEAR(column.y, test(3, 1), 0.001f);
+   EXPECT_NEAR(column.z, test(3, 2), 0.001f);
+   EXPECT_NEAR(column.w, test(3, 3), 0.001f);
+}
+
+TEST(MatrixTest, TestGetColumn3F)
+{
+   MatrixF test(true);
+
+   test.set(EulerF(1.0f, 0.0f, 1.0f), Point3F(5.0f, 0.0f, 1.0f));
+
+   Point3F column;
+
+   column = test.getColumn3F(0);
+
+   EXPECT_NEAR(column.x, test(0, 0), 0.001f);
+   EXPECT_NEAR(column.y, test(1, 0), 0.001f);
+   EXPECT_NEAR(column.z, test(2, 0), 0.001f);
+
+   column = test.getColumn3F(1);
+
+   EXPECT_NEAR(column.x, test(0, 1), 0.001f);
+   EXPECT_NEAR(column.y, test(1, 1), 0.001f);
+   EXPECT_NEAR(column.z, test(2, 1), 0.001f);
+
+   column = test.getColumn3F(2);
+
+   EXPECT_NEAR(column.x, test(0, 2), 0.001f);
+   EXPECT_NEAR(column.y, test(1, 2), 0.001f);
+   EXPECT_NEAR(column.z, test(2, 2), 0.001f);
+
+   column = test.getColumn3F(3);
+
+   EXPECT_NEAR(column.x, test(0, 3), 0.001f);
+   EXPECT_NEAR(column.y, test(1, 3), 0.001f);
+   EXPECT_NEAR(column.z, test(2, 3), 0.001f);
+
+}
+
+TEST(MatrixTest, TestGetRow3F)
+{
+   MatrixF test(true);
+
+   test.set(EulerF(1.0f, 0.0f, 1.0f), Point3F(5.0f, 0.0f, 1.0f));
+
+   Point3F column;
+
+   column = test.getRow3F(0);
+
+   EXPECT_NEAR(column.x, test(0, 0), 0.001f);
+   EXPECT_NEAR(column.y, test(0, 1), 0.001f);
+   EXPECT_NEAR(column.z, test(0, 2), 0.001f);
+
+   column = test.getRow3F(1);
+
+   EXPECT_NEAR(column.x, test(1, 0), 0.001f);
+   EXPECT_NEAR(column.y, test(1, 1), 0.001f);
+   EXPECT_NEAR(column.z, test(1, 2), 0.001f);
+
+   column = test.getRow3F(2);
+
+   EXPECT_NEAR(column.x, test(2, 0), 0.001f);
+   EXPECT_NEAR(column.y, test(2, 1), 0.001f);
+   EXPECT_NEAR(column.z, test(2, 2), 0.001f);
+
+   column = test.getRow3F(3);
+
+   EXPECT_NEAR(column.x, test(3, 0), 0.001f);
+   EXPECT_NEAR(column.y, test(3, 1), 0.001f);
+   EXPECT_NEAR(column.z, test(3, 2), 0.001f);
+}
+
+TEST(MatrixTest, TestSetColumn4)
+{
+   MatrixF test(true);
+
+   test.set(EulerF(1.0f, 0.0f, 1.0f), Point3F(5.0f, 0.0f, 1.0f));
+
+   Point4F column(1.0f, 1.0f, 1.0f, 1.0f);
+
+   test.setColumn(0, column);
+
+   EXPECT_NEAR(column.x, test(0, 0), 0.001f);
+   EXPECT_NEAR(column.y, test(1, 0), 0.001f);
+   EXPECT_NEAR(column.z, test(2, 0), 0.001f);
+   EXPECT_NEAR(column.w, test(3, 0), 0.001f);
+
+   test.setColumn(1, column);
+
+   EXPECT_NEAR(column.x, test(0, 1), 0.001f);
+   EXPECT_NEAR(column.y, test(1, 1), 0.001f);
+   EXPECT_NEAR(column.z, test(2, 1), 0.001f);
+   EXPECT_NEAR(column.w, test(3, 1), 0.001f);
+
+   test.setColumn(2, column);
+
+   EXPECT_NEAR(column.x, test(0, 2), 0.001f);
+   EXPECT_NEAR(column.y, test(1, 2), 0.001f);
+   EXPECT_NEAR(column.z, test(2, 2), 0.001f);
+   EXPECT_NEAR(column.w, test(3, 2), 0.001f);
+
+   test.setColumn(3, column);
+
+   EXPECT_NEAR(column.x, test(0, 3), 0.001f);
+   EXPECT_NEAR(column.y, test(1, 3), 0.001f);
+   EXPECT_NEAR(column.z, test(2, 3), 0.001f);
+   EXPECT_NEAR(column.w, test(3, 3), 0.001f);
+}
+
+TEST(MatrixTest, TestSetRow4)
+{
+   MatrixF test(true);
+
+   test.set(EulerF(1.0f, 0.0f, 1.0f), Point3F(5.0f, 0.0f, 1.0f));
+
+   Point4F column(1.0f, 1.0f, 1.0f, 1.0f);
+
+   test.setRow(0, column);
+
+   EXPECT_NEAR(column.x, test(0, 0), 0.001f);
+   EXPECT_NEAR(column.y, test(0, 1), 0.001f);
+   EXPECT_NEAR(column.z, test(0, 2), 0.001f);
+   EXPECT_NEAR(column.w, test(0, 3), 0.001f);
+
+   test.setRow(1, column);
+
+   EXPECT_NEAR(column.x, test(1, 0), 0.001f);
+   EXPECT_NEAR(column.y, test(1, 1), 0.001f);
+   EXPECT_NEAR(column.z, test(1, 2), 0.001f);
+   EXPECT_NEAR(column.w, test(1, 3), 0.001f);
+
+   test.setRow(2, column);
+
+   EXPECT_NEAR(column.x, test(2, 0), 0.001f);
+   EXPECT_NEAR(column.y, test(2, 1), 0.001f);
+   EXPECT_NEAR(column.z, test(2, 2), 0.001f);
+   EXPECT_NEAR(column.w, test(2, 3), 0.001f);
+
+   test.setRow(3, column);
+
+   EXPECT_NEAR(column.x, test(3, 0), 0.001f);
+   EXPECT_NEAR(column.y, test(3, 1), 0.001f);
+   EXPECT_NEAR(column.z, test(3, 2), 0.001f);
+   EXPECT_NEAR(column.w, test(3, 3), 0.001f);
+}
+
+TEST(MatrixTest, TestSetColumn3)
+{
+   MatrixF test(true);
+
+   test.set(EulerF(1.0f, 0.0f, 1.0f), Point3F(5.0f, 0.0f, 1.0f));
+
+   Point3F column(1.0f, 1.0f, 1.0f);
+
+   test.setColumn(0, column);
+
+   EXPECT_NEAR(column.x, test(0, 0), 0.001f);
+   EXPECT_NEAR(column.y, test(1, 0), 0.001f);
+   EXPECT_NEAR(column.z, test(2, 0), 0.001f);
+
+   test.setColumn(1, column);
+
+   EXPECT_NEAR(column.x, test(0, 1), 0.001f);
+   EXPECT_NEAR(column.y, test(1, 1), 0.001f);
+   EXPECT_NEAR(column.z, test(2, 1), 0.001f);
+
+   test.setColumn(2, column);
+
+   EXPECT_NEAR(column.x, test(0, 2), 0.001f);
+   EXPECT_NEAR(column.y, test(1, 2), 0.001f);
+   EXPECT_NEAR(column.z, test(2, 2), 0.001f);
+
+   test.setColumn(3, column);
+
+   EXPECT_NEAR(column.x, test(0, 3), 0.001f);
+   EXPECT_NEAR(column.y, test(1, 3), 0.001f);
+   EXPECT_NEAR(column.z, test(2, 3), 0.001f);
+}
+
+TEST(MatrixTest, TestSetRow3)
+{
+   MatrixF test(true);
+
+   test.set(EulerF(1.0f, 0.0f, 1.0f), Point3F(5.0f, 0.0f, 1.0f));
+
+   Point3F column(1.0f, 1.0f, 1.0f);
+
+   test.setRow(0, column);
+
+   EXPECT_NEAR(column.x, test(0, 0), 0.001f);
+   EXPECT_NEAR(column.y, test(0, 1), 0.001f);
+   EXPECT_NEAR(column.z, test(0, 2), 0.001f);
+
+   test.setRow(1, column);
+
+   EXPECT_NEAR(column.x, test(1, 0), 0.001f);
+   EXPECT_NEAR(column.y, test(1, 1), 0.001f);
+   EXPECT_NEAR(column.z, test(1, 2), 0.001f);
+
+   test.setRow(2, column);
+
+   EXPECT_NEAR(column.x, test(2, 0), 0.001f);
+   EXPECT_NEAR(column.y, test(2, 1), 0.001f);
+   EXPECT_NEAR(column.z, test(2, 2), 0.001f);
+
+   test.setRow(3, column);
+
+   EXPECT_NEAR(column.x, test(3, 0), 0.001f);
+   EXPECT_NEAR(column.y, test(3, 1), 0.001f);
+   EXPECT_NEAR(column.z, test(3, 2), 0.001f);
+}
+
+TEST(MatrixTest, TestDisplace)
+{
+   MatrixF test(true);
+
+   test.set(EulerF(1.0f, 0.0f, 1.0f), Point3F(5.0f, 0.0f, 1.0f));
+
+   Point3F column(1.0f, 1.0f, 1.0f);
+
+   test.displace(column);
+
+   EXPECT_NEAR(test(0, 3), 6.0f, 0.001f);
+   EXPECT_NEAR(test(1, 3), 1.0f, 0.001f);
+   EXPECT_NEAR(test(2, 3), 2.0f, 0.001f);
+}
+
+TEST(MatrixTest, TestGetVectorFunctions)
+{
+   MatrixF test(true);
+
+   test.set(EulerF(1.0f, 0.0f, 1.0f), Point3F(5.0f, 0.0f, 1.0f));
+
+   VectorF vector;
+
+   vector = test.getRightVector();
+
+   EXPECT_NEAR(vector.x, test(0, 0), 0.001f);
+   EXPECT_NEAR(vector.y, test(1, 0), 0.001f);
+   EXPECT_NEAR(vector.z, test(2, 0), 0.001f);
+
+   vector = test.getForwardVector();
+
+   EXPECT_NEAR(vector.x, test(0, 1), 0.001f);
+   EXPECT_NEAR(vector.y, test(1, 1), 0.001f);
+   EXPECT_NEAR(vector.z, test(2, 1), 0.001f);
+
+   vector = test.getUpVector();
+
+   EXPECT_NEAR(vector.x, test(0, 2), 0.001f);
+   EXPECT_NEAR(vector.y, test(1, 2), 0.001f);
+   EXPECT_NEAR(vector.z, test(2, 2), 0.001f);
+}
+
 TEST(MatrixTest, TestSetCrossProduct)
 {
    MatrixF test(true);
@@ -173,6 +639,21 @@ TEST(MatrixTest, TestMulArgMatrixFunction)
    EXPECT_NEAR(testResult(1, 0), -0.4546f, 0.001f); EXPECT_NEAR(testResult(1, 1), 0.2919f, 0.001f);  EXPECT_NEAR(testResult(1, 2), 0.8415f, 0.001f);  EXPECT_NEAR(testResult(1, 3), -0.8479f, 0.001f);
    EXPECT_NEAR(testResult(2, 0), 0.7081f, 0.001f);  EXPECT_NEAR(testResult(2, 1), -0.4546f, 0.001f); EXPECT_NEAR(testResult(2, 2), 0.5403f, 0.001f);  EXPECT_NEAR(testResult(2, 3), 3.1714, 0.001f);
    EXPECT_NEAR(testResult(3, 0), 0.0f, 0.001f);     EXPECT_NEAR(testResult(3, 1), 0.0f, 0.001f);     EXPECT_NEAR(testResult(3, 2), 0.0f, 0.001f);     EXPECT_NEAR(testResult(3, 3), 1.0f, 0.001f);
+}
+
+TEST(MatrixTest, TestMulArgMultipleRotationMatrix)
+{
+   MatrixF testResult(true);
+
+   MatrixF xRot(EulerF(-1.54f, 0.0f, 0.0f));
+   MatrixF zRot(EulerF(0.0f, 0.0f, -1.57f));
+
+   testResult.mul(zRot, xRot);
+
+   EXPECT_NEAR(testResult(0, 0), 0.0008f, 0.001f); EXPECT_NEAR(testResult(0, 1), -0.0308f, 0.001f);EXPECT_NEAR(testResult(0, 2), 0.9995f, 0.001f);  EXPECT_NEAR(testResult(0, 3), 0.0f, 0.001f);
+   EXPECT_NEAR(testResult(1, 0), 1.0f, 0.001f);    EXPECT_NEAR(testResult(1, 1), 0.0f, 0.001f);    EXPECT_NEAR(testResult(1, 2), -0.0008f, 0.001f); EXPECT_NEAR(testResult(1, 3), 0.0f, 0.001f);
+   EXPECT_NEAR(testResult(2, 0), 0.0f, 0.001f);    EXPECT_NEAR(testResult(2, 1), 0.9995f, 0.001f); EXPECT_NEAR(testResult(2, 2), 0.0308f, 0.001f);  EXPECT_NEAR(testResult(2, 3), 0.0f, 0.001f);
+   EXPECT_NEAR(testResult(3, 0), 0.0f, 0.001f);    EXPECT_NEAR(testResult(3, 1), 0.0f, 0.001f);    EXPECT_NEAR(testResult(3, 2), 0.0f, 0.001f);     EXPECT_NEAR(testResult(3, 3), 1.0f, 0.001f);
 }
 
 TEST(MatrixTest, TestMulScalarFunction)
@@ -294,6 +775,31 @@ TEST(MatrixTest, TestMulBox)
    EXPECT_NEAR(testBox.maxExtents.x, 5.5f, 0.001f); EXPECT_NEAR(testBox.maxExtents.y, 2.5f, 0.001f); EXPECT_NEAR(testBox.maxExtents.z, 1.5f, 0.001f);
 }
 
+TEST(MatrixTest, TestMatrixAdd)
+{
+   MatrixF test(true);
+   MatrixF test2(true);
+   for (U32 i = 0; i < 4; i++)
+   {
+      for (U32 j = 0; j < 4; j++)
+      {
+         test(i, j) = 1.0f;
+         test2(i, j) = 1.0f;
+      }
+   }
+
+   test.add(test2);
+
+   for (U32 i = 0; i < 4; i++)
+   {
+      for (U32 j = 0; j < 4; j++)
+      {
+         EXPECT_NEAR(test(i,j), 2.0f, 0.001f);
+      }
+   }
+
+}
+
 TEST(MatrixTest, TestReverseProjection)
 {
    MatrixF test(true);
@@ -345,6 +851,22 @@ TEST(MatrixTest, TestInvertTo)
    MatrixF test(true);
 
    test1.invertTo(&test);
+
+   EXPECT_NEAR(test(0, 0), 0.5403f, 0.001f);  EXPECT_NEAR(test(0, 1), -0.4546f, 0.001f); EXPECT_NEAR(test(0, 2), 0.7081f, 0.001f);  EXPECT_NEAR(test(0, 3), -5.0f, 0.001f);
+   EXPECT_NEAR(test(1, 0), 0.8415f, 0.001f);  EXPECT_NEAR(test(1, 1), 0.2919f, 0.001f);  EXPECT_NEAR(test(1, 2), -0.4546f, 0.001f); EXPECT_NEAR(test(1, 3), -2.0f, 0.001f);
+   EXPECT_NEAR(test(2, 0), 0.0, 0.001f);      EXPECT_NEAR(test(2, 1), 0.8415f, 0.001f);  EXPECT_NEAR(test(2, 2), 0.5403f, 0.001f);  EXPECT_NEAR(test(2, 3), -1.0f, 0.001f);
+   EXPECT_NEAR(test(3, 0), 0.0f, 0.001f);     EXPECT_NEAR(test(3, 1), 0.0f, 0.001f);     EXPECT_NEAR(test(3, 2), 0.0f, 0.001f);     EXPECT_NEAR(test(3, 3), 1.0f, 0.001f);
+}
+
+TEST(MatrixTest, TestFullInverse)
+{
+   MatrixF test(true);
+   test.setPosition(Point3F(5.0f, 2.0f, 1.0f));
+   MatrixF test2(EulerF(1.0f, 0.0f, 1.0f));
+
+   test.mulL(test2);
+
+   EXPECT_TRUE(test.fullInverse());
 
    EXPECT_NEAR(test(0, 0), 0.5403f, 0.001f);  EXPECT_NEAR(test(0, 1), -0.4546f, 0.001f); EXPECT_NEAR(test(0, 2), 0.7081f, 0.001f);  EXPECT_NEAR(test(0, 3), -5.0f, 0.001f);
    EXPECT_NEAR(test(1, 0), 0.8415f, 0.001f);  EXPECT_NEAR(test(1, 1), 0.2919f, 0.001f);  EXPECT_NEAR(test(1, 2), -0.4546f, 0.001f); EXPECT_NEAR(test(1, 3), -2.0f, 0.001f);

@@ -713,7 +713,10 @@ public:
    ///< a * b -> M
    Matrix<DATA_TYPE, rows, cols>& mul(const Matrix<DATA_TYPE, rows, cols>& a, const F32 b)
    { return *this = a * b; }
-
+   Matrix<DATA_TYPE, rows, cols>& add(const Matrix<DATA_TYPE, rows, cols>& a)
+   {
+      return *this = *this += a;
+   }
 
    ///< M * p -> p (full [4x4] * [1x4])
    void mul(Point4F& p) const { p = *this * p; }
@@ -840,6 +843,33 @@ public:
       return *this;
    }
 
+   Matrix<DATA_TYPE, rows, cols> operator+(const Matrix<DATA_TYPE, rows, cols>& m2) {
+      Matrix<DATA_TYPE, rows, cols> result;
+
+      for (U32 i = 0; i < rows; ++i)
+      {
+         for (U32 j = 0; j < cols; ++j)
+         {
+            result(i, j) = 0; // Initialize result element to 0
+            result(i, j) = (*this)(i, j) + m2(i, j);
+         }
+      }
+
+      return result;
+   }
+
+   Matrix<DATA_TYPE, rows, cols> operator+=(const Matrix<DATA_TYPE, rows, cols>& m2) {
+      for (U32 i = 0; i < rows; ++i)
+      {
+         for (U32 j = 0; j < cols; ++j)
+         {
+            (*this)(i, j) += m2(i, j);
+         }
+      }
+
+      return (*this);
+   }
+
    Matrix<DATA_TYPE, rows, cols> operator * (const DATA_TYPE scalar) const {
       Matrix<DATA_TYPE, rows, cols> result;
       for (U32 i = 0; i < rows; i++)
@@ -917,7 +947,7 @@ public:
       return data[idx(col,row)];
    }
 
-   const DATA_TYPE& operator () (U32 row, U32 col) const {
+   DATA_TYPE operator () (U32 row, U32 col) const {
       if (row >= rows || col >= cols)
          AssertFatal(false, "Matrix indices out of range");
 
@@ -1302,7 +1332,7 @@ inline Matrix<DATA_TYPE, rows, cols>& Matrix<DATA_TYPE, rows, cols>::set(const E
    case AXIS_Z:
       (*this)(0, 0) = cosRoll;   (*this)(1, 0) = -sinRoll;  (*this)(2, 0) = 0.0f;
       (*this)(0, 1) = sinRoll;   (*this)(1, 1) = cosRoll;   (*this)(2, 1) = 0.0f;
-      (*this)(0, 2) = 0.0f;      (*this)(1, 2) = 0.0f;      (*this)(2, 2) = 0.0f;
+      (*this)(0, 2) = 0.0f;      (*this)(1, 2) = 0.0f;      (*this)(2, 2) = 1.0f;
       break;
    default:
       F32 r1 = cosYaw * cosRoll;
