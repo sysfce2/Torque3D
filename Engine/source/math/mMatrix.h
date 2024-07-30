@@ -1623,9 +1623,9 @@ inline Matrix<DATA_TYPE, rows, cols>& Matrix<DATA_TYPE, rows, cols>::affineInver
    (*this)(2, 1) = temp(1, 2);
 
    // Adjust translation part
-   (*this)(0, 3) = -(temp(0, 0) * temp(0, 3) + temp(0, 1) * temp(1, 3) + temp(0, 2) * temp(2, 3));
-   (*this)(1, 3) = -(temp(1, 0) * temp(0, 3) + temp(1, 1) * temp(1, 3) + temp(1, 2) * temp(2, 3));
-   (*this)(2, 3) = -(temp(2, 0) * temp(0, 3) + temp(2, 1) * temp(1, 3) + temp(2, 2) * temp(2, 3));
+   (*this)(0, 3) = -(temp(0, 0) * temp(0, 3) + temp(1, 0) * temp(1, 3) + temp(2, 0) * temp(2, 3));
+   (*this)(1, 3) = -(temp(0, 1) * temp(0, 3) + temp(1, 1) * temp(1, 3) + temp(2, 1) * temp(2, 3));
+   (*this)(2, 3) = -(temp(0, 2) * temp(0, 3) + temp(1, 2) * temp(1, 3) + temp(2, 2) * temp(2, 3));
 
    return *this;
 }
