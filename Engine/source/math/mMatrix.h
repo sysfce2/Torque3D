@@ -734,7 +734,14 @@ public:
    ///< M * p -> p (full [4x4] * [1x4])
    void mul(Point4F& p) const { p = *this * p; }
    ///< M * p -> p (assume w = 1.0f)
-   void mulP(Point3F& p) const { p = *this * p; }
+   void mulP(Point3F& p) const {
+      Point3F result;
+      result.x = (*this)(0, 0) * p.x + (*this)(0, 1) * p.y + (*this)(0, 2) * p.z + (*this)(0, 3);
+      result.y = (*this)(1, 0) * p.x + (*this)(1, 1) * p.y + (*this)(1, 2) * p.z + (*this)(1, 3);
+      result.z = (*this)(2, 0) * p.x + (*this)(2, 1) * p.y + (*this)(2, 2) * p.z + (*this)(2, 3);
+
+      p = result;
+   }
    ///< M * p -> d (assume w = 1.0f)
    void mulP(const Point3F& p, Point3F* d) const { *d = *this * p; }
    ///< M * v -> v (assume w = 0.0f)
@@ -1252,7 +1259,9 @@ inline void Matrix<DATA_TYPE, rows, cols>::invertTo(Matrix<DATA_TYPE, cols, rows
 template<typename DATA_TYPE, U32 rows, U32 cols>
 inline void Matrix<DATA_TYPE, rows, cols>::invertTo(Matrix<DATA_TYPE, cols, rows>* matrix)
 {
-   Matrix<DATA_TYPE, rows, cols> invMatrix = this->inverse();
+   Matrix<DATA_TYPE, rows, cols> invMatrix = *this;
+
+   invMatrix.inverse();
 
    for (U32 i = 0; i < rows; ++i)
    {
@@ -1433,7 +1442,7 @@ inline Matrix<DATA_TYPE, rows, cols>& Matrix<DATA_TYPE, rows, cols>::set(const E
 template<typename DATA_TYPE, U32 rows, U32 cols>
 inline Matrix<DATA_TYPE, rows, cols>& Matrix<DATA_TYPE, rows, cols>::inverse()
 {
-#if 0
+#if 1
    // NOTE: Gauss-Jordan elimination is yielding unpredictable results due to precission handling and
    // numbers near 0.0
    // 
@@ -1565,7 +1574,7 @@ inline Matrix<DATA_TYPE, rows, cols>& Matrix<DATA_TYPE, rows, cols>::inverse()
 template<typename DATA_TYPE, U32 rows, U32 cols>
 inline bool Matrix<DATA_TYPE, rows, cols>::fullInverse()
 {
-#if 0
+#if 1
    // NOTE: Gauss-Jordan elimination is yielding unpredictable results due to precission handling and
    // numbers near 0.0
    AssertFatal(rows == cols, "Can only perform inverse on square matrices.");
