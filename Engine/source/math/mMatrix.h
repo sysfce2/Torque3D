@@ -1492,7 +1492,6 @@ inline Matrix<DATA_TYPE, rows, cols>& Matrix<DATA_TYPE, rows, cols>::inverse()
       // Early out if pivot is 0, return identity matrix.
       if (std::abs(augmentedMatrix(i, i)) < pivot_eps)
       {
-         this->identity();
          return *this;
       }
 
