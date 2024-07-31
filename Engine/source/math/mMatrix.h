@@ -672,6 +672,8 @@ public:
       set(e);
    }
 
+   ~Matrix() = default;
+
    /// Make this an identity matrix.
    Matrix<DATA_TYPE, rows, cols>& identity();
    void reverseProjection();
