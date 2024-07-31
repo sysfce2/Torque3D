@@ -127,6 +127,10 @@ public:
 
    EulerF toEuler() const;
 
+   F32 determinant() const {
+      return m_matF_determinant(*this);
+   }
+
    /// Compute the inverse of the matrix.
    ///
    /// Computes inverse of full 4x4 matrix. Returns false and performs no inverse if
@@ -702,11 +706,9 @@ public:
       AssertFatal(rows == cols, "Determinant is only defined for square matrices.");
       // For simplicity, only implement for 3x3 matrices
       AssertFatal(rows >= 3 && cols >= 3, "Determinant only for 3x3 or more"); // Ensure the matrix is 3x3
-      DATA_TYPE det =
-         data[0] * (data[4] * data[8] - data[5] * data[7]) -
-         data[1] * (data[3] * data[8] - data[5] * data[6]) +
-         data[2] * (data[3] * data[7] - data[4] * data[6]);
-      return det;
+      return (*this)(0, 0) * ((*this)(1, 1) * (*this)(2, 2) - (*this)(1, 2) * (*this)(2, 1)) +
+             (*this)(1, 0) * ((*this)(0, 2) * (*this)(2, 1) - (*this)(0, 1) * (*this)(2, 2)) +
+             (*this)(2, 0) * ((*this)(0, 1) * (*this)(1, 2) - (*this)(0, 2) * (*this)(1, 1));
    }
 
    ///< M * a -> M
@@ -823,6 +825,12 @@ public:
       }
    }
 
+   void swap(DATA_TYPE& a, DATA_TYPE& b) {
+      DATA_TYPE temp = a;
+      a = b;
+      b = temp;
+   }
+
    void invertTo(Matrix<DATA_TYPE, cols, rows>* matrix) const;
    void invertTo(Matrix<DATA_TYPE, cols, rows>* matrix);
 
@@ -834,17 +842,25 @@ public:
    friend Matrix<DATA_TYPE, rows, cols> operator*(const Matrix<DATA_TYPE, rows, cols>& m1, const Matrix<DATA_TYPE, rows, cols>& m2) {
       Matrix<DATA_TYPE, rows, cols> result;
 
-      for (U32 i = 0; i < rows; ++i)
-      {
-         for (U32 j = 0; j < cols; ++j)
-         {
-            result(i, j) = 0; // Initialize result element to 0
-            for (U32 k = 0; k < cols; ++k)
-            {
-               result(i, j) += m1(i, k) * m2(k, j);
-            }
-         }
-      }
+      result(0, 0) = m1(0, 0) * m2(0, 0) + m1(0, 1) * m2(1, 0) + m1(0, 2) * m2(2, 0) + m1(0, 3) * m2(3, 0);
+      result(0, 1) = m1(0, 0) * m2(0, 1) + m1(0, 1) * m2(1, 1) + m1(0, 2) * m2(2, 1) + m1(0, 3) * m2(3, 1);
+      result(0, 2) = m1(0, 0) * m2(0, 2) + m1(0, 1) * m2(1, 2) + m1(0, 2) * m2(2, 2) + m1(0, 3) * m2(3, 2);
+      result(0, 3) = m1(0, 0) * m2(0, 3) + m1(0, 1) * m2(1, 3) + m1(0, 2) * m2(2, 3) + m1(0, 3) * m2(3, 3);
+
+      result(1, 0) = m1(1, 0) * m2(0, 0) + m1(1, 1) * m2(1, 0) + m1(1, 2) * m2(2, 0) + m1(1, 3) * m2(3, 0);
+      result(1, 1) = m1(1, 0) * m2(0, 1) + m1(1, 1) * m2(1, 1) + m1(1, 2) * m2(2, 1) + m1(1, 3) * m2(3, 1);
+      result(1, 2) = m1(1, 0) * m2(0, 2) + m1(1, 1) * m2(1, 2) + m1(1, 2) * m2(2, 2) + m1(1, 3) * m2(3, 2);
+      result(1, 3) = m1(1, 0) * m2(0, 3) + m1(1, 1) * m2(1, 3) + m1(1, 2) * m2(2, 3) + m1(1, 3) * m2(3, 3);
+
+      result(2, 0) = m1(2, 0) * m2(0, 0) + m1(2, 1) * m2(1, 0) + m1(2, 2) * m2(2, 0) + m1(2, 3) * m2(3, 0);
+      result(2, 1) = m1(2, 0) * m2(0, 1) + m1(2, 1) * m2(1, 1) + m1(2, 2) * m2(2, 1) + m1(2, 3) * m2(3, 1);
+      result(2, 2) = m1(2, 0) * m2(0, 2) + m1(2, 1) * m2(1, 2) + m1(2, 2) * m2(2, 2) + m1(2, 3) * m2(3, 2);
+      result(2, 3) = m1(2, 0) * m2(0, 3) + m1(2, 1) * m2(1, 3) + m1(2, 2) * m2(2, 3) + m1(2, 3) * m2(3, 3);
+
+      result(3, 0) = m1(3, 0) * m2(0, 0) + m1(3, 1) * m2(1, 0) + m1(3, 2) * m2(2, 0) + m1(3, 3) * m2(3, 0);
+      result(3, 1) = m1(3, 0) * m2(0, 1) + m1(3, 1) * m2(1, 1) + m1(3, 2) * m2(2, 1) + m1(3, 3) * m2(3, 1);
+      result(3, 2) = m1(3, 0) * m2(0, 2) + m1(3, 1) * m2(1, 2) + m1(3, 2) * m2(2, 2) + m1(3, 3) * m2(3, 2);
+      result(3, 3) = m1(3, 0) * m2(0, 3) + m1(3, 1) * m2(1, 3) + m1(3, 2) * m2(2, 3) + m1(3, 3) * m2(3, 3);
 
       return result;
    }
@@ -907,13 +923,14 @@ public:
 
    Point3F operator*(const Point3F& point) const {
       AssertFatal(rows == 4 && cols == 4, "Multiplying point3 with matrix requires 4x4");
-      return Point3F(
-         (*this)(0, 0) * point.x + (*this)(0, 1) * point.y + (*this)(0, 2) * point.z + (*this)(0, 3),
-         (*this)(1, 0) * point.x + (*this)(1, 1) * point.y + (*this)(1, 2) * point.z + (*this)(1, 3),
-         (*this)(2, 0) * point.x + (*this)(2, 1) * point.y + (*this)(2, 2) * point.z + (*this)(2, 3)
-      );
-   }
+      Point3F result;
+      result.x = (*this)(0, 0) * point.x + (*this)(0, 1) * point.y + (*this)(0, 2) * point.z + (*this)(0, 3);
+      result.y = (*this)(1, 0) * point.x + (*this)(1, 1) * point.y + (*this)(1, 2) * point.z + (*this)(1, 3);
+      result.z = (*this)(2, 0) * point.x + (*this)(2, 1) * point.y + (*this)(2, 2) * point.z + (*this)(2, 3);
 
+      return result;
+   }
+   
    Point4F operator*(const Point4F& point) const {
       AssertFatal(rows == 4 && cols == 4, "Multiplying point4 with matrix requires 4x4");
       return Point4F(
@@ -964,7 +981,6 @@ public:
 
       return data[idx(col, row)];
    }
-
 };
 
 //--------------------------------------------
@@ -975,11 +991,13 @@ inline Matrix<DATA_TYPE, rows, cols>& Matrix<DATA_TYPE, rows, cols>::transpose()
 {
    AssertFatal(rows == cols, "Transpose can only be performed on square matrices.");
 
-   for (U32 i = 0; i < rows; ++i) {
-      for (U32 j = i + 1; j < cols; ++j) {
-         std::swap((*this)(i, j), (*this)(j, i));
-      }
-   }
+   swap((*this)(0, 1), (*this)(1, 0));
+   swap((*this)(0, 2), (*this)(2, 0));
+   swap((*this)(0, 3), (*this)(3, 0));
+   swap((*this)(1, 2), (*this)(2, 1));
+   swap((*this)(1, 3), (*this)(3, 1));
+   swap((*this)(2, 3), (*this)(3, 2));
+
    return (*this);
 }
 
@@ -1331,9 +1349,9 @@ inline Matrix<DATA_TYPE, rows, cols>& Matrix<DATA_TYPE, rows, cols>::set(const E
       (*this) = Matrix<DATA_TYPE, rows, cols>(true);
       break;
    case AXIS_X:
-      (*this)(0, 0) = 1.0f;  (*this)(1, 0) = 0.0f;       (*this)(2, 0) = 0.0f;
-      (*this)(0, 1) = 0.0f;  (*this)(1, 1) = cosPitch;   (*this)(2, 1) = -sinPitch;
-      (*this)(0, 2) = 0.0f;  (*this)(1, 2) = sinPitch;   (*this)(2, 2) = cosPitch;
+      (*this)(0, 0) = 1.0f; (*this)(0, 1) = 0.0f;      (*this)(0, 2) = 0.0f;
+      (*this)(1, 0) = 0.0f; (*this)(1, 1) = cosPitch;  (*this)(1, 2) = sinPitch; 
+      (*this)(2, 0) = 0.0f; (*this)(2, 1) = -sinPitch; (*this)(2, 2) = cosPitch;
       break;
    case AXIS_Y:
       (*this)(0, 0) = cosYaw;    (*this)(1, 0) = 0.0f;   (*this)(2, 0) = sinYaw;
@@ -1341,9 +1359,9 @@ inline Matrix<DATA_TYPE, rows, cols>& Matrix<DATA_TYPE, rows, cols>::set(const E
       (*this)(0, 2) = -sinYaw;   (*this)(1, 2) = 0.0f;   (*this)(2, 2) = cosYaw;
       break;
    case AXIS_Z:
-      (*this)(0, 0) = cosRoll;   (*this)(1, 0) = -sinRoll;  (*this)(2, 0) = 0.0f;
-      (*this)(0, 1) = sinRoll;   (*this)(1, 1) = cosRoll;   (*this)(2, 1) = 0.0f;
-      (*this)(0, 2) = 0.0f;      (*this)(1, 2) = 0.0f;      (*this)(2, 2) = 1.0f;
+      (*this)(0, 0) = cosRoll;  (*this)(0, 1) = sinRoll; (*this)(0, 2) = 0.0f;   
+      (*this)(1, 0) = -sinRoll; (*this)(1, 1) = cosRoll; (*this)(1, 2) = 0.0f; 
+      (*this)(2, 0) = 0.0f;     (*this)(2, 1) = 0.0f;    (*this)(2, 2) = 1.0f;
       break;
    default:
       F32 r1 = cosYaw * cosRoll;
@@ -1363,9 +1381,9 @@ inline Matrix<DATA_TYPE, rows, cols>& Matrix<DATA_TYPE, rows, cols>::set(const E
       //  r4 = sin(y) * sin(z)
 
       // init the euler 3x3 rotation matrix.
-      (*this)(0, 0) = r1 - (r4 * sinPitch);  (*this)(1, 0) = -cosPitch * sinRoll;   (*this)(2, 0) = r3 + (r2 * sinPitch);
-      (*this)(0, 1) = r2 + (r3 * sinPitch);  (*this)(1, 1) = cosPitch * cosRoll;    (*this)(2, 1) = r4 - (r1 * sinPitch);
-      (*this)(0, 2) = -cosPitch * sinYaw;    (*this)(1, 2) = sinPitch;              (*this)(2, 2) = cosPitch * cosYaw;
+      (*this)(0, 0) = r1 - (r4 * sinPitch); (*this)(0, 1) = r2 + (r3 * sinPitch); (*this)(0, 2) = -cosPitch * sinYaw;  
+      (*this)(1, 0) = -cosPitch * sinRoll;  (*this)(1, 1) = cosPitch * cosRoll;   (*this)(1, 2) = sinPitch;    
+      (*this)(2, 0) = r3 + (r2 * sinPitch); (*this)(2, 1) = r4 - (r1 * sinPitch); (*this)(2, 2) = cosPitch * cosYaw;
       break;
    }
 
@@ -1415,9 +1433,13 @@ inline Matrix<DATA_TYPE, rows, cols>& Matrix<DATA_TYPE, rows, cols>::set(const E
 template<typename DATA_TYPE, U32 rows, U32 cols>
 inline Matrix<DATA_TYPE, rows, cols>& Matrix<DATA_TYPE, rows, cols>::inverse()
 {
-   // TODO: insert return statement here
+#if 0
+   // NOTE: Gauss-Jordan elimination is yielding unpredictable results due to precission handling and
+   // numbers near 0.0
+   // 
    AssertFatal(rows == cols, "Can only perform inverse on square matrices.");
    const U32 size = rows - 1;
+   const DATA_TYPE pivot_eps = static_cast<DATA_TYPE>(1e-20);  // Smaller epsilon to handle numerical precision
 
    // Create augmented matrix [this | I]
    Matrix<DATA_TYPE, size, rows + size> augmentedMatrix;
@@ -1436,11 +1458,14 @@ inline Matrix<DATA_TYPE, rows, cols>& Matrix<DATA_TYPE, rows, cols>::inverse()
    {
       U32 pivotRow = i;
 
+      DATA_TYPE pivotValue = std::abs(augmentedMatrix(i, i));
+
       for (U32 k = i + 1; k < size; k++)
       {
-         // use std::abs until the templated math functions are in place.
-         if (std::abs(augmentedMatrix(k, i)) > std::abs(augmentedMatrix(pivotRow, i))) {
+         DATA_TYPE curValue = std::abs(augmentedMatrix(k, i));
+         if (curValue > pivotValue) {
             pivotRow = k;
+            pivotValue = curValue;
          }
       }
 
@@ -1449,18 +1474,20 @@ inline Matrix<DATA_TYPE, rows, cols>& Matrix<DATA_TYPE, rows, cols>::inverse()
       {
          for (U32 j = 0; j < 2 * size; j++)
          {
-            std::swap(augmentedMatrix(i, j), augmentedMatrix(pivotRow, j));
+            DATA_TYPE temp = augmentedMatrix(i, j);
+            augmentedMatrix(i, j) = augmentedMatrix(pivotRow, j);
+            augmentedMatrix(pivotRow, j) = temp;
          }
       }
 
       // Early out if pivot is 0, return identity matrix.
-      if (augmentedMatrix(i, i) == static_cast<DATA_TYPE>(0))
+      if (std::abs(augmentedMatrix(i, i)) < pivot_eps)
       {
          this->identity();
          return *this;
       }
 
-      DATA_TYPE pivotVal = 1.0f / augmentedMatrix(i, i);
+      DATA_TYPE pivotVal = static_cast<DATA_TYPE>(1.0) / augmentedMatrix(i, i);
 
       // scale the pivot
       for (U32 j = 0; j < 2 * size; j++)
@@ -1489,6 +1516,44 @@ inline Matrix<DATA_TYPE, rows, cols>& Matrix<DATA_TYPE, rows, cols>::inverse()
          (*this)(i, j) = augmentedMatrix(i, j + size);
       }
    }
+#else
+   AssertFatal(rows == cols, "Can only perform inverse on square matrices.");
+   AssertFatal(rows >= 3 && cols >= 3, "Must be at least a 3x3 matrix");
+   DATA_TYPE det = determinant();
+
+   // Check if the determinant is non-zero
+   if (std::abs(det) < static_cast<DATA_TYPE>(1e-10)) {
+      this->identity(); // Return the identity matrix if the determinant is zero
+      return *this;
+   }
+
+   DATA_TYPE invDet = DATA_TYPE(1) / det;
+
+   Matrix<DATA_TYPE, rows, cols> temp;
+
+   // Calculate the inverse of the 3x3 upper-left submatrix using Cramer's rule
+   temp(0, 0) = ((*this)(1, 1) * (*this)(2, 2) - (*this)(1, 2) * (*this)(2, 1)) * invDet;
+   temp(0, 1) = ((*this)(2, 1) * (*this)(0, 2) - (*this)(2, 2) * (*this)(0, 1)) * invDet;
+   temp(0, 2) = ((*this)(0, 1) * (*this)(1, 2) - (*this)(0, 2) * (*this)(1, 1)) * invDet;
+
+   temp(1, 0) = ((*this)(1, 2) * (*this)(2, 0) - (*this)(1, 0) * (*this)(2, 2)) * invDet;
+   temp(1, 1) = ((*this)(2, 2) * (*this)(0, 0) - (*this)(2, 0) * (*this)(0, 2)) * invDet;
+   temp(1, 2) = ((*this)(0, 2) * (*this)(1, 0) - (*this)(0, 0) * (*this)(1, 2)) * invDet;
+
+   temp(2, 0) = ((*this)(1, 0) * (*this)(2, 1) - (*this)(1, 1) * (*this)(2, 0)) * invDet;
+   temp(2, 1) = ((*this)(2, 0) * (*this)(0, 1) - (*this)(2, 1) * (*this)(0, 0)) * invDet;
+   temp(2, 2) = ((*this)(0, 0) * (*this)(1, 1) - (*this)(0, 1) * (*this)(1, 0)) * invDet;
+
+   // Copy the 3x3 inverse back into this matrix
+   for (U32 i = 0; i < 3; ++i)
+   {
+      for (U32 j = 0; j < 3; ++j)
+      {
+         (*this)(i, j) = temp(i, j);
+      }
+   }
+
+#endif
 
    Point3F pos = -this->getPosition();
    mulV(pos);
@@ -1500,13 +1565,136 @@ inline Matrix<DATA_TYPE, rows, cols>& Matrix<DATA_TYPE, rows, cols>::inverse()
 template<typename DATA_TYPE, U32 rows, U32 cols>
 inline bool Matrix<DATA_TYPE, rows, cols>::fullInverse()
 {
-   Matrix<DATA_TYPE, rows, cols> inv = this->inverse();
+#if 0
+   // NOTE: Gauss-Jordan elimination is yielding unpredictable results due to precission handling and
+   // numbers near 0.0
+   AssertFatal(rows == cols, "Can only perform inverse on square matrices.");
+   const U32 size = rows;
+   const DATA_TYPE pivot_eps = static_cast<DATA_TYPE>(1e-20);  // Smaller epsilon to handle numerical precision
 
-   if (inv.isIdentity())
+   // Create augmented matrix [this | I]
+   Matrix<DATA_TYPE, size, rows + size> augmentedMatrix;
+
+   for (U32 i = 0; i < size; i++)
+   {
+      for (U32 j = 0; j < size; j++)
+      {
+         augmentedMatrix(i, j) = (*this)(i, j);
+         augmentedMatrix(i, j + size) = (i == j) ? static_cast<DATA_TYPE>(1) : static_cast<DATA_TYPE>(0);
+      }
+   }
+
+   // Apply gauss-joran elimination
+   for (U32 i = 0; i < size; i++)
+   {
+      U32 pivotRow = i;
+
+      DATA_TYPE pivotValue = std::abs(augmentedMatrix(i, i));
+
+      for (U32 k = i + 1; k < size; k++)
+      {
+         DATA_TYPE curValue = std::abs(augmentedMatrix(k, i));
+         if (curValue > pivotValue) {
+            pivotRow = k;
+            pivotValue = curValue;
+         }
+      }
+
+      // Swap if needed.
+      if (i != pivotRow)
+      {
+         for (U32 j = 0; j < 2 * size; j++)
+         {
+            DATA_TYPE temp = augmentedMatrix(i, j);
+            augmentedMatrix(i, j) = augmentedMatrix(pivotRow, j);
+            augmentedMatrix(pivotRow, j) = temp;
+         }
+      }
+
+      // Early out if pivot is 0, return identity matrix.
+      if (std::abs(augmentedMatrix(i, i)) < pivot_eps)
+      {
+         return false;
+      }
+
+      DATA_TYPE pivotVal = static_cast<DATA_TYPE>(1.0) / augmentedMatrix(i, i);
+
+      // scale the pivot
+      for (U32 j = 0; j < 2 * size; j++)
+      {
+         augmentedMatrix(i, j) *= pivotVal;
+      }
+
+      // Eliminate the current column in all other rows
+      for (U32 k = 0; k < size; k++)
+      {
+         if (k != i)
+         {
+            DATA_TYPE factor = augmentedMatrix(k, i);
+            for (U32 j = 0; j < 2 * size; j++)
+            {
+               augmentedMatrix(k, j) -= factor * augmentedMatrix(i, j);
+            }
+         }
+      }
+   }
+
+   for (U32 i = 0; i < size; i++)
+   {
+      for (U32 j = 0; j < size; j++)
+      {
+         (*this)(i, j) = augmentedMatrix(i, j + size);
+      }
+   }
+#else
+   AssertFatal(rows == cols, "Can only perform inverse on square matrices.");
+   AssertFatal(rows >= 4 && cols >= 4, "Can only perform fullInverse on minimum 4x4 matrix");
+
+   Point4F a, b, c, d;
+   getRow(0, &a);
+   getRow(1, &b);
+   getRow(2, &c);
+   getRow(3, &d);
+
+   F32 det = a.x * b.y * c.z * d.w - a.x * b.y * c.w * d.z - a.x * c.y * b.z * d.w + a.x * c.y * b.w * d.z + a.x * d.y * b.z * c.w - a.x * d.y * b.w * c.z
+      - b.x * a.y * c.z * d.w + b.x * a.y * c.w * d.z + b.x * c.y * a.z * d.w - b.x * c.y * a.w * d.z - b.x * d.y * a.z * c.w + b.x * d.y * a.w * c.z
+      + c.x * a.y * b.z * d.w - c.x * a.y * b.w * d.z - c.x * b.y * a.z * d.w + c.x * b.y * a.w * d.z + c.x * d.y * a.z * b.w - c.x * d.y * a.w * b.z
+      - d.x * a.y * b.z * c.w + d.x * a.y * b.w * c.z + d.x * b.y * a.z * c.w - d.x * b.y * a.w * c.z - d.x * c.y * a.z * b.w + d.x * c.y * a.w * b.z;
+
+   if (mFabs(det) < 0.00001f)
       return false;
 
-   *this = inv;
+   Point4F aa, bb, cc, dd;
+   aa.x = b.y * c.z * d.w - b.y * c.w * d.z - c.y * b.z * d.w + c.y * b.w * d.z + d.y * b.z * c.w - d.y * b.w * c.z;
+   aa.y = -a.y * c.z * d.w + a.y * c.w * d.z + c.y * a.z * d.w - c.y * a.w * d.z - d.y * a.z * c.w + d.y * a.w * c.z;
+   aa.z = a.y * b.z * d.w - a.y * b.w * d.z - b.y * a.z * d.w + b.y * a.w * d.z + d.y * a.z * b.w - d.y * a.w * b.z;
+   aa.w = -a.y * b.z * c.w + a.y * b.w * c.z + b.y * a.z * c.w - b.y * a.w * c.z - c.y * a.z * b.w + c.y * a.w * b.z;
+
+   bb.x = -b.x * c.z * d.w + b.x * c.w * d.z + c.x * b.z * d.w - c.x * b.w * d.z - d.x * b.z * c.w + d.x * b.w * c.z;
+   bb.y = a.x * c.z * d.w - a.x * c.w * d.z - c.x * a.z * d.w + c.x * a.w * d.z + d.x * a.z * c.w - d.x * a.w * c.z;
+   bb.z = -a.x * b.z * d.w + a.x * b.w * d.z + b.x * a.z * d.w - b.x * a.w * d.z - d.x * a.z * b.w + d.x * a.w * b.z;
+   bb.w = a.x * b.z * c.w - a.x * b.w * c.z - b.x * a.z * c.w + b.x * a.w * c.z + c.x * a.z * b.w - c.x * a.w * b.z;
+
+   cc.x = b.x * c.y * d.w - b.x * c.w * d.y - c.x * b.y * d.w + c.x * b.w * d.y + d.x * b.y * c.w - d.x * b.w * c.y;
+   cc.y = -a.x * c.y * d.w + a.x * c.w * d.y + c.x * a.y * d.w - c.x * a.w * d.y - d.x * a.y * c.w + d.x * a.w * c.y;
+   cc.z = a.x * b.y * d.w - a.x * b.w * d.y - b.x * a.y * d.w + b.x * a.w * d.y + d.x * a.y * b.w - d.x * a.w * b.y;
+   cc.w = -a.x * b.y * c.w + a.x * b.w * c.y + b.x * a.y * c.w - b.x * a.w * c.y - c.x * a.y * b.w + c.x * a.w * b.y;
+
+   dd.x = -b.x * c.y * d.z + b.x * c.z * d.y + c.x * b.y * d.z - c.x * b.z * d.y - d.x * b.y * c.z + d.x * b.z * c.y;
+   dd.y = a.x * c.y * d.z - a.x * c.z * d.y - c.x * a.y * d.z + c.x * a.z * d.y + d.x * a.y * c.z - d.x * a.z * c.y;
+   dd.z = -a.x * b.y * d.z + a.x * b.z * d.y + b.x * a.y * d.z - b.x * a.z * d.y - d.x * a.y * b.z + d.x * a.z * b.y;
+   dd.w = a.x * b.y * c.z - a.x * b.z * c.y - b.x * a.y * c.z + b.x * a.z * c.y + c.x * a.y * b.z - c.x * a.z * b.y;
+
+   setRow(0, aa);
+   setRow(1, bb);
+   setRow(2, cc);
+   setRow(3, dd);
+
+   mul(1.0f / det);
+#endif
+
    return true;
+
 }
 
 template<typename DATA_TYPE, U32 rows, U32 cols>
@@ -1576,39 +1764,67 @@ inline void Matrix<DATA_TYPE, rows, cols>::mul(Box3F& box) const
 {
    AssertFatal(rows == 4 && cols == 4, "Multiplying Box3F with matrix requires 4x4");
 
-   // Save original min and max
-   Point3F originalMin = box.minExtents;
-   Point3F originalMax = box.maxExtents;
+   // Extract the min and max extents
+   const Point3F& originalMin = box.minExtents;
+   const Point3F& originalMax = box.maxExtents;
 
-   // Initialize min and max with the translation part of the matrix
-   box.minExtents.x = box.maxExtents.x = (*this)(0, 3);
-   box.minExtents.y = box.maxExtents.y = (*this)(1, 3);
-   box.minExtents.z = box.maxExtents.z = (*this)(2, 3);
+   // Array to store transformed corners
+   Point3F transformedCorners[8];
 
-   for (U32 i = 0; i < 3; ++i) {
-         #define Do_One_Row(j)   {                                            \
-            DATA_TYPE a = ((*this)(i, j) * originalMin[j]);                   \
-            DATA_TYPE b = ((*this)(i, j) * originalMax[j]);                   \
-            if (a < b) { box.minExtents[i] += a;  box.maxExtents[i] += b; }   \
-            else       { box.minExtents[i] += b;  box.maxExtents[i] += a; }  }
+   // Compute all 8 corners of the box
+   Point3F corners[8] = {
+       {originalMin.x, originalMin.y, originalMin.z},
+       {originalMax.x, originalMin.y, originalMin.z},
+       {originalMin.x, originalMax.y, originalMin.z},
+       {originalMax.x, originalMax.y, originalMin.z},
+       {originalMin.x, originalMin.y, originalMax.z},
+       {originalMax.x, originalMin.y, originalMax.z},
+       {originalMin.x, originalMax.y, originalMax.z},
+       {originalMax.x, originalMax.y, originalMax.z}
+   };
 
-      Do_One_Row(0);
-      Do_One_Row(1);
-      Do_One_Row(2);
+   // Transform each corner
+   for (U32 i = 0; i < 8; ++i)
+   {
+      const Point3F& corner = corners[i];
+      transformedCorners[i].x = (*this)(0, 0) * corner.x + (*this)(0, 1) * corner.y + (*this)(0, 2) * corner.z + (*this)(0, 3);
+      transformedCorners[i].y = (*this)(1, 0) * corner.x + (*this)(1, 1) * corner.y + (*this)(1, 2) * corner.z + (*this)(1, 3);
+      transformedCorners[i].z = (*this)(2, 0) * corner.x + (*this)(2, 1) * corner.y + (*this)(2, 2) * corner.z + (*this)(2, 3);
    }
+
+   // Initialize min and max extents to the transformed values
+   Point3F newMin = transformedCorners[0];
+   Point3F newMax = transformedCorners[0];
+
+   // Compute the new min and max extents from the transformed corners
+   for (U32 i = 1; i < 8; ++i)
+   {
+      const Point3F& corner = transformedCorners[i];
+      if (corner.x < newMin.x) newMin.x = corner.x;
+      if (corner.y < newMin.y) newMin.y = corner.y;
+      if (corner.z < newMin.z) newMin.z = corner.z;
+
+      if (corner.x > newMax.x) newMax.x = corner.x;
+      if (corner.y > newMax.y) newMax.y = corner.y;
+      if (corner.z > newMax.z) newMax.z = corner.z;
+   }
+
+   // Update the box with the new min and max extents
+   box.minExtents = newMin;
+   box.maxExtents = newMax;
 }
 
 template<typename DATA_TYPE, U32 rows, U32 cols>
 inline bool Matrix<DATA_TYPE, rows, cols>::isAffine() const
 {
-   if ((*this)(rows - 1, cols - 1) != 1.0f)
+   if ((*this)(3, 3) != 1.0f)
    {
       return false;
    }
 
    for (U32 col = 0; col < cols - 1; ++col)
    {
-      if ((*this)(rows - 1, col) != 0.0f)
+      if ((*this)(3, col) != 0.0f)
       {
          return false;
       }
@@ -1744,11 +1960,8 @@ inline void mTransformPlane(
    const PlaneF& plane,
    PlaneF* result
 ) {
-   // Create a non-const copy of the matrix
-   MatrixF matCopy = mat;
-
    // Create the inverse scale matrix
-   MatrixF invScale = MatrixF::Identity;
+   MatrixF invScale(true);
    invScale(0, 0) = 1.0f / scale.x;
    invScale(1, 1) = 1.0f / scale.y;
    invScale(2, 2) = 1.0f / scale.z;
@@ -1764,7 +1977,7 @@ inline void mTransformPlane(
    const F32 C = -mDot(row2, shear);
 
    // Compute the inverse transpose of the matrix
-   MatrixF invTrMatrix = MatrixF::Identity;
+   MatrixF invTrMatrix(true);
    invTrMatrix(0, 0) = mat(0, 0);
    invTrMatrix(0, 1) = mat(0, 1);
    invTrMatrix(0, 2) = mat(0, 2);

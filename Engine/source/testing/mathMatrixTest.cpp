@@ -801,6 +801,73 @@ TEST(MatrixTest, TestMatrixAdd)
 
 }
 
+TEST(MatrixTest, TestCalcPlaneCulls)
+{
+   Point3F lightDir(-0.346188605f, -0.742403805f, -0.573576510f);
+   const F32 shadowDistance = 100.0f;
+   // frustum transform
+   MatrixF test(true);
+
+   test(0, 0) = -0.8930f;  test(0, 1) = 0.3043f;   test(0, 2) = 0.3314f;   test(0, 3) = -8.3111f;
+   test(1, 0) = -0.4499f;  test(1, 1) = -0.6039f;  test(1, 2) = -0.6578f;  test(1, 3) = 8.4487f;
+   test(2, 0) = -0.0f;     test(2, 1) = -0.7366f;  test(2, 2) = 0.6763f;   test(2, 3) = 12.5414f;
+   test(0, 0) = 0.00f;     test(0, 1) = 0.0f;      test(0, 2) = 0.0f;      test(0, 3) = 1.0f;
+
+   Box3F viewBB(-shadowDistance, -shadowDistance, -shadowDistance,
+      shadowDistance, shadowDistance, shadowDistance);
+
+   Frustum testFrustum(false, -0.119894862f, 0.119894862f, 0.0767327100f, -0.0767327100f, 0.1f, 1000.0f, test);
+   testFrustum.getTransform().mul(viewBB);
+
+   testFrustum.cropNearFar(0.1f, shadowDistance);
+
+   PlaneF lightFarPlane, lightNearPlane;
+
+   Point3F viewDir = testFrustum.getTransform().getForwardVector();
+   EXPECT_NEAR(viewDir.x, 0.0f, 0.001f);  EXPECT_NEAR(viewDir.y, -0.6039f, 0.001f);  EXPECT_NEAR(viewDir.z, -0.7365f, 0.001f);
+
+   viewDir.normalize();
+   const Point3F viewPosition = testFrustum.getPosition();
+   EXPECT_NEAR(viewPosition.x, 1.0f, 0.001f);  EXPECT_NEAR(viewPosition.y, 8.4486f, 0.001f);  EXPECT_NEAR(viewPosition.z, 12.5414f, 0.001f);
+
+   const F32 viewDistance = testFrustum.getBounds().len();
+   EXPECT_NEAR(viewDistance, 243.6571f, 0.001f);
+
+   lightNearPlane = PlaneF(viewPosition + (viewDistance * -lightDir), lightDir);
+
+   const Point3F lightFarPlanePos = viewPosition + (viewDistance * lightDir);
+   lightFarPlane = PlaneF(lightFarPlanePos, -lightDir);
+
+   MatrixF invLightFarPlaneMat(true);
+
+   MatrixF lightFarPlaneMat = MathUtils::createOrientFromDir(-lightDir);
+   lightFarPlaneMat.setPosition(lightFarPlanePos);
+   lightFarPlaneMat.invertTo(&invLightFarPlaneMat);
+
+   Vector<Point2F> projVertices;
+
+   //project all frustum vertices into plane
+   // all vertices are 2d and local to far plane
+   projVertices.setSize(8);
+   for (int i = 0; i < 8; ++i) //
+   {
+      const Point3F& point = testFrustum.getPoints()[i];
+
+      Point3F localPoint(lightFarPlane.project(point));
+      invLightFarPlaneMat.mulP(localPoint);
+      projVertices[i] = Point2F(localPoint.x, localPoint.z);
+   }
+
+   EXPECT_NEAR(projVertices[0].x, 0.0240f, 0.001f); EXPECT_NEAR(projVertices[0].y, 0.0117f, 0.001f);
+   EXPECT_NEAR(projVertices[1].x, 0.0696f, 0.001f); EXPECT_NEAR(projVertices[1].y, 0.0678f, 0.001f);
+   EXPECT_NEAR(projVertices[2].x, -0.0186f, 0.001f); EXPECT_NEAR(projVertices[2].y, -0.1257f, 0.001f);
+   EXPECT_NEAR(projVertices[3].x, 0.0269f, 0.001f); EXPECT_NEAR(projVertices[3].y, -0.0696f, 0.001f);
+   EXPECT_NEAR(projVertices[4].x, 24.0571f, 0.001f); EXPECT_NEAR(projVertices[4].y, 11.7618f, 0.001f);
+   EXPECT_NEAR(projVertices[5].x, 69.6498f, 0.001f); EXPECT_NEAR(projVertices[5].y, 67.8426f, 0.001f);
+   EXPECT_NEAR(projVertices[6].x, -18.6059f, 0.001f); EXPECT_NEAR(projVertices[6].y, -125.7341f, 0.001f);
+   EXPECT_NEAR(projVertices[7].x, 26.9866f, 0.001f); EXPECT_NEAR(projVertices[7].y, -69.6534f, 0.001f);
+}
+
 TEST(MatrixTest, TestFrustumProjectionMatrix)
 {
    MatrixF test(true);
