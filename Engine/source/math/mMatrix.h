@@ -841,7 +841,6 @@ public:
    }
 
    void invertTo(Matrix<DATA_TYPE, cols, rows>* matrix) const;
-   void invertTo(Matrix<DATA_TYPE, cols, rows>* matrix);
 
    void dumpMatrix(const char* caption = NULL) const;
    // Static identity matrix
@@ -851,25 +850,16 @@ public:
    friend Matrix<DATA_TYPE, rows, cols> operator*(const Matrix<DATA_TYPE, rows, cols>& m1, const Matrix<DATA_TYPE, rows, cols>& m2) {
       Matrix<DATA_TYPE, rows, cols> result;
 
-      result(0, 0) = m1(0, 0) * m2(0, 0) + m1(0, 1) * m2(1, 0) + m1(0, 2) * m2(2, 0) + m1(0, 3) * m2(3, 0);
-      result(0, 1) = m1(0, 0) * m2(0, 1) + m1(0, 1) * m2(1, 1) + m1(0, 2) * m2(2, 1) + m1(0, 3) * m2(3, 1);
-      result(0, 2) = m1(0, 0) * m2(0, 2) + m1(0, 1) * m2(1, 2) + m1(0, 2) * m2(2, 2) + m1(0, 3) * m2(3, 2);
-      result(0, 3) = m1(0, 0) * m2(0, 3) + m1(0, 1) * m2(1, 3) + m1(0, 2) * m2(2, 3) + m1(0, 3) * m2(3, 3);
-
-      result(1, 0) = m1(1, 0) * m2(0, 0) + m1(1, 1) * m2(1, 0) + m1(1, 2) * m2(2, 0) + m1(1, 3) * m2(3, 0);
-      result(1, 1) = m1(1, 0) * m2(0, 1) + m1(1, 1) * m2(1, 1) + m1(1, 2) * m2(2, 1) + m1(1, 3) * m2(3, 1);
-      result(1, 2) = m1(1, 0) * m2(0, 2) + m1(1, 1) * m2(1, 2) + m1(1, 2) * m2(2, 2) + m1(1, 3) * m2(3, 2);
-      result(1, 3) = m1(1, 0) * m2(0, 3) + m1(1, 1) * m2(1, 3) + m1(1, 2) * m2(2, 3) + m1(1, 3) * m2(3, 3);
-
-      result(2, 0) = m1(2, 0) * m2(0, 0) + m1(2, 1) * m2(1, 0) + m1(2, 2) * m2(2, 0) + m1(2, 3) * m2(3, 0);
-      result(2, 1) = m1(2, 0) * m2(0, 1) + m1(2, 1) * m2(1, 1) + m1(2, 2) * m2(2, 1) + m1(2, 3) * m2(3, 1);
-      result(2, 2) = m1(2, 0) * m2(0, 2) + m1(2, 1) * m2(1, 2) + m1(2, 2) * m2(2, 2) + m1(2, 3) * m2(3, 2);
-      result(2, 3) = m1(2, 0) * m2(0, 3) + m1(2, 1) * m2(1, 3) + m1(2, 2) * m2(2, 3) + m1(2, 3) * m2(3, 3);
-
-      result(3, 0) = m1(3, 0) * m2(0, 0) + m1(3, 1) * m2(1, 0) + m1(3, 2) * m2(2, 0) + m1(3, 3) * m2(3, 0);
-      result(3, 1) = m1(3, 0) * m2(0, 1) + m1(3, 1) * m2(1, 1) + m1(3, 2) * m2(2, 1) + m1(3, 3) * m2(3, 1);
-      result(3, 2) = m1(3, 0) * m2(0, 2) + m1(3, 1) * m2(1, 2) + m1(3, 2) * m2(2, 2) + m1(3, 3) * m2(3, 2);
-      result(3, 3) = m1(3, 0) * m2(0, 3) + m1(3, 1) * m2(1, 3) + m1(3, 2) * m2(2, 3) + m1(3, 3) * m2(3, 3);
+      for (U32 i = 0; i < rows; ++i) {
+        for (U32 j = 0; j < cols; ++j)
+        {
+            result(i, j) = static_cast<DATA_TYPE>(0);
+            for (U32 k = 0; k < cols; ++k)
+            {
+                result(i, j) += m1(i, k) * m2(k, j);
+            }
+         }
+      }
 
       return result;
    }
@@ -1246,22 +1236,6 @@ inline void Matrix<DATA_TYPE, rows, cols>::invertTo(Matrix<DATA_TYPE, cols, rows
          invMatrix(i, j) = (*this)(i, j);
       }
    }
-
-   invMatrix.inverse();
-
-   for (U32 i = 0; i < rows; ++i)
-   {
-      for (U32 j = 0; j < cols; ++j)
-      {
-         (*matrix)(i, j) = invMatrix(i, j);
-      }
-   }
-}
-
-template<typename DATA_TYPE, U32 rows, U32 cols>
-inline void Matrix<DATA_TYPE, rows, cols>::invertTo(Matrix<DATA_TYPE, cols, rows>* matrix)
-{
-   Matrix<DATA_TYPE, rows, cols> invMatrix = *this;
 
    invMatrix.inverse();
 
