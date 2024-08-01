@@ -701,7 +701,7 @@ TEST(MatrixTest, TestMulPoint4)
    Point4F testPoint(0.5f, 1.0f, 2.0f, 1.0f);
    test.mul(testPoint);
 
-   EXPECT_NEAR(testPoint.x, 5.496f, POINT_EPSILON);  EXPECT_NEAR(testPoint.y, 0.899f, POINT_EPSILON);  EXPECT_NEAR(testPoint.z, 4.151f, POINT_EPSILON); EXPECT_NEAR(testPoint.w, 1.0f, POINT_EPSILON);
+   EXPECT_NEAR(testPoint.x, 5.4960f, POINT_EPSILON);  EXPECT_NEAR(testPoint.y, 0.8996f, POINT_EPSILON);  EXPECT_NEAR(testPoint.z, 4.1513f, POINT_EPSILON); EXPECT_NEAR(testPoint.w, 1.0f, POINT_EPSILON);
 }
 
 TEST(MatrixTest, TestMulPoint3)
@@ -715,7 +715,7 @@ TEST(MatrixTest, TestMulPoint3)
    Point3F testPoint(0.5f, 1.0f, 2.0f);
    test.mulP(testPoint);
 
-   EXPECT_NEAR(testPoint.x, 5.496f, POINT_EPSILON);  EXPECT_NEAR(testPoint.y, 0.899f, POINT_EPSILON);  EXPECT_NEAR(testPoint.z, 4.151f, POINT_EPSILON);
+   EXPECT_NEAR(testPoint.x, 5.4960f, POINT_EPSILON);  EXPECT_NEAR(testPoint.y, 0.8996f, POINT_EPSILON);  EXPECT_NEAR(testPoint.z, 4.1513f, POINT_EPSILON);
 }
 
 TEST(MatrixTest, TestMulPoint3ToPoint3)
@@ -730,7 +730,7 @@ TEST(MatrixTest, TestMulPoint3ToPoint3)
    Point3F testPoint;
    test.mulP(point, &testPoint);
 
-   EXPECT_NEAR(testPoint.x, 5.496f, POINT_EPSILON);  EXPECT_NEAR(testPoint.y, 0.899f, POINT_EPSILON);  EXPECT_NEAR(testPoint.z, 4.151f, POINT_EPSILON);
+   EXPECT_NEAR(testPoint.x, 5.4960f, POINT_EPSILON);  EXPECT_NEAR(testPoint.y, 0.8996f, POINT_EPSILON);  EXPECT_NEAR(testPoint.z, 4.1513f, POINT_EPSILON);
 }
 
 TEST(MatrixTest, TestMulVector)
@@ -744,7 +744,7 @@ TEST(MatrixTest, TestMulVector)
    VectorF testPoint(0.5f, 1.0f, 2.0f);
    test.mulV(testPoint);
 
-   EXPECT_NEAR(testPoint.x, 1.111f, POINT_EPSILON);  EXPECT_NEAR(testPoint.y, 1.747f, POINT_EPSILON);  EXPECT_NEAR(testPoint.z, 0.979f, POINT_EPSILON);
+   EXPECT_NEAR(testPoint.x, 1.1116f, POINT_EPSILON);  EXPECT_NEAR(testPoint.y, 1.7475f, POINT_EPSILON);  EXPECT_NEAR(testPoint.z, 0.9799f, POINT_EPSILON);
 }
 
 TEST(MatrixTest, TestMulVectorToPoint3)
@@ -759,7 +759,7 @@ TEST(MatrixTest, TestMulVectorToPoint3)
    Point3F testPoint;
    test.mulV(vec, &testPoint);
 
-   EXPECT_NEAR(testPoint.x, 1.111f, POINT_EPSILON);  EXPECT_NEAR(testPoint.y, 1.747f, POINT_EPSILON);  EXPECT_NEAR(testPoint.z, 0.979f, POINT_EPSILON);
+   EXPECT_NEAR(testPoint.x, 1.1116f, POINT_EPSILON);  EXPECT_NEAR(testPoint.y, 1.7475f, POINT_EPSILON);  EXPECT_NEAR(testPoint.z, 0.9799f, POINT_EPSILON);
 }
 
 TEST(MatrixTest, TestMulBox)
