@@ -396,6 +396,7 @@ if (APPLE)
   MACOSX_BUNDLE_INFO_PLIST "${TORQUE_APP_ROOT_DIRECTORY}/source/Info.plist"
   XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "com.torque3d.${TORQUE_APP_NAME}"
   XCODE_ATTRIBUTE_INSTALL_PATH "/Applications"
+  INSTALL_RPATH "@executable_path/../Frameworks"
   XCODE_ATTRIBUTE_SKIP_INSTALL "No"
   XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME "AppIcon"
   XCODE_ATTRIBUTE_LINKER_DISPLAYS_MANGLED_NAMES[variant=Debug] YES
@@ -497,7 +498,9 @@ append_defs()
 foreach (LIBRARY_BINARY ${TORQUE_ADDITIONAL_LIBRARY_BINARIES})
   if (APPLE)
     # For OSX, we want these binaries to be copied to the Frameworks directory
-    add_custom_command(TARGET ${TORQUE_APP_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${LIBRARY_BINARY} "${TORQUE_APP_GAME_DIRECTORY}/${TORQUE_APP_NAME}.app/Contents/Frameworks/$(CONFIGURATION)")
+    add_custom_command(TARGET ${TORQUE_APP_NAME} POST_BUILD 
+    COMMAND ${CMAKE_COMMAND} -E make_directory  "${TORQUE_APP_GAME_DIRECTORY}/${TORQUE_APP_NAME}.app/Contents/Frameworks"
+    COMMAND ${CMAKE_COMMAND} -E copy ${LIBRARY_BINARY} "${TORQUE_APP_GAME_DIRECTORY}/${TORQUE_APP_NAME}.app/Contents/Frameworks/$(CONFIGURATION)")
   else()
     # All other platforms expect the file next to the executable
     add_custom_command(TARGET ${TORQUE_APP_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${LIBRARY_BINARY} "${TORQUE_APP_GAME_DIRECTORY}")
@@ -517,9 +520,9 @@ if (UNIX)
 		  # Only pay attention to shared libraries and make them output to the app resources
 		  if ("${LINK_LIBRARY_TYPE}" STREQUAL "SHARED_LIBRARY")
         if (APPLE)
-          set_target_properties(${GAME_LINK_LIBRARY} PROPERTIES 
-                  XCODE_ATTRIBUTE_INSTALL_PATH "@rpath"
-                  XCODE_ATTRIBUTE_SKIP_INSTALL[variant=Release] YES)
+          add_custom_command(TARGET ${TORQUE_APP_NAME} POST_BUILD 
+          COMMAND ${CMAKE_COMMAND} -E make_directory  "${TORQUE_APP_GAME_DIRECTORY}/${TORQUE_APP_NAME}.app/Contents/Frameworks"
+          COMMAND ${CMAKE_COMMAND} -E copy "$<TARGET_FILE:${GAME_LINK_LIBRARY}>" "${TORQUE_APP_GAME_DIRECTORY}/${TORQUE_APP_NAME}.app/Contents/Frameworks/$<TARGET_FILE_NAME:${GAME_LINK_LIBRARY}>")
         else()
           set_target_properties(${GAME_LINK_LIBRARY} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${TORQUE_APP_GAME_DIRECTORY}")
         endif(APPLE)
