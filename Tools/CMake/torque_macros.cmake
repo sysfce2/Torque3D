@@ -128,6 +128,7 @@ endmacro (filterOut)
 ################# apple frameworks ###################
 macro(addFramework framework)
 	if (APPLE)
-      set(TORQUE_LINK_FRAMEWORKS ${TORQUE_LINK_FRAMEWORKS} "${CMAKE_FRAMEWORK_PATH}/${framework}.framework")
+      find_library(FRAMEWORK_PATH ${framework} PATHS /System/Library/Frameworks /Library/Frameworks)
+      set(TORQUE_LINK_FRAMEWORKS ${TORQUE_LINK_FRAMEWORKS} "${FRAMEWORK_PATH}/${framework}.framework")
 	endif()
 endmacro()
