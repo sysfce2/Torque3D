@@ -338,6 +338,7 @@ bool SubScene::save()
    //Finally, save
    saveSuccess = mLevelAsset->saveAsset();
 
+   return saveSuccess;
 }
 
 void SubScene::_onSelected()

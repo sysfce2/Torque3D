@@ -86,12 +86,12 @@ public:
    void unpackUpdate(NetConnection *conn, BitStream *stream) override;
 
    //
-   Vector<SceneObject*> getObjectsByClass(String className, bool checkSubscenes);
+   Vector<SceneObject*> getObjectsByClass(String className);
 
    void getUtilizedAssetsFromSceneObject(SimObject* object, Vector<StringTableEntry>* usedAssetsList);
 
    template <class T>
-   Vector<T*> getObjectsByClass(bool checkSubscenes);
+   Vector<T*> getObjectsByClass();
 
    static Scene *getRootScene() 
    { 
@@ -108,7 +108,7 @@ public:
 
 
 template <class T>
-Vector<T*> Scene::getObjectsByClass(bool checkSubscenes)
+Vector<T*> Scene::getObjectsByClass()
 {
    Vector<T*> foundObjects;
 
@@ -127,19 +127,6 @@ Vector<T*> Scene::getObjectsByClass(bool checkSubscenes)
       curObject = dynamic_cast<T*>(mDynamicObjects[i]);
       if (curObject)
          foundObjects.push_back(curObject);
-   }
-
-   if (checkSubscenes)
-   {
-      for (U32 i = 0; i < mSubScenes.size(); i++)
-      {
-         Vector<T*> appendList = mSubScenes[i]->getObjectsByClass<T>(true);
-
-         for (U32 a = 0; a < appendList.size(); a++)
-         {
-            foundObjects.push_back(appendList[a]);
-         }
-      }
    }
 
    return foundObjects;

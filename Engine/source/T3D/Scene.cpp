@@ -369,7 +369,7 @@ void Scene::getUtilizedAssetsFromSceneObject(SimObject* object, Vector<StringTab
 }
 
 //
-Vector<SceneObject*> Scene::getObjectsByClass(String className, bool checkSubscenes)
+Vector<SceneObject*> Scene::getObjectsByClass(String className)
 {
    return Vector<SceneObject*>();
 }
