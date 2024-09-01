@@ -42,6 +42,70 @@ function ChooseLevelMenu::onWake(%this)
    %this.fillPrefEntries();
    LevelPreviewArray.clear();
    
+   refreshGameModesList();
+
+   if(!$pref::HostMultiPlayer)
+      ChooseLevelTitleText.setText("SINGLE PLAYER");
+   else
+      ChooseLevelTitleText.setText("CREATE SERVER");
+      
+   ChooseLevelMenuTabList-->ConfigBtn.visible = $pref::HostMultiPlayer;
+      
+   ChooseLevelMenuTabList.visible = true;//$pref::HostMultiPlayer;
+   ChooseLevelMenuNavButtonOverlay.visible = true;//$pref::HostMultiPlayer;
+      
+   %this.schedule(32, openMenu, 0);
+}
+
+function refreshGameModesList()
+{
+   GameModePreviewArray.clear();
+   
+   $pref::Server::GameMode = "";
+   ChooseLevelMenuTabList-->LevelBtn.active = false;
+   
+   //popilate the gamemodes list first
+   %gamemodeList = getGameModesList();
+   for(%i=0; %i < getTokenCount(%gamemodeList, ";"); %i++)
+   {
+      %gameModeObj = getToken(%gamemodeList, ";", %i);
+      
+      if(isObject(%gameModeObj))
+      {
+         %gameModeName = %gameModeObj.gameModeName;
+         if(%gameModeName $= "")
+            %gameModeName = %gameModeObj.getName();
+            
+         %preview = new GuiButtonCtrl() {
+            position = "0 0";
+            extent = ChooseLevelMenu.previewButtonSize;
+            buttonType = "PushButton";
+            profile = GuiMenuButtonLeftJustProfile;
+            horizSizing = "right";
+            vertSizing = "bottom";
+            internalName = "button";
+            class = "GameModePreviewButton";
+            //command = "ChooseGameModeBegin(" @ %i @ ");";
+            altCommand = "ChooseGameModeBegin(" @ %i @ ");"; //allow doubleclick to quick action it
+            text = %gameModeName;
+            gameModeObj = %gameModeObj;
+            gameModeDesc = %gameModeObj.description;
+            previewImage = %gameModeObj.previewImage;
+            textMargin = 120;
+            groupNum = 2;
+            cansave = false;
+         };
+         
+         GameModePreviewArray.add(%preview);
+      }
+   }
+}
+
+function refreshLevelsList()
+{
+   LevelPreviewArray.clear();
+   
+   //fetch the levelAssets   
    ChooseLevelAssetQuery.clear();
    AssetDatabase.findAssetType(ChooseLevelAssetQuery, "LevelAsset");
       
@@ -57,6 +121,7 @@ function ChooseLevelMenu::onWake(%this)
       return;
    }
    
+   //filter the levelAssets by the gamemode selected
    for(%i=0; %i < %count; %i++)
 	{
 	   %assetId = ChooseLevelAssetQuery.getAsset(%i);
@@ -71,6 +136,32 @@ function ChooseLevelMenu::onWake(%this)
       if ( !isFile(%file) )
          continue;
          
+      if( %levelAsset.isSubScene )
+         continue;
+         
+      //filter for selected gamemode
+      %levelGameModes = %levelAsset.gameModesNames;
+      
+      echo("LevelAsset gamemodes: " @ %levelGameModes);
+      
+      %foundGameModeMatch = false;
+      for(%gm = 0; %gm < getTokenCount(%levelGameModes, ";"); %gm++)
+      {
+         %gameModeName = getToken(%levelGameModes, ";", %gm);
+         
+         echo("testing gamemode: " @ %gameModeName);
+         echo("selected gamemode: " @ $pref::Server::GameMode.getName());
+         
+         if(%gameModeName $= $pref::Server::GameMode.getName())
+         {
+            %foundGameModeMatch = true;
+            break;
+         }
+      }
+      
+      if(!%foundGameModeMatch)
+         continue;
+         
       %levelPreviewImg = %levelAsset.getPreviewImagePath();
    
       if (!isFile(%levelPreviewImg))
@@ -78,7 +169,7 @@ function ChooseLevelMenu::onWake(%this)
          
       %preview = new GuiIconButtonCtrl() {
          position = "0 0";
-         extent = %this.previewButtonSize;
+         extent = ChooseLevelMenu.previewButtonSize;
          buttonType = "PushButton";
          profile = GuiMenuButtonLeftJustProfile;
          horizSizing = "right";
@@ -86,7 +177,7 @@ function ChooseLevelMenu::onWake(%this)
          internalName = "button";
          class = "LevelPreviewButton";
          //command = "$selectedLevelAsset = " @ %assetId @ ";";
-         altCommand = "ChooseLevelBegin(1);"; //allow doubleclick to quick action it
+         altCommand = "ChooseLevelBegin(" @ %i @ ");"; //allow doubleclick to quick action it
          text = %levelAsset.levelName;
          bitmapAsset = %levelPreviewImg;
          levelAsset = %levelAsset;
@@ -107,20 +198,10 @@ function ChooseLevelMenu::onWake(%this)
    
    // Also add the new level mission as defined in the world editor settings
    // if we are choosing a level to launch in the editor.
-   if ( %this.launchInEditor )
+   if ( ChooseLevelMenu.launchInEditor )
    {
-      %this.addMissionFile( "tools/levels/DefaultEditorLevel.mis" );
+      ChooseLevelMenu.addMissionFile( "tools/levels/DefaultEditorLevel.mis" );
    }
-
-   if(!$pref::HostMultiPlayer)
-      ChooseLevelTitleText.setText("SINGLE PLAYER");
-   else
-      ChooseLevelTitleText.setText("CREATE SERVER");
-      
-   ChooseLevelMenuTabList.visible = $pref::HostMultiPlayer;
-   ChooseLevelMenuNavButtonOverlay.visible = $pref::HostMultiPlayer;
-      
-   %this.schedule(32, openMenu, 0);
 }
 
 if(!isObject( ChooseLevelActionMap ) )
@@ -133,8 +214,8 @@ if(!isObject( ChooseLevelActionMap ) )
    ChooseLevelActionMap.bind( keyboard, e, ChooseLevelMenuNextMenu);
    ChooseLevelActionMap.bind( gamepad, btn_r, ChooseLevelMenuNextMenu);
    
-   ChooseLevelActionMap.bind( keyboard, Space, ChooseLevelBegin );
-   ChooseLevelActionMap.bind( gamepad, btn_a, ChooseLevelBegin );
+   ChooseLevelActionMap.bind( keyboard, Space, ChooseLevelMenuOption );
+   ChooseLevelActionMap.bind( gamepad, btn_a, ChooseLevelMenuOption );
 }
 
 function ChooseLevelMenu::syncGUI(%this)
@@ -169,14 +250,26 @@ function LevelPreviewArray::syncGUI(%this)
    $selectedLevelAsset = %btn.levelAssetId;
 }
 
+function GameModePreviewArray::syncGUI(%this)
+{
+   %btn = %this.getObject(%this.listPosition);
+   %btn.setHighlighted(true);
+   
+   $pref::Server::GameMode = %btn.gameModeObject;
+}
+
 function ChooseLevelMenuPrevMenu(%val)
 {
-   if(%val && $pref::HostMultiPlayer)
+   if(%val)
    {
       %currentIdx = ChooseLevelMenu.currentMenuIdx;
       ChooseLevelMenu.currentMenuIdx -= 1;
       
-      ChooseLevelMenu.currentMenuIdx = mClamp(ChooseLevelMenu.currentMenuIdx, 0, 1);
+      %endIndex = 1;
+      if($pref::HostMultiPlayer)
+         %endIndex = 2;
+      
+      ChooseLevelMenu.currentMenuIdx = mClamp(ChooseLevelMenu.currentMenuIdx, 0, %endIndex);
     
       if(%currentIdx == ChooseLevelMenu.currentMenuIdx)
          return;
@@ -187,12 +280,16 @@ function ChooseLevelMenuPrevMenu(%val)
 
 function ChooseLevelMenuNextMenu(%val)
 {
-   if(%val && $pref::HostMultiPlayer)
+   if(%val)
    {
       %currentIdx = ChooseLevelMenu.currentMenuIdx;
       ChooseLevelMenu.currentMenuIdx += 1;
       
-      ChooseLevelMenu.currentMenuIdx = mClamp(ChooseLevelMenu.currentMenuIdx, 0, 1);
+      %endIndex = 1;
+      if($pref::HostMultiPlayer)
+         %endIndex = 2;
+      
+      ChooseLevelMenu.currentMenuIdx = mClamp(ChooseLevelMenu.currentMenuIdx, 0, %endIndex);
     
       if(%currentIdx == ChooseLevelMenu.currentMenuIdx)
          return;
@@ -201,15 +298,17 @@ function ChooseLevelMenuNextMenu(%val)
    }
 }
 
-
 function ChooseLevelMenu::openMenu(%this, %menuIdx)
 {
-   LevelSelectContainer.setVisible(%menuIdx == 0);
-   ServerConfigContainer.setVisible(%menuIdx == 1);
-   
+   GameModeSelectContainer.setVisible(%menuIdx == 0);
+   LevelSelectContainer.setVisible(%menuIdx == 1);
+   ServerConfigContainer.setVisible(%menuIdx == 2);
+
    if(%menuIdx == 0)
-      $MenuList = LevelPreviewArray;
+      $MenuList = GameModePreviewArray;
    else if(%menuIdx == 1)
+      $MenuList = LevelPreviewArray;
+   else if(%menuIdx == 2)
       $MenuList = ServerConfigList;
    
     %this.currentMenuIdx = %menuIdx;
@@ -220,37 +319,63 @@ function ChooseLevelMenu::openMenu(%this, %menuIdx)
    %this.syncGui();
 }
 
-function ChooseLevelBegin(%val)
+function ChooseLevelMenuOption(%val)
 {
    if(%val)
    {
-      // So we can't fire the button when loading is in progress.
-      if ( isObject( ServerGroup ) )
-         return;
-         
-      Canvas.popDialog();
-      
-      %entry = LevelPreviewArray.getObject(LevelPreviewArray.listPosition);
-      
-      if(!AssetDatabase.isDeclaredAsset(%entry.levelAssetId))
-      {
-         MessageBoxOK("Error", "Selected level preview does not have a valid level asset!");
-         return;  
-      }
-      
-      $selectedLevelAsset = %entry.levelAssetId;
+      if(ChooseLevelMenu.currentMenuIdx == 0)
+         ChooseGameModeBegin(ChooseLevelMenu.listPosition);
+      else if(ChooseLevelMenu.currentMenuIdx == 1)
+         ChooseLevelBegin(ChooseLevelMenu.listPosition);
+   }
+}
 
-      // Launch the chosen level with the editor open?
-      if ( ChooseLevelMenu.launchInEditor )
-      {
-         activatePackage( "BootEditor" );
-         ChooseLevelMenu.launchInEditor = false; 
-         StartGame(%entry.levelAssetId, "SinglePlayer");
-      }
-      else
-      {
-         StartGame(%entry.levelAssetId); 
-      }
+function ChooseGameModeBegin(%index)
+{
+   %entry = GameModePreviewArray.getObject(%index);
+   if(!isObject(%entry) || !isObject(%entry.gameModeObj))
+   {
+      MessageBoxOK("Error", "Selected game mode does not have a valid mode");
+      return; 
+   }
+
+   $pref::Server::GameMode = %entry.gameModeObj;
+
+   ChooseLevelMenuTabList-->LevelBtn.active = true;
+   
+   refreshLevelsList();
+   
+   ChooseLevelMenu.openMenu(1);
+}
+
+function ChooseLevelBegin(%index)
+{
+   // So we can't fire the button when loading is in progress.
+   if ( isObject( ServerGroup ) )
+      return;
+      
+   Canvas.popDialog();
+   
+   %entry = LevelPreviewArray.getObject(%index);
+   
+   if(!AssetDatabase.isDeclaredAsset(%entry.levelAssetId))
+   {
+      MessageBoxOK("Error", "Selected level preview does not have a valid level asset!");
+      return;  
+   }
+   
+   $selectedLevelAsset = %entry.levelAssetId;
+
+   // Launch the chosen level with the editor open?
+   if ( ChooseLevelMenu.launchInEditor )
+   {
+      activatePackage( "BootEditor" );
+      ChooseLevelMenu.launchInEditor = false; 
+      StartGame(%entry.levelAssetId, "SinglePlayer");
+   }
+   else
+   {
+      StartGame(%entry.levelAssetId); 
    }
 }
 
@@ -267,6 +392,23 @@ function ChooseLevelMenu::onSleep( %this )
       %prefPath = getPrefpath();
       export("$Pref::Server::*", %prefPath @ "/serverPrefs." @ $TorqueScriptFileExtension, false);
       BanList::Export(%prefPath @ "/banlist." @ $TorqueScriptFileExtension);  
+   }
+}
+
+function GameModePreviewButton::onHighlighted(%this, %highlighted)
+{
+   if(%highlighted)
+   {
+      $MenuList.listPosition = $MenuList.getObjectIndex(%this);
+      
+      GameModePreviewBitmap.bitmapAsset = %this.previewImage;
+      
+      GameModePreviewBitmap.visible = (%this.previewImage !$= "");
+      
+      GameModeNameText.text = %this.text;
+      GameModeDescriptionText.setText(%this.gameModeDesc);
+      
+      GameModePreviewScroll.scrollToObject(%this);
    }
 }
 

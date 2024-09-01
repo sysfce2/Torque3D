@@ -1,5 +1,5 @@
 #pragma once
-
+#ifndef SCENE_H
 #include "console/engineAPI.h"
 
 #ifndef _NETOBJECT_H_
@@ -9,8 +9,16 @@
 #ifndef _ITICKABLE_H_
 #include "core/iTickable.h"
 #endif
-
+#ifndef _SCENEOBJECT_H_
 #include "scene/sceneObject.h"
+#endif
+
+#ifndef GAME_MODE_H
+#include "gameMode.h"
+#endif
+#ifndef SUB_SCENE_H
+#include "SubScene.h"
+#endif
 
 /// Scene
 /// This object is effectively a smart container to hold and manage any relevent scene objects and data
@@ -19,14 +27,11 @@ class Scene : public NetObject, public virtual ITickable
 {
    typedef NetObject Parent;
 
-   bool mIsSubScene;
-
    Scene* mParentScene;
 
-   Vector<Scene*> mSubScenes;
+   Vector<SubScene*> mSubScenes;
 
    Vector<SceneObject*> mPermanentObjects;
-
    Vector<SceneObject*> mDynamicObjects;
 
    S32 mSceneId;
@@ -37,7 +42,8 @@ class Scene : public NetObject, public virtual ITickable
 
    bool mEditPostFX;
 
-   StringTableEntry mGameModeName;
+   StringTableEntry mGameModesNames;
+   Vector<GameMode*> mGameModesList;
 
 protected:
    static Scene * smRootScene;
@@ -96,6 +102,8 @@ public:
    }
 
    static Vector<Scene*> smSceneList;
+
+   DECLARE_CALLBACK(void, onSaving, (const char* fileName));
 };
 
 
@@ -136,3 +144,4 @@ Vector<T*> Scene::getObjectsByClass(bool checkSubscenes)
 
    return foundObjects;
 }
+#endif

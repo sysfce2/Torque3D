@@ -9,6 +9,7 @@ $guiContent = new GuiControl(ChooseLevelMenu) {
    tooltipProfile = "GuiToolTipProfile";
    isContainer = "1";
    canSaveDynamicFields = "1";
+      currentMenuIdx = "0";
       launchInEditor = "0";
       previewButtonSize = "445 120";
 
@@ -39,31 +40,42 @@ $guiContent = new GuiControl(ChooseLevelMenu) {
    new GuiStackControl(ChooseLevelMenuTabList) {
       stackingType = "Horizontal";
       padding = "10";
-      position = "485 61";
-      extent = "310 41";
+      position = "405 61";
+      extent = "470 41";
       horizSizing = "center";
       profile = "GuiDefaultProfile";
-      visible = "0";
       tooltipProfile = "GuiToolTipProfile";
-      hidden = "1";
 
       new GuiButtonCtrl() {
-         text = "Level";
+         text = "Game Mode";
          groupNum = "1";
          extent = "150 41";
          profile = "GuiMenuButtonProfile";
          command = "ChooseLevelMenu.openMenu(0);";
          tooltipProfile = "GuiToolTipProfile";
+         internalName = "GameModeBtn";
          class = "ChooseLevelMenuButton";
       };
       new GuiButtonCtrl() {
-         text = "Server Config";
+         text = "Level";
          groupNum = "1";
          position = "160 0";
          extent = "150 41";
          profile = "GuiMenuButtonProfile";
          command = "ChooseLevelMenu.openMenu(1);";
          tooltipProfile = "GuiToolTipProfile";
+         internalName = "LevelBtn";
+         class = "ChooseLevelMenuButton";
+      };
+      new GuiButtonCtrl() {
+         text = "Server Config";
+         groupNum = "1";
+         position = "320 0";
+         extent = "150 41";
+         profile = "GuiMenuButtonProfile";
+         command = "ChooseLevelMenu.openMenu(2);";
+         tooltipProfile = "GuiToolTipProfile";
+         internalName = "ConfigBtn";
          class = "ChooseLevelMenuButton";
       };
    };
@@ -72,14 +84,12 @@ $guiContent = new GuiControl(ChooseLevelMenu) {
       extent = "1281 60";
       horizSizing = "width";
       profile = "GuiNonModalDefaultProfile";
-      visible = "0";
       tooltipProfile = "GuiToolTipProfile";
       isContainer = "1";
-      hidden = "1";
 
       new GuiBitmapCtrl(ChooseLevelMenuPrevNavIcon) {
          BitmapAsset = "UI:Keyboard_Black_Q_image";
-         position = "485 24";
+         position = "405 24";
          extent = "40 40";
          vertSizing = "top";
          profile = "GuiNonModalDefaultProfile";
@@ -87,11 +97,62 @@ $guiContent = new GuiControl(ChooseLevelMenu) {
       };
       new GuiBitmapCtrl(ChooseLevelMenuNextNavIcon) {
          BitmapAsset = "UI:Keyboard_Black_E_image";
-         position = "595 24";
+         position = "515 24";
          extent = "40 40";
          vertSizing = "top";
          profile = "GuiNonModalDefaultProfile";
          tooltipProfile = "GuiToolTipProfile";
+      };
+   };
+   new GuiContainer(GameModeSelectContainer) {
+      position = "196 119";
+      extent = "888 566";
+      horizSizing = "center";
+      profile = "GuiNonModalDefaultProfile";
+      tooltipProfile = "GuiToolTipProfile";
+
+      new GuiScrollCtrl(GameModePreviewScroll) {
+         hScrollBar = "alwaysOff";
+         vScrollBar = "dynamic";
+         extent = "445 562";
+         vertSizing = "height";
+         profile = "GuiMenuScrollProfile";
+         tooltipProfile = "GuiToolTipProfile";
+
+         new GuiStackControl(GameModePreviewArray) {
+            padding = "5";
+            position = "0 1";
+            extent = "445 120";
+            horizSizing = "width";
+            vertSizing = "height";
+            profile = "GuiMenuDefaultProfile";
+            tooltipProfile = "GuiToolTipProfile";
+         };
+      };
+      new GuiBitmapCtrl(GameModePreviewBitmap) {
+         BitmapAsset = "UI:no_preview_image";
+         position = "448 0";
+         extent = "440 440";
+         horizSizing = "left";
+         profile = "GuiNonModalDefaultProfile";
+         tooltipProfile = "GuiToolTipProfile";
+      };
+      new GuiTextCtrl(GameModeNameText) {
+         text = "Example Level";
+         position = "448 445";
+         extent = "440 20";
+         horizSizing = "left";
+         profile = "MenuSubHeaderText";
+         tooltipProfile = "GuiToolTipProfile";
+         internalName = "GameModeNameTxt";
+      };
+      new GuiMLTextCtrl(GameModeDescriptionText) {
+         position = "448 473";
+         extent = "440 19";
+         horizSizing = "left";
+         profile = "GuiMLTextProfile";
+         tooltipProfile = "GuiToolTipProfile";
+         internalName = "GameModeDescTxt";
       };
    };
    new GuiContainer(LevelSelectContainer) {
@@ -99,7 +160,9 @@ $guiContent = new GuiControl(ChooseLevelMenu) {
       extent = "888 566";
       horizSizing = "center";
       profile = "GuiNonModalDefaultProfile";
+      visible = "0";
       tooltipProfile = "GuiToolTipProfile";
+      hidden = "1";
 
       new GuiScrollCtrl(LevelPreviewScroll) {
          hScrollBar = "alwaysOff";
@@ -120,7 +183,7 @@ $guiContent = new GuiControl(ChooseLevelMenu) {
          };
       };
       new GuiBitmapCtrl(LevelPreviewBitmap) {
-         BitmapAsset = "";
+         BitmapAsset = "UI:no_preview_image";
          position = "448 0";
          extent = "440 440";
          horizSizing = "left";
@@ -128,7 +191,7 @@ $guiContent = new GuiControl(ChooseLevelMenu) {
          tooltipProfile = "GuiToolTipProfile";
       };
       new GuiTextCtrl(LevelNameText) {
-         text = "";
+         text = "Example Level";
          position = "448 445";
          extent = "440 20";
          horizSizing = "left";
@@ -214,7 +277,6 @@ $guiContent = new GuiControl(ChooseLevelMenu) {
                   tooltipProfile = "GuiToolTipProfile";
                };
                new GuiTextEditCtrl(serverNameCTRL) {
-                  text = "";
                   position = "606 4";
                   extent = "295 22";
                   horizSizing = "left";
@@ -240,7 +302,6 @@ $guiContent = new GuiControl(ChooseLevelMenu) {
                   tooltipProfile = "GuiToolTipProfile";
                };
                new GuiTextEditCtrl(serverPassCTRL) {
-                  text = "";
                   position = "606 4";
                   extent = "295 22";
                   horizSizing = "left";
@@ -314,7 +375,7 @@ $guiContent = new GuiControl(ChooseLevelMenu) {
       tooltipProfile = "GuiToolTipProfile";
 
       new GuiIconButtonCtrl(ChooseLevelStartBtn) {
-         BitmapAsset = "UI:Keyboard_Black_Return_image";
+         BitmapAsset = "UI:Keyboard_Black_Space_image";
          sizeIconToButton = "1";
          makeIconSquare = "1";
          textLocation = "Center";
