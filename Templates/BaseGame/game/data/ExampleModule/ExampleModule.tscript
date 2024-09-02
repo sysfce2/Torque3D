@@ -9,7 +9,7 @@ function ExampleModule::onDestroy(%this)
 //This is called when the server is initially set up by the game application
 function ExampleModule::initServer(%this)
 {
-   %this.queueExec("./scripts/server/ExampleGameMode");
+   %this.queueExec("./scripts/shared/ExampleGameMode");
 }
 
 //This is called when the server is created for an actual game/map to be played
@@ -25,7 +25,7 @@ function ExampleModule::onDestroyGameServer(%this)
 //This is called when the client is initially set up by the game application
 function ExampleModule::initClient(%this)
 {
-    %this.queueExec("./scripts/client/inputCommands");
+   %this.queueExec("./scripts/client/inputCommands");
     
     //client scripts
    exec("./scripts/client/defaultkeybinds");
@@ -34,7 +34,7 @@ function ExampleModule::initClient(%this)
    if(isScriptFile(%prefPath @ "/keybinds"))
       exec(%prefPath @ "/keybinds");
       
-   %this.queueExec("./scripts/server/ExampleGameMode");
+   %this.queueExec("./scripts/shared/ExampleGameMode");
 }
 
 //This is called when a client connects to a server
