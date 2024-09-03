@@ -116,6 +116,8 @@ void SceneGroup::inspectPostApply()
 
 void SceneGroup::onInspect(GuiInspector* inspector)
 {
+   Parent::onInspect(inspector);
+   
    //Put the SubScene group before everything that'd be SubScene-effecting, for orginazational purposes
    GuiInspectorGroup* sceneGroupGrp = inspector->findExistentGroup(StringTable->insert("SceneGroup"));
    if (!sceneGroupGrp)
