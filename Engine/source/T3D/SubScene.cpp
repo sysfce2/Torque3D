@@ -309,15 +309,23 @@ bool SubScene::save()
 
    for (SimGroup::iterator itr = begin(); itr != end(); itr++)
    {
-      //Just in case there's a valid callback the scene object would like to invoke for saving
-      SceneObject* gc = dynamic_cast<SceneObject*>(*itr);
-      if (gc)
+      //Inform our objects we're saving, so if they do any special stuff
+      //they can do it before the actual write-out
+      SimGroup* sg = dynamic_cast<SimGroup*>(*itr);
+      if (sg)
       {
-         gc->onSaving_callback(mLevelAssetId);
+         ConsoleValue vars[3];
+         vars[2].setString(mLevelAssetId);
+         sg->callOnChildren("onSaving", 3, vars);
+      }
+
+      SceneObject* scO = dynamic_cast<SceneObject*>(*itr);
+      if (scO)
+      {
+         scO->onSaving_callback(mLevelAssetId);
       }
 
       SimObject* sO = static_cast<SimObject*>(*itr);
-
       if (!sO->save(levelPath))
       {
          Con::errorf("SubScene::save() - error, failed to write object %s to file: %s", sO->getIdString(), levelPath);

@@ -296,11 +296,28 @@ bool Scene::saveScene(StringTableEntry fileName)
 
    //Inform our objects we're saving, so if they do any special stuff
    //they can do it before the actual write-out
-   for (U32 i = 0; i < mPermanentObjects.size(); i++)
+   for (SimGroup::iterator itr = begin(); itr != end(); itr++)
+   {
+      SimGroup* sg = dynamic_cast<SimGroup*>(*itr);
+      if (sg)
+      {
+         ConsoleValue vars[3];
+         vars[2].setString(fileName);
+         sg->callOnChildren("onSaving", 3, vars);
+      }
+
+      SceneObject* sO = dynamic_cast<SceneObject*>(*itr);
+      if (sO)
+      {
+         sO->onSaving_callback(fileName);
+      }
+   }
+
+   /*for (U32 i = 0; i < mPermanentObjects.size(); i++)
    {
       SceneObject* obj = mPermanentObjects[i];
       obj->onSaving_callback(fileName);
-   }
+   }*/
 
    //Inform our subscenes we're saving so they can do any
    //special work required as well
