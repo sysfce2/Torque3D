@@ -943,6 +943,14 @@ singleton GuiControlProfile( GuiBackFillProfile )
    category = "Editor";
 };
 
+singleton GuiControlProfile( GuiDarkFillProfile )
+{
+   opaque = true;
+   fillColor = "25 25 25";
+   border = false;
+   category = "Editor";
+};
+
 singleton GuiControlProfile(GuiShaderEditorProfile : ToolsGuiDefaultProfile)
 {
    opaque = true;

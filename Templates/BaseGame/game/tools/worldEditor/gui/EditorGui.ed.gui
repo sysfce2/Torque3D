@@ -19,6 +19,19 @@ $guiContent = new GuiContainer(EditorGui,EditorGuiGroup) {
    AnchorLeft = "1";
    AnchorRight = "0";
    
+   new GuiDecoyCtrl(EditorGuiMainTabBookBG) {
+      profile = "GuiDarkFillProfile";
+      horizSizing = "width";
+      vertSizing = "bottom";
+      position = "0 5";
+      extent = "800 24";
+      minExtent = "8 8";
+      visible = "1";
+      helpTag = "0";
+      useMouseEvents = "0";
+      isDecoy = "1";
+   };
+   
    new GuiTabBookCtrl(EditorGuiMainTabBook) {
       tabHeight = "20";
       selectedPage = "0";
