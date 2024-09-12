@@ -10,7 +10,7 @@ else
 
 //--- OBJECT WRITE BEGIN ---
 $guiContent = new GuiWindowCollapseCtrl(ShapeEdAdvancedWindow,EditorGuiGroup) {
-   text = "::  Shape Editor - Advanced Properties";
+   text = ":: Shape Editor - Advanced Properties";
    resizeWidth = "0";
    resizeHeight = "0";
    canMove = "1";

@@ -784,8 +784,8 @@ function MaterialEditorGui::isMatEditorMaterial(%this, %material)
 
 function MaterialEditorGui::setMaterialNotDirty(%this)
 {
-   %propertyText = "::  Material Editor - Properties";
-   %previewText = "::  Material Editor - Preview";
+   %propertyText = ":: Material Editor - Properties";
+   %previewText = ":: Material Editor - Preview";
    MaterialEditorPropertiesWindow.text = %propertyText;
    MaterialEditorPreviewWindow.text = %previewText;
    
@@ -795,8 +795,8 @@ function MaterialEditorGui::setMaterialNotDirty(%this)
 
 function MaterialEditorGui::setMaterialDirty(%this)
 { 
-   %propertyText = "::  Material Editor - Properties *";
-   %previewText = "::  Material Editor - Preview *";
+   %propertyText = ":: Material Editor - Properties *";
+   %previewText = ":: Material Editor - Preview *";
    MaterialEditorPropertiesWindow.text = %propertyText;
    MaterialEditorPreviewWindow.text = %previewText;
    
