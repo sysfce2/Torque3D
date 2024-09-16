@@ -45,8 +45,8 @@ $guiContent = new GuiColorPickerCtrl(ColorPickerDlg,EditorGuiGroup) {
       canSaveDynamicFields = "0";
 
       new GuiBitmapBorderCtrl(){ // color blend
-         position = "3 24";
-         extent = "255 258";
+         position = "3 25";
+         extent = "260 260";
          minExtent = "8 2";
          horizSizing = "right";
          vertSizing = "bottom";
@@ -67,8 +67,8 @@ $guiContent = new GuiColorPickerCtrl(ColorPickerDlg,EditorGuiGroup) {
             selectorGap = "1";
             displayMode = "BlendColor";
             actionOnMove = "1";
-            position = "1 0";
-            extent = "255 258";
+            position = "1 1";
+            extent = "255 255";
             minExtent = "8 2";
             horizSizing = "right";
             vertSizing = "bottom";
@@ -86,8 +86,8 @@ $guiContent = new GuiColorPickerCtrl(ColorPickerDlg,EditorGuiGroup) {
          };
       };
       new GuiBitmapBorderCtrl(){ // Hue
-         position = "263 23";
-         extent = "25 261";
+         position = "265 25";
+         extent = "25 260";
          minExtent = "8 2";
          horizSizing = "right";
          vertSizing = "bottom";
@@ -109,7 +109,7 @@ $guiContent = new GuiColorPickerCtrl(ColorPickerDlg,EditorGuiGroup) {
             displayMode = "VertColor";
             actionOnMove = "1";
             position = "1 1";
-            extent = "21 257";
+            extent = "20 255";
             minExtent = "8 2";
             horizSizing = "right";
             vertSizing = "bottom";
