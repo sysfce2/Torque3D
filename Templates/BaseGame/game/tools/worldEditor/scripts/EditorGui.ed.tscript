@@ -2488,7 +2488,8 @@ function EWorldEditor::syncGui( %this )
    ESnapOptions-->SnapSize.setText( EWorldEditor.getSoftSnapSize() );
    ESnapOptions-->GridSize.setText( EWorldEditor.getGridSize() );
    
-   ESnapOptions-->GridSnapButton.setStateOn( %this.getGridSnap() );
+   %this.UseGridSnap = EditorSettings.value("WorldEditor/Tools/UseGridSnap");
+   ESnapOptions-->GridSnapButton.setStateOn( %this.UseGridSnap );
    
    %this.UseGroupCenter = EditorSettings.value("WorldEditor/Tools/UseGroupCenter");
    
@@ -2762,7 +2763,9 @@ function toggleSnappingOptions( %var )
    }
    else if( %var $= "grid" )
    {
-      EWorldEditor.setGridSnap( !EWorldEditor.getGridSnap() );
+	  EWorldEditor.UseGridSnap = !EWorldEditor.UseGridSnap;
+	  EditorSettings.setValue("WorldEditor/Tools/UseGridSnap", EWorldEditor.UseGridSnap );
+      EWorldEditor.setGridSnap( EWorldEditor.UseGridSnap );
    }
    else if( %var $= "byGroup" )
    {
