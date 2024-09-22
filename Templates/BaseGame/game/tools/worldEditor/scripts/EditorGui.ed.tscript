@@ -1019,6 +1019,10 @@ function WorldEditorPlugin::onActivated( %this )
       ETransformSelection.setVisible(true);
    }
    
+   EWorldEditor.UseGridSnap = EditorSettings.value("WorldEditor/Tools/UseGridSnap");
+   ESnapOptions-->GridSnapButton.setStateOn( EWorldEditor.UseGridSnap );
+   SnapToBar-->objectGridSnapBtn.setStateOn( EWorldEditor.UseGridSnap );
+   
    Parent::onActivated(%this);
 }
 
