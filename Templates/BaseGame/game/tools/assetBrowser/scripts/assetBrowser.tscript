@@ -663,7 +663,9 @@ function AssetBrowser::doRefresh(%this)
 
 function AssetBrowser::populatePreviewImages(%this)
 {
-   echo("AssetBrowser::populatePreviewImages() - Previews to generate: " @ AssetPreviewArray.count());
+   if (AssetPreviewArray.count()>0)
+      echo("AssetBrowser::populatePreviewImages() - Previews to generate: " @ AssetPreviewArray.count());
+      
    for(%i=0; %i < AssetPreviewArray.count(); %i++)
    {
       %previewButton = AssetPreviewArray.getKey(%i);
@@ -1490,7 +1492,8 @@ function AssetBrowser::rebuildAssetArray(%this)
    if(!%this.previewArrayDirty)
    {
       %this.previewArrayDirty = true;
-      %this.schedule(16, "doRebuildAssetArray");
+      cancel(%this.pendingRebuild);
+      %this.pendingRebuild = %this.schedule(16, "doRebuildAssetArray");
    }
 }
 
@@ -2863,6 +2866,5 @@ function AssetBrowserWindow::onResize(%this, %posX, %posY, %width, %height)
         AssetBrowser-->assetList.fillRowFirst = true;
     else
         AssetBrowser-->assetList.fillRowFirst = false;
-        
-    AssetBrowser.doRebuildAssetArray();
+    AssetBrowser.rebuildAssetArray();
 }
