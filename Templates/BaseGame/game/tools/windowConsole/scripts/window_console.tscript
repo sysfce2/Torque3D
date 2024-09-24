@@ -102,10 +102,23 @@ function windowConsoleDlg::hideWindow(%this)
 
 function windowConsoleDlg::showWindow(%this)
 {
-   $WindowConsole::Open = true;
-   Canvas.pushDialog(%this);
-   %this-->Scroll.setVisible(true);
+   if($WindowConsole::Open)
+   {
+      // close the window when it's already opened
+      windowConsoleDlg.hideWindow();
+   }
+   else
+   {
+      // open the console window
+      $WindowConsole::Open = true;
+      Canvas.pushDialog(%this);
+      %this-->Scroll.setVisible(true);
+      // update all the windows (position and size)
+      EditorGui.updateSideBar();
+   }
 }
+
+
 
 //-----------------------------------------------------------------------------
 
