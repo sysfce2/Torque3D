@@ -628,6 +628,7 @@ function EditorGui::updateSideBar(%this)
 {   
    if(GuiEditorIsActive())
    {
+      // Update the Asset Browser's size
       if(isObject(AssetBrowserWindow) && isObject(GuiEditorSidebar))
       {
          if(AssetBrowserWindow.docked == true)
@@ -637,6 +638,19 @@ function EditorGui::updateSideBar(%this)
             %browserHeight = AssetBrowserWindow.extent.y;
             %browserPosY = Canvas.extent.y - AssetBrowserWindow.extent.y - 33;
             AssetBrowserWindow.resize(0, %browserPosY, %browserWidth, %browserHeight);
+         }
+      }
+      
+      // Update the Windowed Console's size
+      if(isObject(windowConsoleControl) && isObject(GuiEditorSidebar))
+      {
+         if(windowConsoleControl.docked == true)
+         {
+            // The width is relative to the sidepanel
+            %consoleWidth = Canvas.extent.x - GuiEditorSidebar.extent.x;
+            %consoleHeight = windowConsoleControl.extent.y;
+            %consolePosY = Canvas.extent.y - windowConsoleControl.extent.y - 33;
+            windowConsoleControl.resize(0, %consolePosY, %consoleWidth, %consoleHeight);
          }
       }
       return;
@@ -2763,8 +2777,8 @@ function toggleSnappingOptions( %var )
    }
    else if( %var $= "grid" )
    {
-	  EWorldEditor.UseGridSnap = !EWorldEditor.UseGridSnap;
-	  EditorSettings.setValue("WorldEditor/Tools/UseGridSnap", EWorldEditor.UseGridSnap );
+ 	   EWorldEditor.UseGridSnap = !EWorldEditor.UseGridSnap;
+	   EditorSettings.setValue("WorldEditor/Tools/UseGridSnap", EWorldEditor.UseGridSnap );
       EWorldEditor.setGridSnap( EWorldEditor.UseGridSnap );
    }
    else if( %var $= "byGroup" )

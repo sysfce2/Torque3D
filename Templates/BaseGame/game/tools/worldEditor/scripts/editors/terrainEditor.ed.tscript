@@ -636,7 +636,7 @@ function TerrainPainterContainer::maxSize(%this, %window)
       // --- Windowed Console --------------------------------------------------
       if(isObject(windowConsoleControl))
       {
-         // Only resize the AssetBrowser if it's docked
+         // Only resize the console if it's docked
          if(windowConsoleControl.docked == true)
          {
             // The width is relative to the sidepanel
