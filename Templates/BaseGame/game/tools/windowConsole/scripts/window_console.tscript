@@ -252,6 +252,10 @@ function windowConsoleDlg::incFont()
 {
    switch ($Con::font)
    {
+      case 16:
+         windowConsoleMessageLogView.setProfile(ToolsGuiConsoleXLProfile);
+         $Con::font = 18;
+         windowConsoleMessageLogView.refresh();
       case 14:
          windowConsoleMessageLogView.setProfile(ToolsGuiConsoleLargeProfile);
          $Con::font = 16;
@@ -274,6 +278,10 @@ function windowConsoleDlg::decFont()
       case 16:
          windowConsoleMessageLogView.setProfile(ToolsGuiConsoleMediumProfile);
          $Con::font = 14;
+         windowConsoleMessageLogView.refresh();
+      case 18:
+         windowConsoleMessageLogView.setProfile(ToolsGuiConsoleLargeProfile);
+         $Con::font = 16;
          windowConsoleMessageLogView.refresh();
    }
 }
