@@ -1569,6 +1569,11 @@ new GuiControlProfile(ToolsGuiConsoleLargeProfile : ToolsGuiConsoleProfile)
 {
    fontSize = $GUI::fontSize[16];
 };
+if(!isObject(ToolsGuiConsoleXLProfile))
+new GuiControlProfile(ToolsGuiConsoleXLProfile : ToolsGuiConsoleProfile)
+{
+   fontSize = $GUI::fontSize[18];
+};
 if(!isObject(ToolsGuiConsoleTextProfile))
 new GuiControlProfile(ToolsGuiConsoleTextProfile)
 {   
