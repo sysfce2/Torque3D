@@ -156,26 +156,35 @@ function refreshLevelsList()
       //filter for selected gamemode
       %levelGameModes = %levelAsset.gameModesNames;
       
-      %foundGameModeMatch = false;
-      for(%gm = 0; %gm < getTokenCount(%levelGameModes, ";"); %gm++)
+      //If the level has no gamemodes defined, we just assume the default case of it being a wildcard to whatever gamemode
+      //is available
+      if(%levelGameModes $= "")
       {
-         %gameModeName = getToken(%levelGameModes, ";", %gm);
-         
-         for(%g=0; %g < GameModePreviewArray.getCount(); %g++)
+         %foundGameModeMatch = true;
+      }
+      else
+      {
+         %foundGameModeMatch = false;
+         for(%gm = 0; %gm < getTokenCount(%levelGameModes, ";"); %gm++)
          {
-            %gmb = GameModePreviewArray.getObject(%g);
-            if(!isObject(%gmb.gameModeObj) || (!%gmb.gameModeObj.active && !%gmb.gameModeObj.alwaysActive))
-               continue;
-               
-            if(%gameModeName $= %gmb.gameModeObj.getName())
+            %gameModeName = getToken(%levelGameModes, ";", %gm);
+            
+            for(%g=0; %g < GameModePreviewArray.getCount(); %g++)
             {
-               %foundGameModeMatch = true;
-               break;  
+               %gmb = GameModePreviewArray.getObject(%g);
+               if(!isObject(%gmb.gameModeObj) || (!%gmb.gameModeObj.active && !%gmb.gameModeObj.alwaysActive))
+                  continue;
+                  
+               if(%gameModeName $= %gmb.gameModeObj.getName())
+               {
+                  %foundGameModeMatch = true;
+                  break;  
+               }
             }
+            
+            if(%foundGameModeMatch)
+               break;
          }
-         
-         if(%foundGameModeMatch)
-            break;
       }
       
       if(!%foundGameModeMatch)
