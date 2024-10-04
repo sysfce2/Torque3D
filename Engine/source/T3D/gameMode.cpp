@@ -4,6 +4,8 @@
 #include "gui/containers/guiDynamicCtrlArrayCtrl.h"
 #endif
 
+#include "console/arrayObject.h"
+
 IMPLEMENT_CONOBJECT(GameMode);
 
 IMPLEMENT_CALLBACK(GameMode, onActivated, void, (), (),
@@ -47,7 +49,9 @@ ConsoleSetType(TypeGameModeList)
 
 GameMode::GameMode() :
    mGameModeName(StringTable->EmptyString()),
-   mGameModeDesc(StringTable->EmptyString())
+   mGameModeDesc(StringTable->EmptyString()),
+   mIsActive(false),
+   mIsAlwaysActive(false)
 {
    INIT_ASSET(PreviewImage);
 }
@@ -62,6 +66,7 @@ void GameMode::initPersistFields()
      INITPERSISTFIELD_IMAGEASSET(PreviewImage, GameMode, "Preview Image");
 
      addField("active", TypeBool, Offset(mIsActive, GameMode), "Is the gamemode active");
+     addField("alwaysActive", TypeBool, Offset(mIsAlwaysActive, GameMode), "Is the gamemode always active");
 }
 
 bool GameMode::onAdd()
@@ -110,6 +115,11 @@ void GameMode::setActive(const bool& active)
       onDeactivated_callback();
 }
 
+void GameMode::setAlwaysActive(const bool& alwaysActive)
+{
+   mIsAlwaysActive = alwaysActive;
+}
+
 DefineEngineMethod(GameMode, isActive, bool, (), ,
    "Returns if the GameMode is currently active.\n"
    "@return The active status of the GameMode")
@@ -124,24 +134,38 @@ DefineEngineMethod(GameMode, setActive, void, (bool active), (true),
    object->setActive(active);
 }
 
-DefineEngineFunction(getGameModesList, const char*, (), , "")
+DefineEngineMethod(GameMode, isALwaysActive, bool, (), ,
+   "Returns if the GameMode is currently active.\n"
+   "@return The active status of the GameMode")
 {
-   char* returnBuffer = Con::getReturnBuffer(1024);
+   return object->isActive();
+}
 
-   String formattedList;
+DefineEngineMethod(GameMode, setAlwaysActive, void, (bool alwaysActive), (true),
+   "Sets the active state of the GameMode.\n"
+   "@param active A bool of the state the GameMode should be set to")
+{
+   object->setAlwaysActive(alwaysActive);
+}
+
+DefineEngineFunction(getGameModesList, ArrayObject*, (), , "")
+{
+   ArrayObject* dictionary = new ArrayObject();
+   dictionary->registerObject();
+
+   char activeValBuffer[16];
 
    for (SimGroup::iterator itr = Sim::getRootGroup()->begin(); itr != Sim::getRootGroup()->end(); itr++)
    {
       GameMode* gm = dynamic_cast<GameMode*>(*itr);
       if (gm)
       {
-         formattedList += String(gm->getName()) + ";";
+         dSprintf(activeValBuffer, 16, "%d", (gm->mIsActive || gm->mIsAlwaysActive));
+         dictionary->push_back(gm->getName(), activeValBuffer);
       }
    }
 
-   dSprintf(returnBuffer, 1024, "%s", formattedList.c_str());
-
-   return returnBuffer;
+   return dictionary;
 }
 
 //-----------------------------------------------------------------------------

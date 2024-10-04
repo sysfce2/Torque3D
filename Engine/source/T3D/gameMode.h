@@ -22,6 +22,7 @@ private:
    DECLARE_ASSET_SETGET(GameMode, PreviewImage);
 
    bool mIsActive;
+   bool mIsAlwaysActive;
 
 public:
 
@@ -33,6 +34,9 @@ public:
 
    bool isActive() { return mIsActive; }
    void setActive(const bool& active);
+
+   bool isAlwaysActive() { return mIsAlwaysActive; }
+   void setAlwaysActive(const bool& alwaysActive);
 
    DECLARE_CONOBJECT(GameMode);
 

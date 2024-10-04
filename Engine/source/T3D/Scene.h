@@ -93,6 +93,8 @@ public:
    template <class T>
    Vector<T*> getObjectsByClass();
 
+   void loadAtPosition(const Point3F& position);
+
    static Scene *getRootScene() 
    { 
       if (Scene::smSceneList.empty())

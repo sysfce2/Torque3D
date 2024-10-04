@@ -38,6 +38,7 @@ private:
    S32 mStartUnloadTimerMS;
 
    bool mLoaded;
+   String mLoadIf;
 
    bool mGlobalLayer;
 public:

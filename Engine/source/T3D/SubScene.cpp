@@ -49,6 +49,7 @@ void SubScene::initPersistFields()
    addGroup("SubScene");
    addField("isGlobalLayer", TypeBool, Offset(mGlobalLayer, SubScene), "");
    INITPERSISTFIELD_LEVELASSET(Level, SubScene, "The level asset to load.");
+   addField("loadIf", TypeCommand, Offset(mLoadIf, SubScene), "evaluation condition (true/false)");
    addField("gameModes", TypeGameModeList, Offset(mGameModesNames, SubScene), "The game modes that this subscene is associated with.");
    endGroup("SubScene");
 
@@ -143,9 +144,18 @@ bool SubScene::testBox(const Box3F& testBox)
    if (mGlobalLayer)
       return true;
 
-   bool isOverlapped = getWorldBox().isOverlapped(testBox);
-      
-   return getWorldBox().isOverlapped(testBox);
+   bool passes = getWorldBox().isOverlapped(testBox);
+   if (passes && !mLoadIf.isEmpty())
+   {
+      //test the mapper plugged in condition line
+      String resVar = getIdString() + String(".result");
+      Con::setBoolVariable(resVar.c_str(), false);
+      String command = resVar + "=" + mLoadIf + ";";
+      Con::evaluatef(command.c_str());
+      passes = Con::getBoolVariable(resVar.c_str());
+   }
+
+   return passes;
 }
 
 void SubScene::write(Stream& stream, U32 tabStop, U32 flags)

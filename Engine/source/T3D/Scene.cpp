@@ -391,6 +391,21 @@ Vector<SceneObject*> Scene::getObjectsByClass(String className)
    return Vector<SceneObject*>();
 }
 
+void Scene::loadAtPosition(const Point3F& position)
+{
+   for (U32 i = 0; i < mSubScenes.size(); i++)
+   {
+      Box3F testBox = Box3F(0.5);
+      testBox.setCenter(position);
+
+      if (mSubScenes[i]->testBox(testBox))
+      {
+         mSubScenes[i]->setUnloadTimeMS(-1);
+         mSubScenes[i]->load();
+      }
+   }
+}
+
 DefineEngineFunction(getScene, Scene*, (U32 sceneId), (0),
    "Get the root Scene object that is loaded.\n"
    "@return The id of the Root Scene. Will be 0 if no root scene is loaded")
@@ -488,4 +503,10 @@ DefineEngineMethod(Scene, save, bool, (const char* fileName), (""),
    "@param True on success, false on failure.")
 {
    return object->saveScene(StringTable->insert(fileName));
+}
+
+DefineEngineMethod(Scene, loadAtPosition, void, (Point3F position), (Point3F::Zero),
+   "Loads any subscenes at a given point by force.\n")
+{
+   object->loadAtPosition(position);
 }
