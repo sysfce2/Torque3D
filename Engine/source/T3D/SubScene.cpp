@@ -7,16 +7,25 @@
 #include "gfx/gfxDrawUtil.h"
 #include "gfx/gfxTransformSaver.h"
 #include "gui/editor/inspector/group.h"
+#include "T3D/gameBase/gameBase.h"
 
 IMPLEMENT_CO_NETOBJECT_V1(SubScene);
 
 S32 SubScene::mUnloadTimeoutMs = 5000;
+
+IMPLEMENT_CALLBACK(SubScene, onLoaded, void, (), (),
+   "@brief Called when a subScene has been loaded and has game mode implications.\n\n");
+IMPLEMENT_CALLBACK(SubScene, onUnloaded, void, (), (),
+   "@brief Called when a subScene has been unloaded and has game mode implications.\n\n");
 
 SubScene::SubScene() :
    mLevelAssetId(StringTable->EmptyString()),
    mGameModesNames(StringTable->EmptyString()),
    mScopeDistance(-1),
    mLoaded(false),
+   mFreezeLoading(false),
+   mTickPeriodMS(1000),
+   mCurrTick(0),
    mGlobalLayer(false)
 {
    mNetFlags.set(Ghostable | ScopeAlways);
@@ -33,6 +42,8 @@ bool SubScene::onAdd()
    if (!Parent::onAdd())
      return false;
 
+   setProcessTick(true);
+
     return true;
 }
 
@@ -40,6 +51,8 @@ void SubScene::onRemove()
 {
     if (isClientObject())
       removeFromScene();
+
+    unload();
 
     Parent::onRemove();
 }
@@ -49,9 +62,19 @@ void SubScene::initPersistFields()
    addGroup("SubScene");
    addField("isGlobalLayer", TypeBool, Offset(mGlobalLayer, SubScene), "");
    INITPERSISTFIELD_LEVELASSET(Level, SubScene, "The level asset to load.");
-   addField("loadIf", TypeCommand, Offset(mLoadIf, SubScene), "evaluation condition (true/false)");
    addField("gameModes", TypeGameModeList, Offset(mGameModesNames, SubScene), "The game modes that this subscene is associated with.");
    endGroup("SubScene");
+
+   addGroup("LoadingManagement");
+   addField("freezeLoading", TypeBool, Offset(mFreezeLoading, SubScene), "If true, will prevent the zone from being changed from it's current loading state.");
+   addField("loadIf", TypeCommand, Offset(mLoadIf, SubScene), "evaluation condition (true/false)");
+
+   addField("tickPeriodMS", TypeS32, Offset(mTickPeriodMS, SubScene), "evaluation rate (ms)");
+
+   addField("onLoadCommand", TypeCommand, Offset(mOnLoadCommand, SubScene), "The command to execute when the subscene is loaded. Maximum 1023 characters.");
+   addField("onUnloadCommand", TypeCommand, Offset(mOnUnloadCommand, SubScene), "The command to execute when subscene is unloaded. Maximum 1023 characters.");
+   endGroup("LoadingManagement");
+
 
    Parent::initPersistFields();
 }
@@ -139,22 +162,29 @@ void SubScene::inspectPostApply()
    setMaskBits(-1);
 }
 
+bool SubScene::evaluateCondition()
+{
+   if (!mLoadIf.isEmpty())
+   {
+      //test the mapper plugged in condition line
+      String resVar = getIdString() + String(".result");
+      Con::setBoolVariable(resVar.c_str(), false);
+      String command = resVar + "=" + mLoadIf + ";";
+
+      Con::evaluatef(command.c_str());
+      return Con::getBoolVariable(resVar.c_str());
+   }
+   return true;
+}
+
 bool SubScene::testBox(const Box3F& testBox)
 {
    if (mGlobalLayer)
       return true;
 
    bool passes = getWorldBox().isOverlapped(testBox);
-   if (passes && !mLoadIf.isEmpty())
-   {
-      //test the mapper plugged in condition line
-      String resVar = getIdString() + String(".result");
-      Con::setBoolVariable(resVar.c_str(), false);
-      String command = resVar + "=" + mLoadIf + ";";
-      Con::evaluatef(command.c_str());
-      passes = Con::getBoolVariable(resVar.c_str());
-   }
-
+   if (passes)
+      passes = evaluateCondition();
    return passes;
 }
 
@@ -187,6 +217,14 @@ void SubScene::write(Stream& stream, U32 tabStop, U32 flags)
 
 void SubScene::processTick(const Move* move)
 {
+   mCurrTick += TickMs;
+   if (mCurrTick > mTickPeriodMS)
+   {
+      mCurrTick = 0;
+      //re-evaluate
+      if (!evaluateCondition())
+         unload();
+   }
 }
 
 void SubScene::_onFileChanged(const Torque::Path& path)
@@ -201,19 +239,34 @@ void SubScene::_onFileChanged(const Torque::Path& path)
    setMaskBits(U32_MAX);
 }
 
+void SubScene::_removeContents(SimGroupIterator set)
+{
+   for (SimGroupIterator itr(set); *itr; ++itr)
+   {
+
+      SimGroup* child = dynamic_cast<SimGroup*>(*itr);
+      if (child)
+      {
+         _removeContents(SimGroupIterator(child));
+
+         GameBase* asGameBase = dynamic_cast<GameBase*>(child);
+         if (asGameBase)
+         {
+            asGameBase->scriptOnRemove();
+         }
+
+         Sim::cancelPendingEvents(child);
+
+         child->safeDeleteObject();
+      }
+   }
+}
+
 void SubScene::_closeFile(bool removeFileNotify)
 {
    AssertFatal(isServerObject(), "Trying to close out a subscene file on the client is bad!");
 
-   U32 count = size();
-
-   for (SimSetIterator itr(this); *itr; ++itr)
-   {
-      SimObject* child = dynamic_cast<SimObject*>(*itr);
-
-      if (child)
-         child->safeDeleteObject();
-   }
+   _removeContents(SimGroupIterator(this));
 
    if (removeFileNotify && mLevelAsset.notNull() && mLevelAsset->getLevelPath() != StringTable->EmptyString())
    {
@@ -249,20 +302,33 @@ void SubScene::load()
    if (mLoaded)
       return;
 
+   if (mFreezeLoading)
+      return;
+
    _loadFile(true);
    mLoaded = true;
 
    GameMode::findGameModes(mGameModesNames, &mGameModesList);
 
+   onLoaded_callback();
    for (U32 i = 0; i < mGameModesList.size(); i++)
    {
-      mGameModesList[i]->onSubsceneLoaded_callback();
+      mGameModesList[i]->onSubsceneLoaded_callback(this);
+   }
+
+   if (!mOnLoadCommand.isEmpty())
+   {
+      String command = "%this = " + String(getIdString()) + "; " + mLoadIf + ";";
+      Con::evaluatef(command.c_str());
    }
 }
 
 void SubScene::unload()
 {
    if (!mLoaded)
+      return;
+
+   if (mFreezeLoading)
       return;
 
    if (isSelected())
@@ -273,33 +339,43 @@ void SubScene::unload()
 
    //scan down through our child objects, see if any are marked as selected,
    //if so, skip unloading and reset the timer
-   for (SimSetIterator itr(this); *itr; ++itr)
+   for (SimGroupIterator itr(this); *itr; ++itr)
    {
       SimGroup* childGrp = dynamic_cast<SimGroup*>(*itr);
-      if (childGrp && childGrp->isSelected())
+      if (childGrp)
       {
-         mStartUnloadTimerMS = Sim::getCurrentTime();
-         return; //if a child is selected, then we don't want to unload
-      }
-
-      for (SimSetIterator cldItr(childGrp); *cldItr; ++cldItr)
-      {
-         SimObject* chldChld = dynamic_cast<SimObject*>(*cldItr);
-         if (chldChld && chldChld->isSelected())
+         if (childGrp->isSelected())
          {
             mStartUnloadTimerMS = Sim::getCurrentTime();
             return; //if a child is selected, then we don't want to unload
          }
+         for (SimGroupIterator cldItr(childGrp); *cldItr; ++cldItr)
+         {
+            SimObject* chldChld = dynamic_cast<SimObject*>(*cldItr);
+            if (chldChld && chldChld->isSelected())
+            {
+               mStartUnloadTimerMS = Sim::getCurrentTime();
+               return; //if a child is selected, then we don't want to unload
+            }
+         }
       }
+   }
+
+   onUnloaded_callback();
+   for (U32 i = 0; i < mGameModesList.size(); i++)
+   {
+      mGameModesList[i]->onSubsceneUnloaded_callback(this);
+   }
+
+   if (!mOnUnloadCommand.isEmpty())
+   {
+      String command = "%this = " + String(getIdString()) + "; " + mOnUnloadCommand + ";";
+      Con::evaluatef(command.c_str());
    }
 
    _closeFile(true);
    mLoaded = false;
 
-   for (U32 i = 0; i < mGameModesList.size(); i++)
-   {
-      mGameModesList[i]->onSubsceneUnloaded_callback();
-   }
 }
 
 bool SubScene::save()

@@ -8,9 +8,8 @@
 #ifndef LEVEL_ASSET_H
 #include "assets/LevelAsset.h"
 #endif
-#ifndef GAME_MODE_H
-#include "gameMode.h"
-#endif
+
+class GameMode;
 
 class SubScene : public SceneGroup
 {
@@ -38,7 +37,14 @@ private:
    S32 mStartUnloadTimerMS;
 
    bool mLoaded;
+   bool mFreezeLoading;
+
    String mLoadIf;
+   String mOnLoadCommand;
+   String mOnUnloadCommand;
+
+   S32 mTickPeriodMS;
+   U32 mCurrTick;
 
    bool mGlobalLayer;
 public:
@@ -50,6 +56,7 @@ public:
 
    static void initPersistFields();
    static void consoleInit();
+   StringTableEntry getTypeHint() const override { return (getLevelAsset()) ? getLevelAsset()->getAssetName() : StringTable->EmptyString(); }
 
    // SimObject
    bool onAdd() override;
@@ -65,7 +72,7 @@ public:
    void inspectPostApply() override;
 
    bool testBox(const Box3F& testBox);
-
+   bool evaluateCondition();
    void _onSelected() override;
    void _onUnselected() override;
 
@@ -76,6 +83,7 @@ protected:
 
    //
    void _onFileChanged(const Torque::Path& path);
+   void _removeContents(SimGroupIterator);
    void _closeFile(bool removeFileNotify);
    void _loadFile(bool addFileNotify);
 
@@ -104,6 +112,8 @@ public:
 
    bool save();
 
+   DECLARE_CALLBACK(void, onLoaded, ());
+   DECLARE_CALLBACK(void, onUnloaded, ());
    DECLARE_ASSET_SETGET(SubScene, Level);
 };
 #endif

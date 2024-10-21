@@ -8,6 +8,9 @@
 #endif
 #endif
 
+#ifndef SUB_SCENE_H
+#include "SubScene.h"
+#endif
 
 #include "T3D/assets/ImageAsset.h"
 
@@ -48,8 +51,8 @@ public:
    DECLARE_CALLBACK(void, onDeactivated, ());
    DECLARE_CALLBACK(void, onSceneLoaded, ());
    DECLARE_CALLBACK(void, onSceneUnloaded, ());
-   DECLARE_CALLBACK(void, onSubsceneLoaded, ());
-   DECLARE_CALLBACK(void, onSubsceneUnloaded, ());
+   DECLARE_CALLBACK(void, onSubsceneLoaded, (SubScene*));
+   DECLARE_CALLBACK(void, onSubsceneUnloaded, (SubScene*));
 };
 
 DefineConsoleType(TypeGameModeList, String)

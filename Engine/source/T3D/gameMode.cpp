@@ -16,9 +16,9 @@ IMPLEMENT_CALLBACK(GameMode, onSceneLoaded, void, (), (),
    "@brief Called when a scene has been loaded and has game mode implications.\n\n");
 IMPLEMENT_CALLBACK(GameMode, onSceneUnloaded, void, (), (),
    "@brief Called when a scene has been unloaded and has game mode implications.\n\n");
-IMPLEMENT_CALLBACK(GameMode, onSubsceneLoaded, void, (), (),
+IMPLEMENT_CALLBACK(GameMode, onSubsceneLoaded, void, (SubScene*), ("SubScene"),
    "@brief Called when a subScene has been loaded and has game mode implications.\n\n");
-IMPLEMENT_CALLBACK(GameMode, onSubsceneUnloaded, void, (), (),
+IMPLEMENT_CALLBACK(GameMode, onSubsceneUnloaded, void, (SubScene*), ("SubScene"),
    "@brief Called when a subScene has been unloaded and has game mode implications.\n\n");
 
 
