@@ -570,6 +570,17 @@ new GuiMouseEventCtrl(PaintBrushSlopeMinContainer,EditorGuiGroup) {
 function PaintBrushSlopeMinContainer::onWake(%this)
 {
    %this-->slider.setValue(PaintBrushSlopeControl-->SlopeMinAngle.getText());
+   %this-->slider.AltCommand = "PaintBrushSlopeControl-->SlopeMinAngle.setValue(mFloatLength( ($ThisControl.getValue()), 1 )); ETerrainEditor.setSlopeLimitMinAngle(mFloatLength( ($ThisControl.getValue()), 1 ));TerrainPainterPlugin.validateSlopeMinAngle();";
+
+   %pos = PaintBrushSlopeControl-->SlopeMinAngle.getGlobalPosition();
+   
+   if (PaintBrushSlopeControlTE.isAwake())
+   {
+      %pos = PaintBrushSlopeControlTE-->SlopeMinAngle.getGlobalPosition();      
+      %this-->slider.AltCommand = "PaintBrushSlopeControlTE-->SlopeMinAngle.setValue(mFloatLength( ($ThisControl.getValue()), 1 )); ETerrainEditor.setSlopeLimitMinAngle(mFloatLength( ($ThisControl.getValue()), 1 ));TerrainPainterPlugin.validateSlopeMinAngle();";
+
+   }
+   %this-->slider.setPositionGlobal(%pos.x, %pos.y + 25);
 }
 
 new GuiMouseEventCtrl(PaintBrushSlopeMaxContainer,EditorGuiGroup) {
@@ -605,6 +616,16 @@ new GuiMouseEventCtrl(PaintBrushSlopeMaxContainer,EditorGuiGroup) {
 function PaintBrushSlopeMaxContainer::onWake(%this)
 {
    %this-->slider.setValue(PaintBrushSlopeControl-->SlopeMaxAngle.getText());
+   %this-->slider.AltCommand = "PaintBrushSlopeControl-->SlopeMaxAngle.setValue(mFloatLength( ($ThisControl.getValue()), 1 )); ETerrainEditor.setSlopeLimitMaxAngle(mFloatLength( ($ThisControl.getValue()), 1 ));TerrainPainterPlugin.validateSlopeMaxAngle();";
+
+   %pos = PaintBrushSlopeControl-->SlopeMaxAngle.getGlobalPosition();
+   
+   if (PaintBrushSlopeControlTE.isAwake())
+   {
+      %pos = PaintBrushSlopeControlTE-->SlopeMaxAngle.getGlobalPosition();
+      %this-->slider.AltCommand = "PaintBrushSlopeControlTE-->SlopeMaxAngle.setValue(mFloatLength( ($ThisControl.getValue()), 1 )); ETerrainEditor.setSlopeLimitMaxAngle(mFloatLength( ($ThisControl.getValue()), 1 ));TerrainPainterPlugin.validateSlopeMaxAngle();";
+   }
+   %this-->slider.setPositionGlobal(%pos.x, %pos.y + 25);
 }
 
 function PaintBrushSlopeMaxContainer::init(%this)

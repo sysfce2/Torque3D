@@ -27,6 +27,32 @@
 #include "gui/core/guiCanvas.h"
 
 //------------------------------------------------------------------------------
+bool TerrainAction::isValid(GridInfo tile)
+{
+
+   const bool slopeLimit = mTerrainEditor->mSlopeMinAngle > 0.0f || mTerrainEditor->mSlopeMaxAngle < 90.0f;
+   const F32 minSlope = mSin(mDegToRad(90.0f - mTerrainEditor->mSlopeMinAngle));
+   const F32 maxSlope = mSin(mDegToRad(90.0f - mTerrainEditor->mSlopeMaxAngle));
+
+   const TerrainBlock* terrain = mTerrainEditor->getActiveTerrain();
+   const F32 squareSize = terrain->getSquareSize();
+
+   Point2F p;
+   Point3F norm;
+
+   if (slopeLimit)
+   {
+      p.x = tile.mGridPoint.gridPos.x * squareSize;
+      p.y = tile.mGridPoint.gridPos.y * squareSize;
+      if (!terrain->getNormal(p, &norm, true))
+         return false;
+
+      if (norm.z > minSlope ||
+         norm.z < maxSlope)
+         return false;
+   }
+   return true;
+}
 
 void SelectAction::process(Selection * sel, const Gui3DMouseEvent & event, bool selChanged, Type type)
 {
@@ -388,6 +414,9 @@ void SetEmptyAction::process(Selection * sel, const Gui3DMouseEvent &, bool selC
 
       // Skip already empty blocks.
       if ( inf.mMaterial == U8_MAX )
+         continue;
+
+      if (!isValid(inf))
          continue;
 
       // The change flag needs to be set on the undo
