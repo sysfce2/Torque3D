@@ -447,7 +447,7 @@ $guiContent = new GuiControl(EWTerrainEditToolbar,EditorGuiGroup) {
             AnchorBottom = "0";
             AnchorLeft = "1";
             AnchorRight = "0";
-            text = "Slope Mask:  Min";
+            text = "Slope Mask: Min";
             maxLength = "1024";
          };
          new GuiTextEditCtrl() {
