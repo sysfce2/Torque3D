@@ -1435,14 +1435,14 @@ function TerrainPainterPlugin::validateTileMinHeight( %this )
 {
    %maxval = ETerrainEditor.getTileLimitMinHeight();
    PaintBrushSlopeControl-->tileMinHeight.setText(%maxval); 
-   //PaintBrushSlopeControlTE-->tileMinHeight.setText(%maxval); 
+   PaintBrushSlopeControlTE-->tileMinHeight.setText(%maxval); 
 }
 
 function TerrainPainterPlugin::validateTileMaxHeight( %this )
 {
    %minval = ETerrainEditor.getTileLimitMaxHeight();
    PaintBrushSlopeControl-->tileMaxHeight.setText(%minval); 
-   //PaintBrushSlopeControlTE-->tileMaxHeight.setText(%minval);  
+   PaintBrushSlopeControlTE-->tileMaxHeight.setText(%minval);  
 }
 
 function TerrainPainterPlugin::keyboardModifyBrushSize( %this, %amt)
