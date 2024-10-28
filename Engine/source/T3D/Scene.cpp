@@ -148,20 +148,32 @@ void Scene::removeObject(SimObject* object)
    Parent::removeObject(object);
 }
 
-void Scene::addDynamicObject(SceneObject* object)
+void Scene::addDynamicObject(SimObject* object)
 {
    mDynamicObjects.push_back(object);
 
+   SimGroup* cleanupGroup;
+   if(Sim::findObject("MissionCleanup", cleanupGroup))
+   {
+      cleanupGroup->addObject(object);
+   }
+
    //Do it like regular, though we should probably bail if we're trying to add non-scene objects to the scene?
-   Parent::addObject(object);
+   //Parent::addObject(object);
 }
 
-void Scene::removeDynamicObject(SceneObject* object)
+void Scene::removeDynamicObject(SimObject* object)
 {
    mDynamicObjects.remove(object);
 
+   SimGroup* cleanupGroup;
+   if (Sim::findObject("MissionCleanup", cleanupGroup))
+   {
+      cleanupGroup->removeObject(object);
+   }
+
    //Do it like regular, though we should probably bail if we're trying to add non-scene objects to the scene?
-   Parent::removeObject(object);
+   //Parent::removeObject(object);
 }
 
 void Scene::interpolateTick(F32 delta)
@@ -242,7 +254,7 @@ void Scene::dumpUtilizedAssets()
    Con::printf("Dumping utilized assets in scene!");
 
    Vector<StringTableEntry> utilizedAssetsList;
-   for (U32 i = 0; i < mPermanentObjects.size(); i++)
+   /*for (U32 i = 0; i < mPermanentObjects.size(); i++)
    {
       mPermanentObjects[i]->getUtilizedAssets(&utilizedAssetsList);
    }
@@ -250,7 +262,7 @@ void Scene::dumpUtilizedAssets()
    for (U32 i = 0; i < mDynamicObjects.size(); i++)
    {
       mDynamicObjects[i]->getUtilizedAssets(&utilizedAssetsList);
-   }
+   }*/
 
    for (U32 i = 0; i < utilizedAssetsList.size(); i++)
    {
@@ -294,30 +306,15 @@ bool Scene::saveScene(StringTableEntry fileName)
       fileName = getOriginatingFile();
    }
 
-   //Inform our objects we're saving, so if they do any special stuff
-   //they can do it before the actual write-out
-   for (SimGroup::iterator itr = begin(); itr != end(); itr++)
+   for (SimGroupIterator itr(this); *itr; ++itr)
    {
-      SimGroup* sg = dynamic_cast<SimGroup*>(*itr);
-      if (sg)
+      if((*itr)->isMethod("onSaving"))
       {
          ConsoleValue vars[3];
          vars[2].setString(fileName);
-         sg->callOnChildren("onSaving", 3, vars);
-      }
-
-      SceneObject* sO = dynamic_cast<SceneObject*>(*itr);
-      if (sO)
-      {
-         sO->onSaving_callback(fileName);
+         Con::execute((*itr), 3, vars);
       }
    }
-
-   /*for (U32 i = 0; i < mPermanentObjects.size(); i++)
-   {
-      SceneObject* obj = mPermanentObjects[i];
-      obj->onSaving_callback(fileName);
-   }*/
 
    //Inform our subscenes we're saving so they can do any
    //special work required as well

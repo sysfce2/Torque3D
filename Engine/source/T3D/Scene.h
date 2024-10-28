@@ -31,8 +31,8 @@ class Scene : public NetObject, public virtual ITickable
 
    Vector<SubScene*> mSubScenes;
 
-   Vector<SceneObject*> mPermanentObjects;
-   Vector<SceneObject*> mDynamicObjects;
+   Vector<SimObject*> mPermanentObjects;
+   Vector<SimObject*> mDynamicObjects;
 
    S32 mSceneId;
 
@@ -69,8 +69,8 @@ public:
    void addObject(SimObject* object) override;
    void removeObject(SimObject* object) override;
 
-   void addDynamicObject(SceneObject* object);
-   void removeDynamicObject(SceneObject* object);
+   void addDynamicObject(SimObject* object);
+   void removeDynamicObject(SimObject* object);
    void clearDynamicObjects() { mDynamicObjects.clear(); }
 
    void dumpUtilizedAssets();

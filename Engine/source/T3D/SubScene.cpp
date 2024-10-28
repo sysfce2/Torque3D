@@ -1,6 +1,7 @@
 #include "SubScene.h"
 
 #include "gameMode.h"
+#include "console/persistenceManager.h"
 #include "console/script.h"
 #include "scene/sceneRenderState.h"
 #include "renderInstance/renderPassManager.h"
@@ -391,33 +392,27 @@ bool SubScene::save()
    if (mStartUnloadTimerMS != -1)
       mStartUnloadTimerMS = Sim::getCurrentTime();
 
+   PersistenceManager prMger;
+
    StringTableEntry levelPath = mLevelAsset->getLevelPath();
 
-   for (SimGroup::iterator itr = begin(); itr != end(); itr++)
+   FileStream fs;
+   fs.open(levelPath, Torque::FS::File::Write);
+   fs.close();
+
+   for (SimGroupIterator itr(this); *itr; ++itr)
    {
-      //Inform our objects we're saving, so if they do any special stuff
-      //they can do it before the actual write-out
-      SimGroup* sg = dynamic_cast<SimGroup*>(*itr);
-      if (sg)
+      if ((*itr)->isMethod("onSaving"))
       {
          ConsoleValue vars[3];
          vars[2].setString(mLevelAssetId);
-         sg->callOnChildren("onSaving", 3, vars);
+         Con::execute((*itr), 3, vars);
       }
 
-      SceneObject* scO = dynamic_cast<SceneObject*>(*itr);
-      if (scO)
-      {
-         scO->onSaving_callback(mLevelAssetId);
-      }
-
-      SimObject* sO = static_cast<SimObject*>(*itr);
-      if (!sO->save(levelPath))
-      {
-         Con::errorf("SubScene::save() - error, failed to write object %s to file: %s", sO->getIdString(), levelPath);
-         return false;
-      }
+      prMger.setDirty((*itr), levelPath);
    }
+
+   prMger.saveDirty();
 
    //process our gameModeList and write it out to the levelAsset for metadata stashing
    bool saveSuccess = false;
