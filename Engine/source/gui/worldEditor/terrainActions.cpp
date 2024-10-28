@@ -525,9 +525,6 @@ void BrushAdjustHeightAction::process(Selection * sel, const Gui3DMouseEvent & e
       // and record the starting heights
       for(U32 i = 0; i < sel->size(); i++)
       {
-         if (!isValid((*sel)[i]))
-            continue;
-
          mTerrainEditor->getUndoSel()->add((*sel)[i]);
          (*sel)[i].mStartHeight = (*sel)[i].mHeight;
       }
@@ -654,9 +651,6 @@ void SmoothHeightAction::process(Selection * sel, const Gui3DMouseEvent &, bool 
       // linear
       for(U32 i = 0; i < sel->size(); i++)
       {
-         if (!isValid((*sel)[i]))
-            continue;
-
          (*sel)[i].mHeight += (avgHeight - (*sel)[i].mHeight) * mTerrainEditor->mSmoothFactor * (*sel)[i].mWeight;
          mTerrainEditor->setGridInfo((*sel)[i]);
       }
@@ -701,9 +695,6 @@ void SmoothSlopeAction::process(Selection * sel, const Gui3DMouseEvent &, bool s
       F32 goalHeight;  
       for(U32 i = 0; i < sel->size(); i++)  
       {
-         if (!isValid((*sel)[i]))
-            continue;
-
          goalHeight = avgHeight + ((*sel)[i].mGridPoint.gridPos.x - avgPos.x)*avgSlope.x +  
             ((*sel)[i].mGridPoint.gridPos.y - avgPos.y)*avgSlope.y;  
          (*sel)[i].mHeight += (goalHeight - (*sel)[i].mHeight) * (*sel)[i].mWeight;  
