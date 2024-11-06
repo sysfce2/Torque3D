@@ -579,6 +579,7 @@ class SimObject: public ConsoleObject, public TamlCallbacks
 
       /// Save object as a TorqueScript File.
       virtual bool save( const char* pcFilePath, bool bOnlySelected = false, const char *preappend = NULL );
+      virtual bool saveAppend(const char* pcFilePath, bool bOnlySelected = false, const char* preappend = NULL);
 
       /// Check if a method exists in the objects current namespace.
       virtual bool isMethod( const char* methodName );
@@ -981,6 +982,8 @@ class SimObject: public ConsoleObject, public TamlCallbacks
       
       DECLARE_CONOBJECT( SimObject );
       DECLARE_CALLBACK(void, onInspectPostApply, (SimObject* obj));
+      DECLARE_CALLBACK(void, onSelected, (SimObject* obj));
+      DECLARE_CALLBACK(void, onUnselected, (SimObject* obj));
       
       static SimObject* __findObject( const char* id ) { return Sim::findObject( id ); }
       static const char* __getObjectId( ConsoleObject* object )

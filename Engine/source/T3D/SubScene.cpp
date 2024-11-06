@@ -10,6 +10,8 @@
 #include "gui/editor/inspector/group.h"
 #include "T3D/gameBase/gameBase.h"
 
+bool SubScene::smTransformChildren = false;
+
 IMPLEMENT_CO_NETOBJECT_V1(SubScene);
 
 S32 SubScene::mUnloadTimeoutMs = 5000;
@@ -86,6 +88,10 @@ void SubScene::consoleInit()
 
    Con::addVariable("$SubScene::UnloadTimeoutMS", TypeBool, &SubScene::mUnloadTimeoutMs, "The amount of time in milliseconds it takes for a SubScene to be unloaded if it's inactive.\n"
       "@ingroup Editors\n");
+
+   Con::addVariable("$SubScene::transformChildren", TypeBool, &SubScene::smTransformChildren,
+      "@brief If true, then transform manipulations modify child objects. If false, only triggering bounds is manipulated\n\n"
+      "@ingroup Editors");
 }
 
 void SubScene::addObject(SimObject* object)
@@ -161,6 +167,30 @@ void SubScene::inspectPostApply()
 {
    Parent::inspectPostApply();
    setMaskBits(-1);
+}
+
+void SubScene::setTransform(const MatrixF& mat)
+{
+   if(SubScene::smTransformChildren)
+   {
+      Parent::setTransform(mat);
+   }
+   else
+   {
+      SceneObject::setTransform(mat);
+   }
+}
+
+void SubScene::setRenderTransform(const MatrixF& mat)
+{
+   if (SubScene::smTransformChildren)
+   {
+      Parent::setRenderTransform(mat);
+   }
+   else
+   {
+      SceneObject::setRenderTransform(mat);
+   }
 }
 
 bool SubScene::evaluateCondition()

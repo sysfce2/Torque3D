@@ -23,6 +23,9 @@ public:
 
    void onLevelChanged() {}
 
+protected:
+   static bool smTransformChildren;
+
 private:
    DECLARE_LEVELASSET(SubScene, Level, onLevelChanged);
 
@@ -47,6 +50,7 @@ private:
    U32 mCurrTick;
 
    bool mGlobalLayer;
+
 public:
    SubScene();
    virtual ~SubScene();
@@ -70,6 +74,9 @@ public:
    //void onEditorEnable() override;
    //void onEditorDisable() override;
    void inspectPostApply() override;
+
+   void setTransform(const MatrixF& mat) override;
+   void setRenderTransform(const MatrixF& mat) override;
 
    bool testBox(const Box3F& testBox);
    bool evaluateCondition();
