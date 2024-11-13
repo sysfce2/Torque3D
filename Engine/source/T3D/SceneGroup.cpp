@@ -164,9 +164,8 @@ void SceneGroup::setTransform(const MatrixF& mat)
    Parent::setTransform(mat);
 
    // Calculate the delta transformation
-   MatrixF deltaTransform;
-   oldTransform.inverse();
-   deltaTransform.mul(oldTransform, getTransform());
+   MatrixF deltaTransform = mat;
+   deltaTransform.mul(oldTransform.inverse());
 
    if (isServerObject())
    {
@@ -178,11 +177,19 @@ void SceneGroup::setTransform(const MatrixF& mat)
          SceneObject* child = dynamic_cast<SceneObject*>(*itr);
          if (child)
          {
+            // Get the child's current transform
             MatrixF childTransform = child->getTransform();
-            MatrixF relativeTransform;
-            relativeTransform.mul(deltaTransform, childTransform);
-            child->setTransform(relativeTransform);
-            child->setScale(childTransform.getScale()); //we don't modify scale
+
+            // Apply the delta transformation (ignoring scale)
+            MatrixF updatedTransform = childTransform;
+            updatedTransform.mul(deltaTransform);
+
+            // Update the child's transform
+            child->setTransform(updatedTransform);
+
+            PhysicsShape* childPS = dynamic_cast<PhysicsShape*>(child);
+            if (childPS)
+               childPS->storeRestorePos();
          }
       }
    }
@@ -196,9 +203,8 @@ void SceneGroup::setRenderTransform(const MatrixF& mat)
    Parent::setRenderTransform(mat);
 
    // Calculate the delta transformation
-   MatrixF deltaTransform;
-   oldTransform.inverse();
-   deltaTransform.mul(oldTransform, getRenderTransform());
+   MatrixF deltaTransform = mat;
+   deltaTransform.mul(oldTransform.inverse());
 
    // Update all child transforms
    for (SimSetIterator itr(this); *itr; ++itr)
@@ -206,11 +212,19 @@ void SceneGroup::setRenderTransform(const MatrixF& mat)
       SceneObject* child = dynamic_cast<SceneObject*>(*itr);
       if (child)
       {
-         MatrixF childTransform = child->getRenderTransform();
-         MatrixF relativeTransform;
-         relativeTransform.mul(deltaTransform, childTransform);
-         child->setRenderTransform(relativeTransform);
-         child->setScale(childTransform.getScale()); //we don't modify scale
+         // Get the child's current transform
+         MatrixF childTransform = child->getTransform();
+
+         // Apply the delta transformation (ignoring scale)
+         MatrixF updatedTransform = childTransform;
+         updatedTransform.mul(deltaTransform);
+
+         // Update the child's transform
+         child->setTransform(updatedTransform);
+
+         PhysicsShape* childPS = dynamic_cast<PhysicsShape*>(child);
+         if (childPS)
+            childPS->storeRestorePos();
       }
    }
 }
