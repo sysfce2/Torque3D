@@ -192,31 +192,30 @@ void SceneGroup::setTransform(const MatrixF& mat)
 
 void SceneGroup::setRenderTransform(const MatrixF& mat)
 {
+   MatrixF newTransform = mat;
+   Parent::setRenderTransform(mat);
+
    // Update all child transforms
    for (SimSetIterator itr(this); *itr; ++itr)
    {
       SceneObject* child = dynamic_cast<SceneObject*>(*itr);
       if (child)
       {
-         // Get the child's current world transform
-         MatrixF childWorldTrans = child->getRenderTransform();
+         MatrixF childOffset = child->getRenderTransform();
+         childOffset.mulL(newTransform.inverse());
 
-         MatrixF childLocalTrans;
-         childLocalTrans = mWorldToObj.mul(childWorldTrans);
+         // Calculate the child's new transform
+         MatrixF newChildTransform = childOffset;
+         newChildTransform.mulL(newTransform);
 
-         MatrixF updatedTrans;
-         updatedTrans.mul(mat, childLocalTrans);
-
-         // Set the child's new world transform
-         child->setRenderTransform(updatedTrans);
+         // Apply the new transform to the child
+         child->setRenderTransform(newChildTransform);
 
          PhysicsShape* childPS = dynamic_cast<PhysicsShape*>(child);
          if (childPS)
             childPS->storeRestorePos();
       }
    }
-
-   Parent::setRenderTransform(mat);
 }
 
 void SceneGroup::addObject(SimObject* object)
