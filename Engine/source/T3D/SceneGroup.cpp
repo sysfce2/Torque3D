@@ -158,15 +158,6 @@ void SceneGroup::onInspect(GuiInspector* inspector)
 
 void SceneGroup::setTransform(const MatrixF& mat)
 {
-   //transform difference
-   MatrixF oldTransform = getTransform();
-
-   Parent::setTransform(mat);
-
-   // Calculate the delta transformation
-   MatrixF deltaTransform = mat;
-   deltaTransform.mul(oldTransform.inverse());
-
    if (isServerObject())
    {
       setMaskBits(TransformMask);
@@ -177,15 +168,17 @@ void SceneGroup::setTransform(const MatrixF& mat)
          SceneObject* child = dynamic_cast<SceneObject*>(*itr);
          if (child)
          {
-            // Get the child's current transform
-            MatrixF childTransform = child->getTransform();
+            // Get the child's current world transform
+            MatrixF childWorldTrans = child->getTransform();
 
-            // Apply the delta transformation (ignoring scale)
-            MatrixF updatedTransform = childTransform;
-            updatedTransform.mul(deltaTransform);
+            MatrixF childLocalTrans;
+            childLocalTrans = mWorldToObj.mul(childWorldTrans);
 
-            // Update the child's transform
-            child->setTransform(updatedTransform);
+            MatrixF updatedTrans;
+            updatedTrans.mul(mat, childLocalTrans);
+
+            // Set the child's new world transform
+            child->setTransform(updatedTrans);
 
             PhysicsShape* childPS = dynamic_cast<PhysicsShape*>(child);
             if (childPS)
@@ -193,40 +186,37 @@ void SceneGroup::setTransform(const MatrixF& mat)
          }
       }
    }
+
+   Parent::setTransform(mat);
 }
 
 void SceneGroup::setRenderTransform(const MatrixF& mat)
 {
-   //transform difference
-   MatrixF oldTransform = getRenderTransform();
-
-   Parent::setRenderTransform(mat);
-
-   // Calculate the delta transformation
-   MatrixF deltaTransform = mat;
-   deltaTransform.mul(oldTransform.inverse());
-
    // Update all child transforms
    for (SimSetIterator itr(this); *itr; ++itr)
    {
       SceneObject* child = dynamic_cast<SceneObject*>(*itr);
       if (child)
       {
-         // Get the child's current transform
-         MatrixF childTransform = child->getTransform();
+         // Get the child's current world transform
+         MatrixF childWorldTrans = child->getRenderTransform();
 
-         // Apply the delta transformation (ignoring scale)
-         MatrixF updatedTransform = childTransform;
-         updatedTransform.mul(deltaTransform);
+         MatrixF childLocalTrans;
+         childLocalTrans = mWorldToObj.mul(childWorldTrans);
 
-         // Update the child's transform
-         child->setTransform(updatedTransform);
+         MatrixF updatedTrans;
+         updatedTrans.mul(mat, childLocalTrans);
+
+         // Set the child's new world transform
+         child->setRenderTransform(updatedTrans);
 
          PhysicsShape* childPS = dynamic_cast<PhysicsShape*>(child);
          if (childPS)
             childPS->storeRestorePos();
       }
    }
+
+   Parent::setRenderTransform(mat);
 }
 
 void SceneGroup::addObject(SimObject* object)
