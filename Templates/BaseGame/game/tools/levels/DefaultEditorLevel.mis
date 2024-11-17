@@ -40,20 +40,6 @@ new Scene(EditorTemplateLevel) {
          rotation = "1 0 0 0";
          scale = "1 1 1";
    };
-   new SubScene() {
-      LevelAsset = "Prototyping:PrefabTestSubScene";
-      position = "4.38205 -5.66842 1.53303";
-      scale = "33.0705 24.1137 4.59909";
-   };
-   new Trigger() {
-      dataBlock = "DefaultTrigger";
-      position = "0 0 -7.19786";
-      scale = "15.3957 15.3957 15.3957";
-         firstDataCheck = "1";
-   };
-   new Prefab() {
-      fileName = "data/Prototyping/prefabs/testPrefab.prefab";
-   };
 };
 //--- OBJECT WRITE END ---
 

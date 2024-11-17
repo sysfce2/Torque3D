@@ -162,23 +162,26 @@ void SceneGroup::setTransform(const MatrixF& mat)
    {
       setMaskBits(TransformMask);
 
+      MatrixF newXform = mat;
+      MatrixF oldXform = getTransform();
+      oldXform.affineInverse();
+
+      MatrixF offset;
+      offset.mul(newXform, oldXform);
+
       // Update all child transforms
       for (SimSetIterator itr(this); *itr; ++itr)
       {
          SceneObject* child = dynamic_cast<SceneObject*>(*itr);
          if (child)
          {
-            // Get the child's current world transform
-            MatrixF childWorldTrans = child->getTransform();
+            MatrixF childMat;
 
-            MatrixF childLocalTrans;
-            childLocalTrans = mWorldToObj.mul(childWorldTrans);
-
-            MatrixF updatedTrans;
-            updatedTrans.mul(mat, childLocalTrans);
-
-            // Set the child's new world transform
-            child->setTransform(updatedTrans);
+            //add the "offset" caused by the parents change, and add it to it's own
+            // This is needed by objects that update their own render transform thru interpolate tick
+            // Mostly for stationary objects.
+            childMat.mul(offset, child->getTransform());
+            child->setTransform(childMat);
 
             PhysicsShape* childPS = dynamic_cast<PhysicsShape*>(child);
             if (childPS)
@@ -192,8 +195,12 @@ void SceneGroup::setTransform(const MatrixF& mat)
 
 void SceneGroup::setRenderTransform(const MatrixF& mat)
 {
-   MatrixF newTransform = mat;
-   Parent::setRenderTransform(mat);
+   MatrixF newXform = mat;
+   MatrixF oldXform = getRenderTransform();
+   oldXform.affineInverse();
+
+   MatrixF offset;
+   offset.mul(newXform, oldXform);
 
    // Update all child transforms
    for (SimSetIterator itr(this); *itr; ++itr)
@@ -201,21 +208,21 @@ void SceneGroup::setRenderTransform(const MatrixF& mat)
       SceneObject* child = dynamic_cast<SceneObject*>(*itr);
       if (child)
       {
-         MatrixF childOffset = child->getRenderTransform();
-         childOffset.mulL(newTransform.inverse());
+         MatrixF childMat;
 
-         // Calculate the child's new transform
-         MatrixF newChildTransform = childOffset;
-         newChildTransform.mulL(newTransform);
-
-         // Apply the new transform to the child
-         child->setRenderTransform(newChildTransform);
+         //add the "offset" caused by the parents change, and add it to it's own
+         // This is needed by objects that update their own render transform thru interpolate tick
+         // Mostly for stationary objects.
+         childMat.mul(offset, child->getRenderTransform());
+         child->setRenderTransform(childMat);
 
          PhysicsShape* childPS = dynamic_cast<PhysicsShape*>(child);
          if (childPS)
             childPS->storeRestorePos();
       }
    }
+
+   Parent::setRenderTransform(mat);
 }
 
 void SceneGroup::addObject(SimObject* object)
