@@ -812,7 +812,7 @@ String AssetImporter::getAssetTypeByFile(Torque::Path filePath)
 
    if (fileExt == String("png") || fileExt == String("jpg") || fileExt == String("jpeg") || fileExt == String("dds"))
       return "ImageAsset";
-   else if (fileExt == String("dae") || fileExt == String("fbx") || fileExt == String("blend") || fileExt == String("obj") || fileExt == String("dts") || fileExt == String("gltf") || fileExt == String("gltb"))
+   else if (fileExt == String("dae") || fileExt == String("fbx") || fileExt == String("blend") || fileExt == String("obj") || fileExt == String("dts") || fileExt == String("gltf") || fileExt == String("glb"))
       return "ShapeAsset";
    else if (fileExt == String("dsq"))
       return "ShapeAnimationAsset";
