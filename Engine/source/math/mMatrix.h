@@ -235,6 +235,14 @@ public:
    
    MatrixF& add( const MatrixF& m );
 
+   /// <summary>
+   /// Turns this matrix into a view matrix that looks at target.
+   /// </summary>
+   /// <param name="eye">The eye position.</param>
+   /// <param name="target">The target position/direction.</param>
+   /// <param name="up">The up direction.</param>
+   void LookAt(const VectorF& eye, const VectorF& target, const VectorF& up);
+
    /// Convenience function to allow people to treat this like an array.
    F32& operator ()(S32 row, S32 col) { return m[idx(col,row)]; }
    F32 operator ()(S32 row, S32 col) const { return m[idx(col,row)]; }
@@ -496,6 +504,35 @@ inline MatrixF& MatrixF::add( const MatrixF& a )
       m[ i ] += a.m[ i ];
       
    return *this;
+}
+
+inline void MatrixF::LookAt(const VectorF& eye, const VectorF& target, const VectorF& up)
+{
+   VectorF yAxis = target - eye;          // Forward
+   yAxis.normalize();
+
+   VectorF xAxis = mCross(up, yAxis);     // Right
+   xAxis.normalize();
+
+   VectorF zAxis = mCross(yAxis, xAxis);  // Up
+
+   // Right vector.
+   setColumn(0, xAxis);
+   m[12] = -mDot(xAxis, eye);
+
+   // Forward vector.
+   setColumn(1, yAxis);
+   m[13] = -mDot(yAxis, eye);
+
+   // Up vector.
+   setColumn(2, zAxis);
+   m[14] = -mDot(zAxis, eye);
+
+   m[3] = 0.0f;
+   m[7] = 0.0f;
+   m[11] = 0.0f;
+   m[15] = 1.0f;
+
 }
 
 inline void MatrixF::getColumn(S32 col, Point4F *cptr) const
