@@ -369,7 +369,8 @@ void GuiMaterialPreview::renderWorld(const RectI &updateRect)
    F32 left, right, top, bottom, nearPlane, farPlane;
    bool isOrtho;
    GFX->getFrustum( &left, &right, &bottom, &top, &nearPlane, &farPlane, &isOrtho);
-   Frustum frust( isOrtho, left, right, bottom, top, nearPlane, farPlane, MatrixF::Identity );
+   mSaveFrustum = Frustum( isOrtho, left, right, bottom, top, nearPlane, farPlane, MatrixF::Identity );
+   mSaveFrustum.setTransform(MatrixF::Identity);
 
    FogData savedFogData = gClientSceneGraph->getFogData();
    gClientSceneGraph->setFogData( FogData() );  // no fog in preview window
@@ -382,7 +383,7 @@ void GuiMaterialPreview::renderWorld(const RectI &updateRect)
    (
       gClientSceneGraph,
       SPT_Diffuse,
-      SceneCameraState( GFX->getViewport(), frust, GFX->getWorldMatrix(), GFX->getProjectionMatrix() ),
+      SceneCameraState( GFX->getViewport(), mSaveFrustum, GFX->getWorldMatrix(), GFX->getProjectionMatrix() ),
       renderPass,
       true
    );
