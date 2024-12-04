@@ -372,6 +372,9 @@ void GuiMaterialPreview::renderWorld(const RectI &updateRect)
    mSaveFrustum = Frustum( isOrtho, left, right, bottom, top, nearPlane, farPlane, MatrixF::Identity );
    mSaveFrustum.setTransform(MatrixF::Identity);
 
+   mSaveProjection = GFX->getProjectionMatrix();
+   mSaveWorldToScreenScale = GFX->getWorldToScreenScale();
+
    FogData savedFogData = gClientSceneGraph->getFogData();
    gClientSceneGraph->setFogData( FogData() );  // no fog in preview window
 
