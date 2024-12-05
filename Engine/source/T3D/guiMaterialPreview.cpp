@@ -115,20 +115,20 @@ void GuiMaterialPreview::setLightTranslate(S32 modifier, F32 xstep, F32 ystep)
 	F32 _lighttransstep = (modifier & SI_SHIFT ? mLightTransStep : (mLightTransStep*mLightTranMult));
 
 	Point3F relativeLightDirection = GuiMaterialPreview::mFakeSun->getDirection();
-	// May be able to get rid of this. For now, it helps to fix the position of the light if i gets messed up.
-	if (modifier & SI_PRIMARY_CTRL)
-	{
-		relativeLightDirection.x += ( xstep * _lighttransstep * -1 );//need to invert this for some reason. Otherwise, it's backwards.
-		relativeLightDirection.y += ( ystep * _lighttransstep );
-		GuiMaterialPreview::mFakeSun->setDirection(relativeLightDirection);
-	}
-	// Default action taken by mouse wheel clicking.
-	else
-	{
-		relativeLightDirection.x += ( xstep * _lighttransstep * -1 ); //need to invert this for some reason. Otherwise, it's backwards.
-		relativeLightDirection.z += ( ystep * _lighttransstep );
-		GuiMaterialPreview::mFakeSun->setDirection(relativeLightDirection);
-	}
+
+   F32 azimuth = mAtan2(relativeLightDirection.y, relativeLightDirection.x);
+   F32 elevation = mAsin(relativeLightDirection.z);
+
+   // Modify azimuth and elevation based on input
+   azimuth += xstep * _lighttransstep;
+   elevation = mClampF(elevation + ystep * _lighttransstep, -M_2PI_F, M_2PI_F);
+
+   // Convert back to Cartesian coordinates
+   relativeLightDirection.x = mCos(elevation) * mCos(azimuth);
+   relativeLightDirection.y = mCos(elevation) * mSin(azimuth);
+   relativeLightDirection.z = mSin(elevation);
+
+   GuiMaterialPreview::mFakeSun->setDirection(relativeLightDirection);
 }
 
 // This is for panning the viewport camera.
