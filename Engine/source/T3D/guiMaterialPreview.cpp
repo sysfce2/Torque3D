@@ -35,6 +35,7 @@
 #include "scene/sceneRenderState.h"
 #include "renderInstance/renderProbeMgr.h"
 #include "T3D/lighting/skylight.h"
+#include "gfx/gfxDrawUtil.h"
 
 // GuiMaterialPreview
 GuiMaterialPreview::GuiMaterialPreview()
@@ -370,7 +371,6 @@ void GuiMaterialPreview::renderWorld(const RectI &updateRect)
    bool isOrtho;
    GFX->getFrustum( &left, &right, &bottom, &top, &nearPlane, &farPlane, &isOrtho);
    mSaveFrustum = Frustum( isOrtho, left, right, bottom, top, nearPlane, farPlane, MatrixF::Identity );
-   mSaveFrustum.setTransform(MatrixF::Identity);
 
    mSaveProjection = GFX->getProjectionMatrix();
    mSaveWorldToScreenScale = GFX->getWorldToScreenScale();
@@ -426,10 +426,41 @@ void GuiMaterialPreview::renderWorld(const RectI &updateRect)
 
    renderPass->renderPass( &state );
 
+   if (mMouseState == MovingLight)
+   {
+      renderSunDirection();
+   }
+
    gClientSceneGraph->setFogData( savedFogData );         // restore fog setting
 
    // Make sure to remove our fake sun
    LIGHTMGR->unregisterAllLights();
+}
+
+void GuiMaterialPreview::renderSunDirection() const
+{
+   // Render four arrows aiming in the direction of the sun's light
+   ColorI color = LinearColorF(mFakeSun->getColor()).toColorI();
+   F32 length = mModel->getShape()->mBounds.len() * 0.8f;
+
+   // Get the sun's vectors
+   Point3F fwd = mFakeSun->getTransform().getForwardVector();
+   Point3F up = mFakeSun->getTransform().getUpVector() * length / 8;
+   Point3F right = mFakeSun->getTransform().getRightVector() * length / 8;
+
+   // Calculate the start and end points of the first arrow (bottom left)
+   Point3F start = mModel->getShape()->center - fwd * length - up / 2 - right / 2;
+   Point3F end = mModel->getShape()->center - fwd * length / 3 - up / 2 - right / 2;
+
+   GFXStateBlockDesc desc;
+   desc.setZReadWrite(true, true);
+
+   GFXDrawUtil* drawUtil = GFX->getDrawUtil();
+
+   drawUtil->drawArrow(desc, start, end, color);
+   drawUtil->drawArrow(desc, start + up, end + up, color);
+   drawUtil->drawArrow(desc, start + right, end + right, color);
+   drawUtil->drawArrow(desc, start + up + right, end + up + right, color);
 }
 
 // Make sure the orbit distance is within the acceptable range.
