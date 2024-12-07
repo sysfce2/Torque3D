@@ -411,6 +411,9 @@ void SubScene::unload()
 
 bool SubScene::save()
 {
+   if (!isServerObject())
+      return false;
+
    //if there's nothing TO save, don't bother
    if (size() == 0 || !isLoaded())
       return false;
@@ -432,14 +435,20 @@ bool SubScene::save()
 
    for (SimGroupIterator itr(this); *itr; ++itr)
    {
-      if ((*itr)->isMethod("onSaving"))
-      {
-         ConsoleValue vars[3];
-         vars[2].setString(mLevelAssetId);
-         Con::execute((*itr), 3, vars);
-      }
+      SimObject* childObj = (*itr);
 
-      prMger.setDirty((*itr), levelPath);
+      if (!prMger.isDirty(childObj))
+      {
+         if ((*itr)->isMethod("onSaving"))
+         {
+            Con::executef((*itr), "onSaving", mLevelAssetId);
+         }
+
+         if (childObj->getGroup() == this)
+         {
+            prMger.setDirty((*itr), levelPath);
+         }
+      }
    }
 
    prMger.saveDirty();

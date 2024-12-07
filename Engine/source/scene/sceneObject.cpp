@@ -1724,7 +1724,7 @@ void SceneObject::updateRenderChangesByParent(){
 		MatrixF offset;
 		offset.mul(renderXform, xform);
 
-   	    MatrixF mat;
+      MatrixF mat;
 		
 		//add the "offset" caused by the parents change, and add it to it's own
 		// This is needed by objects that update their own render transform thru interpolate tick

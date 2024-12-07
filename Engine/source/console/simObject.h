@@ -530,6 +530,9 @@ class SimObject: public ConsoleObject, public TamlCallbacks
       void setDataFieldType(const U32 fieldTypeId, StringTableEntry slotName, const char *array);
       void setDataFieldType(const char *typeName, StringTableEntry slotName, const char *array);
 
+      virtual U32 getSpecialFieldSize(StringTableEntry fieldName) { return 0; }
+      virtual const char* getSpecialFieldOut(StringTableEntry fieldName, const U32& index) { return NULL; }
+
       /// Get reference to the dictionary containing dynamic fields.
       ///
       /// See @ref simobject_console "here" for a detailed discussion of what this

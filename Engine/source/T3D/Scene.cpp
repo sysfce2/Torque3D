@@ -296,6 +296,9 @@ StringTableEntry Scene::getLevelAsset()
 
 bool Scene::saveScene(StringTableEntry fileName)
 {
+   if (!isServerObject())
+      return false;
+
    //So, we ultimately want to not only save out the level, but also collate all the assets utilized
    //by the static objects in the scene so we can have those before we parse the level file itself
    //Useful for preloading or stat tracking
@@ -310,9 +313,7 @@ bool Scene::saveScene(StringTableEntry fileName)
    {
       if((*itr)->isMethod("onSaving"))
       {
-         ConsoleValue vars[3];
-         vars[2].setString(fileName);
-         Con::execute((*itr), 3, vars);
+         Con::executef((*itr), "onSaving", fileName);
       }
    }
 
