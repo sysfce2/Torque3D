@@ -193,10 +193,12 @@ inline Point4F& Point4F::operator/=(F32 scalar)
    if (mIsZero(scalar))
       return *this;
 
-   x /= scalar;
-   y /= scalar;
-   z /= scalar;
-   w /= scalar;
+   F32 denom = 1 / scalar;
+
+   x *= denom;
+   y *= denom;
+   z *= denom;
+   w *= denom;
 
    return *this;
 }
