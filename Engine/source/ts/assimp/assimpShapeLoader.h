@@ -26,6 +26,7 @@
 #ifndef _TSSHAPELOADER_H_
 #include "ts/loader/tsShapeLoader.h"
 #endif
+#include <assimp/Importer.hpp>
 #include <assimp/texture.h>
 
 class GuiTreeViewCtrl;
@@ -37,7 +38,8 @@ class AssimpShapeLoader : public TSShapeLoader
    friend TSShape* assimpLoadShape(const Torque::Path &path);
 
 protected:
-   const struct aiScene* mScene;
+   Assimp::Importer mImporter;
+   const aiScene* mScene;
 
    bool ignoreNode(const String& name) override;
    bool ignoreMesh(const String& name) override;
@@ -59,6 +61,7 @@ public:
 
    void releaseImport();
    void enumerateScene() override;
+   void configureImportUnitsAndAxis();
    void updateMaterialsScript(const Torque::Path &path);
    void processAnimations();
 

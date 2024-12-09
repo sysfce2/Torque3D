@@ -50,8 +50,8 @@ class AssimpAppNode : public AppNode
 
 protected:
 
-   const struct aiScene*   mScene;
-   const struct aiNode*    mNode;                  ///< Pointer to the assimp scene node
+   const aiScene*   mScene;
+   const aiNode*    mNode;                  ///< Pointer to the assimp scene node
    AssimpAppNode*          appParent;              ///< Parent node
    MatrixF                 mNodeTransform;         ///< Scene node transform converted to TorqueSpace (filled for ALL nodes)
 

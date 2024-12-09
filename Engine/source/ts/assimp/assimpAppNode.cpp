@@ -35,14 +35,17 @@ aiAnimation* AssimpAppNode::sActiveSequence = NULL;
 F32 AssimpAppNode::sTimeMultiplier = 1.0f;
 
 AssimpAppNode::AssimpAppNode(const struct aiScene* scene, const struct aiNode* node, AssimpAppNode* parent)
-:  mInvertMeshes(false),
-   mLastTransformTime(TSShapeLoader::DefaultTime - 1),
-   mDefaultTransformValid(false)
+   :  mScene(scene),
+      mNode(node ? node : scene->mRootNode),
+      appParent(parent),
+      mInvertMeshes(false),
+      mLastTransformTime(TSShapeLoader::DefaultTime - 1),
+      mDefaultTransformValid(false)
 {
-   mScene = scene;
-   mNode = node;
-   appParent = parent;
 
+   mScene = scene;
+   mNode = node ? node : scene->mRootNode; 
+   // Initialize node and parent names.
    mName = dStrdup(mNode->mName.C_Str());
    if ( dStrlen(mName) == 0 )
    {
@@ -51,6 +54,8 @@ AssimpAppNode::AssimpAppNode(const struct aiScene* scene, const struct aiNode* n
    }
 
    mParentName = dStrdup(parent ? parent->getName() : "ROOT");
+
+   // Convert transformation matrix
    assimpToTorqueMat(node->mTransformation, mNodeTransform);
    Con::printf("[ASSIMP] Node Created: %s, Parent: %s", mName, mParentName);
 }
@@ -58,12 +63,21 @@ AssimpAppNode::AssimpAppNode(const struct aiScene* scene, const struct aiNode* n
 // Get all child nodes
 void AssimpAppNode::buildChildList()
 {
-   if (!mNode)
-   {
-      mNode = mScene->mRootNode;
+   // Ensure mNode is valid
+   if (!mNode) {
+      Con::errorf("[ASSIMP] Error: mNode is null in buildChildList");
+      return;
    }
 
+   if (!mNode->mChildren)
+      return;
+    
    for (U32 n = 0; n < mNode->mNumChildren; ++n) {
+      if (!mNode->mChildren[n]) {
+         Con::errorf("[ASSIMP] Warning: Null child node at index %d", n);
+         continue;
+      }
+
       mChildNodes.push_back(new AssimpAppNode(mScene, mNode->mChildren[n], this));
    }
 }

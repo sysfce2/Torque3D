@@ -70,7 +70,7 @@ if (NOT ASSIMP_BUILD_M3D_EXPORTER)
 endif () # if (not ASSIMP_BUILD_M3D_EXPORTER)
 
 # Toggles the use of the hunter package manager
-option(ASSIMP_HUNTER_ENABLED "Enable Hunter package manager support" ON)
+option(ASSIMP_HUNTER_ENABLED "Enable Hunter package manager support" OFF)
 
 IF(ASSIMP_HUNTER_ENABLED)
   include("cmake-modules/HunterGate.cmake")
@@ -127,7 +127,7 @@ OPTION ( ASSIMP_COVERALLS
 )
 OPTION( ASSIMP_INSTALL
   "Disable this if you want to use assimp as a submodule."
-  OFF
+  ON
 )
 OPTION ( ASSIMP_WARNINGS_AS_ERRORS
   "Treat all warnings as errors."
@@ -511,12 +511,12 @@ IF(ASSIMP_HUNTER_ENABLED)
   find_package(ZLIB CONFIG REQUIRED)
 
   add_definitions(-DASSIMP_BUILD_NO_OWN_ZLIB)
-  set( TRUE)
+  set(ZLIB_FOUND TRUE)
   set(ZLIB_LIBRARIES ZLIB::zlib)
   set(ASSIMP_BUILD_MINIZIP TRUE)
 ELSE()
   # If the zlib is already found outside, add an export in case assimpTargets can't find it.
-  IF(  AND ASSIMP_INSTALL)
+  IF( ZLIB_FOUND AND ASSIMP_INSTALL)
     INSTALL( TARGETS zlib zlibstatic
         EXPORT "${TARGETS_EXPORT_NAME}")
   ENDIF()
@@ -525,11 +525,11 @@ ELSE()
     FIND_PACKAGE(ZLIB)
   ENDIF()
 
-  IF ( NOT  AND NOT ASSIMP_BUILD_ZLIB )
+  IF ( NOT ZLIB_FOUND AND NOT ASSIMP_BUILD_ZLIB )
     message( FATAL_ERROR
       "Build configured with -DASSIMP_BUILD_ZLIB=OFF but unable to find zlib"
     )
-  ELSEIF( NOT  )
+  ELSEIF( NOT ZLIB_FOUND )
     MESSAGE(STATUS "compiling zlib from sources")
     INCLUDE(CheckIncludeFile)
     INCLUDE(CheckTypeSize)
@@ -545,7 +545,7 @@ ELSE()
 
     # compile from sources
     ADD_SUBDIRECTORY(contrib/zlib)
-    SET( 1)
+    SET(ZLIB_FOUND 1)
     SET(ZLIB_LIBRARIES zlibstatic)
     SET(ZLIB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/contrib/zlib ${CMAKE_CURRENT_BINARY_DIR}/contrib/zlib)
     # need to ensure we don't link with system zlib or minizip as well.
