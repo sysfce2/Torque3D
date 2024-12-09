@@ -104,6 +104,7 @@ class Point4F
    Point4F& operator*=(const Point4F&);
    Point4F& operator=(const Point3F&);
    Point4F& operator=(const Point4F&);
+   Point4F& operator/=(F32);
    
    Point3F asPoint3F() const { return Point3F(x,y,z); }
 
@@ -182,6 +183,20 @@ inline Point4F& Point4F::operator=(const Point4F &_vec)
    y = _vec.y;
    z = _vec.z;
    w = _vec.w;
+
+   return *this;
+}
+
+inline Point4F& Point4F::operator/=(F32 scalar)
+{
+   // Prevent division by zero
+   if (mIsZero(scalar))
+      return *this;
+
+   x /= scalar;
+   y /= scalar;
+   z /= scalar;
+   w /= scalar;
 
    return *this;
 }
