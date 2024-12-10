@@ -194,7 +194,8 @@ float getUnitScaleFactor(const aiScene* scene) {
 }
 
 void scaleScene(const aiScene* scene, float scaleFactor) {
-   aiMatrix4x4 scaleMatrix = aiMatrix4x4::Scaling(aiVector3D(scaleFactor, scaleFactor, scaleFactor), aiMatrix4x4());
+   aiMatrix4x4 scaleMatrix;
+   scaleMatrix = aiMatrix4x4::Scaling(aiVector3D(scaleFactor, scaleFactor, scaleFactor), scaleMatrix);
    applyTransformation(scene->mRootNode, scaleMatrix);
 }
 
