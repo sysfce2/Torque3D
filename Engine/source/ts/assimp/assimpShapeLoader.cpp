@@ -349,12 +349,16 @@ void AssimpShapeLoader::processAnimations()
 
    Vector<aiNodeAnim*> ambientChannels;
    F32 duration = 0.0f;
+   F32 ticks = 0.0f;
    if (mScene->mNumAnimations > 0)
    {
       for (U32 i = 0; i < mScene->mNumAnimations; ++i)
       {
          aiAnimation* anim = mScene->mAnimations[i];
-         duration = anim->mDuration;
+
+         ticks = anim->mTicksPerSecond;
+
+         duration = 0.0f;
          for (U32 j = 0; j < anim->mNumChannels; j++)
          {
             aiNodeAnim* nodeAnim = anim->mChannels[j];
@@ -379,7 +383,7 @@ void AssimpShapeLoader::processAnimations()
       ambientSeq->mNumChannels = ambientChannels.size();
       ambientSeq->mChannels = ambientChannels.address();
       ambientSeq->mDuration = duration;
-      ambientSeq->mTicksPerSecond = 24.0;
+      ambientSeq->mTicksPerSecond = ticks;
 
       AssimpAppSequence* defaultAssimpSeq = new AssimpAppSequence(ambientSeq);
       appSequences.push_back(defaultAssimpSeq);

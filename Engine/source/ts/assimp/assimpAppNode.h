@@ -45,6 +45,8 @@ class AssimpAppNode : public AppNode
 
    MatrixF getTransform(F32 time);
    void getAnimatedTransform(MatrixF& mat, F32 t, aiAnimation* animSeq);
+   Point3F interpolateVectorKey(const aiVectorKey* keys, U32 numKeys, F32 frameTime);
+   QuatF interpolateQuaternionKey(const aiQuatKey* keys, U32 numKeys, F32 frameTime);
    void buildMeshList() override;
    void buildChildList() override;
 

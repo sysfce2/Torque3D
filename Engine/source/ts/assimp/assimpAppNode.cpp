@@ -135,115 +135,104 @@ MatrixF AssimpAppNode::getTransform(F32 time)
 
 void AssimpAppNode::getAnimatedTransform(MatrixF& mat, F32 t, aiAnimation* animSeq)
 {
-   // Find the channel for this node
+   // Convert time `t` (in seconds) to a frame index
+   const F32 frameTime = (t * animSeq->mTicksPerSecond + 0.5f) + 1.0f;
+
+   // Loop through animation channels to find the matching node
    for (U32 k = 0; k < animSeq->mNumChannels; ++k)
    {
-      if (dStrcmp(mName, animSeq->mChannels[k]->mNodeName.C_Str()) == 0)
+      const aiNodeAnim* nodeAnim = animSeq->mChannels[k];
+      if (dStrcmp(mName, nodeAnim->mNodeName.C_Str()) != 0)
+         continue;
+
+      Point3F translation(Point3F::Zero);
+      QuatF rotation(QuatF::Identity);
+      Point3F scale(Point3F::One);
+
+      // Interpolate Translation Keys
+      if (nodeAnim->mNumPositionKeys > 0)
       {
-         aiNodeAnim *nodeAnim = animSeq->mChannels[k];
-         Point3F trans(Point3F::Zero);
-         Point3F scale(Point3F::One);
-         QuatF rot;
-         rot.identity();
-         // T is in seconds, convert to frames.
-         F32 frame = (t * animSeq->mTicksPerSecond + 0.5f) + 1.0f;
+         translation = interpolateVectorKey(nodeAnim->mPositionKeys, nodeAnim->mNumPositionKeys, frameTime);
+      }
 
-         // Transform
-         if (nodeAnim->mNumPositionKeys == 1)
-            trans.set(nodeAnim->mPositionKeys[0].mValue.x, nodeAnim->mPositionKeys[0].mValue.y, nodeAnim->mPositionKeys[0].mValue.z);
-         else
-         {
-            Point3F curPos, lastPos;
-            F32 lastT = 0.0;
-            for (U32 key = 0; key < nodeAnim->mNumPositionKeys; ++key)
-            {
-               F32 curT = sTimeMultiplier * (F32)nodeAnim->mPositionKeys[key].mTime;
-               curPos.set(nodeAnim->mPositionKeys[key].mValue.x, nodeAnim->mPositionKeys[key].mValue.y, nodeAnim->mPositionKeys[key].mValue.z);
-               if ((curT > frame) && (key > 0))
-               {
-                  F32 factor = (frame - lastT) / (curT - lastT);
-                  trans.interpolate(lastPos, curPos, factor);
-                  break;
-               }
-               else if ((curT >= frame) || (key == nodeAnim->mNumPositionKeys - 1))
-               {
-                  trans = curPos;
-                  break;
-               }
+      // Interpolate Rotation Keys
+      if (nodeAnim->mNumRotationKeys > 0)
+      {
+         rotation = interpolateQuaternionKey(nodeAnim->mRotationKeys, nodeAnim->mNumRotationKeys, frameTime);
+      }
 
-               lastT = curT;
-               lastPos = curPos;
-            }
-         }
+      // Interpolate Scaling Keys
+      if (nodeAnim->mNumScalingKeys > 0)
+      {
+         scale = interpolateVectorKey(nodeAnim->mScalingKeys, nodeAnim->mNumScalingKeys, frameTime);
+      }
 
-         // Rotation
-         if (nodeAnim->mNumRotationKeys == 1)
-            rot.set(nodeAnim->mRotationKeys[0].mValue.x, nodeAnim->mRotationKeys[0].mValue.y,
-               nodeAnim->mRotationKeys[0].mValue.z, nodeAnim->mRotationKeys[0].mValue.w);
-         else
-         {
-            QuatF curRot, lastRot;
-            F32 lastT = 0.0;
-            for (U32 key = 0; key < nodeAnim->mNumRotationKeys; ++key)
-            {
-               F32 curT = sTimeMultiplier * (F32)nodeAnim->mRotationKeys[key].mTime;
-               curRot.set(nodeAnim->mRotationKeys[key].mValue.x, nodeAnim->mRotationKeys[key].mValue.y,
-                  nodeAnim->mRotationKeys[key].mValue.z, nodeAnim->mRotationKeys[key].mValue.w);
-               if ((curT > frame) && (key > 0))
-               {
-                  F32 factor = (frame - lastT) / (curT - lastT);
-                  rot.interpolate(lastRot, curRot, factor);
-                  break;
-               }
-               else if ((curT >= frame) || (key == nodeAnim->mNumRotationKeys - 1))
-               {
-                  rot = curRot;
-                  break;
-               }
+      // Apply the interpolated transform components to the matrix
+      rotation.setMatrix(&mat);
+      mat.inverse();
+      mat.setPosition(translation);
+      mat.scale(scale);
 
-               lastT = curT;
-               lastRot = curRot;
-            }
-         }
+      return; // Exit after processing the matching node
+   }
 
-         // Scale
-         if (nodeAnim->mNumScalingKeys == 1)
-            scale.set(nodeAnim->mScalingKeys[0].mValue.x, nodeAnim->mScalingKeys[0].mValue.y, nodeAnim->mScalingKeys[0].mValue.z);
-         else
-         {
-            Point3F curScale, lastScale;
-            F32 lastT = 0.0;
-            for (U32 key = 0; key < nodeAnim->mNumScalingKeys; ++key)
-            {
-               F32 curT = sTimeMultiplier * (F32)nodeAnim->mScalingKeys[key].mTime;
-               curScale.set(nodeAnim->mScalingKeys[key].mValue.x, nodeAnim->mScalingKeys[key].mValue.y, nodeAnim->mScalingKeys[key].mValue.z);
-               if ((curT > frame) && (key > 0))
-               {
-                  F32 factor = (frame - lastT) / (curT - lastT);
-                  scale.interpolate(lastScale, curScale, factor);
-                  break;
-               }
-               else if ((curT >= frame) || (key == nodeAnim->mNumScalingKeys - 1))
-               {
-                  scale = curScale;
-                  break;
-               }
+   // Default to the static node transformation if no animation data is found
+   mat = mNodeTransform;
+}
 
-               lastT = curT;
-               lastScale = curScale;
-            }
-         }
+Point3F AssimpAppNode::interpolateVectorKey(const aiVectorKey* keys, U32 numKeys, F32 frameTime)
+{
+   if (numKeys == 1) // Single keyframe: use it directly
+      return Point3F(keys[0].mValue.x, keys[0].mValue.y, keys[0].mValue.z);
 
-         rot.setMatrix(&mat);
-         mat.inverse();
-         mat.setPosition(trans);
-         mat.scale(scale);
-         return;
+   // Clamp frameTime to the bounds of the keyframes
+   if (frameTime <= keys[0].mTime) {
+      // Before the first keyframe, return the first key
+      return Point3F(keys[0].mValue.x, keys[0].mValue.y, keys[0].mValue.z);
+   }
+   if (frameTime >= keys[numKeys - 1].mTime) {
+      // After the last keyframe, return the last key
+      return Point3F(keys[numKeys - 1].mValue.x, keys[numKeys - 1].mValue.y, keys[numKeys - 1].mValue.z);
+   }
+
+   // Interpolate between the two nearest keyframes
+   for (U32 i = 1; i < numKeys; ++i)
+   {
+      if (frameTime < keys[i].mTime)
+      {
+         const F32 factor = (frameTime - keys[i - 1].mTime) / (keys[i].mTime - keys[i - 1].mTime);
+         Point3F start(keys[i - 1].mValue.x, keys[i - 1].mValue.y, keys[i - 1].mValue.z);
+         Point3F end(keys[i].mValue.x, keys[i].mValue.y, keys[i].mValue.z);
+         Point3F result;
+         result.interpolate(start, end, factor);
+         return result;
       }
    }
 
-   // Node not found in the animation channels
-   mat = mNodeTransform;
+   // Default to the last keyframe
+   return Point3F(keys[numKeys - 1].mValue.x, keys[numKeys - 1].mValue.y, keys[numKeys - 1].mValue.z);
+}
+
+QuatF AssimpAppNode::interpolateQuaternionKey(const aiQuatKey* keys, U32 numKeys, F32 frameTime)
+{
+   if (numKeys == 1) // Single keyframe: use it directly
+      return QuatF(keys[0].mValue.x, keys[0].mValue.y, keys[0].mValue.z, keys[0].mValue.w);
+
+   for (U32 i = 1; i < numKeys; ++i)
+   {
+      if (frameTime < keys[i].mTime)
+      {
+         const F32 factor = (frameTime - keys[i - 1].mTime) / (keys[i].mTime - keys[i - 1].mTime);
+         QuatF start(keys[i - 1].mValue.x, keys[i - 1].mValue.y, keys[i - 1].mValue.z, keys[i - 1].mValue.w);
+         QuatF end(keys[i].mValue.x, keys[i].mValue.y, keys[i].mValue.z, keys[i].mValue.w);
+         QuatF result;
+         result.interpolate(start, end, factor);
+         return result;
+      }
+   }
+
+   // Default to the last keyframe
+   return QuatF(keys[numKeys - 1].mValue.x, keys[numKeys - 1].mValue.y, keys[numKeys - 1].mValue.z, keys[numKeys - 1].mValue.w);
 }
 
 bool AssimpAppNode::animatesTransform(const AppSequence* appSeq)
