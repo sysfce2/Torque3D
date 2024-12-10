@@ -235,11 +235,6 @@ void AssimpShapeLoader::enumerateScene()
    // Format-specific adjustments
    String fileExt = String::ToLower(shapePath.getExtension());
    const aiImporterDesc* importerDescription = aiGetImporterDesc(fileExt.c_str());
-   if (fileExt == String::ToString("gltf") || fileExt == String::ToString("glb")) {
-      Con::printf("[ASSIMP] Detected GLTF format, applying reorientation...");
-      ColladaUtils::getOptions().upAxis = UPAXISTYPE_X_UP;
-   }
-
    if (importerDescription && dStrcmp(importerDescription->mName, "Autodesk FBX Importer") == 0) {
       Con::printf("[ASSIMP] Detected FBX format, checking unit scale...");
       F32 scaleFactor = ColladaUtils::getOptions().unit;
@@ -251,8 +246,6 @@ void AssimpShapeLoader::enumerateScene()
       {
          scaleScene(mScene, 0.01f);
       }
-
-      ColladaUtils::getOptions().upAxis = UPAXISTYPE_Y_UP;
    }
 
    // Extract embedded textures
