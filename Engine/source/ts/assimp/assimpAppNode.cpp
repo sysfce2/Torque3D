@@ -96,7 +96,9 @@ MatrixF AssimpAppNode::getTransform(F32 time)
 {
    // Check if we can use the last computed transform
    if (time == mLastTransformTime)
+   {
       return mLastTransform;
+   }
 
    if (appParent) {
       // Get parent node's transform

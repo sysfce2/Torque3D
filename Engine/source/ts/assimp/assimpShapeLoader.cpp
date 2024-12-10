@@ -124,6 +124,16 @@ void AssimpShapeLoader::releaseImport()
 {
 }
 
+void applyTransformation(aiNode* node, const aiMatrix4x4& transform) {
+   node->mTransformation = transform * node->mTransformation; // Apply transformation to the node
+}
+
+void scaleScene(const aiScene* scene, float scaleFactor) {
+   aiMatrix4x4 scaleMatrix;
+   scaleMatrix = aiMatrix4x4::Scaling(aiVector3D(scaleFactor, scaleFactor, scaleFactor), scaleMatrix);
+   applyTransformation(scene->mRootNode, scaleMatrix);
+}
+
 void debugSceneMetaData(const aiScene* scene) {
    if (!scene->mMetaData) {
       Con::printf("[ASSIMP] No metadata available.");
@@ -166,49 +176,15 @@ void debugSceneMetaData(const aiScene* scene) {
    }
 }
 
-void applyTransformation(aiNode* node, const aiMatrix4x4& transform) {
-   node->mTransformation = transform * node->mTransformation; // Apply transformation to the node
-}
-
-void reorientGLTFScene(const aiScene* scene) {
-   aiMatrix4x4 rotationMatrix;
-   rotationMatrix = aiMatrix4x4::RotationX(AI_MATH_PI / 2, rotationMatrix); // Rotate -90 degrees around X-axis
-
-   applyTransformation(scene->mRootNode, rotationMatrix);
-
-   rotationMatrix = aiMatrix4x4::RotationZ(AI_MATH_PI, rotationMatrix); // Rotate -90 degrees around X-axis
-   applyTransformation(scene->mRootNode, rotationMatrix);
-}
-
-float getUnitScaleFactor(const aiScene* scene) {
-   float scale = 1.0f;
-
-   if (scene->mMetaData) {
-      double unitScaleFactor;
-      if (scene->mMetaData->Get("UnitScaleFactor", unitScaleFactor)) {
-         scale = static_cast<float>(unitScaleFactor);
-      }
-   }
-
-   return scale;
-}
-
-void scaleScene(const aiScene* scene, float scaleFactor) {
-   aiMatrix4x4 scaleMatrix;
-   scaleMatrix = aiMatrix4x4::Scaling(aiVector3D(scaleFactor, scaleFactor, scaleFactor), scaleMatrix);
-   applyTransformation(scene->mRootNode, scaleMatrix);
-}
-
 void AssimpShapeLoader::enumerateScene()
 {
    TSShapeLoader::updateProgress(TSShapeLoader::Load_ReadFile, "Reading File");
    Con::printf("[ASSIMP] Attempting to load file: %s", shapePath.getFullPath().c_str());
 
    // Define post-processing steps
-   unsigned int ppsteps = aiProcess_Triangulate | aiProcess_ValidateDataStructure | aiProcess_MakeLeftHanded | aiProcess_FlipUVs;
+   unsigned int ppsteps = aiProcess_Triangulate | aiProcess_ConvertToLeftHanded & ~aiProcess_FlipWindingOrder;
 
    const auto& options = ColladaUtils::getOptions();
-   if (options.convertLeftHanded) ppsteps |= aiProcess_MakeLeftHanded;
    if (options.reverseWindingOrder) ppsteps |= aiProcess_FlipWindingOrder;
    if (options.calcTangentSpace) ppsteps |= aiProcess_CalcTangentSpace;
    if (options.joinIdenticalVerts) ppsteps |= aiProcess_JoinIdenticalVertices;
@@ -245,22 +221,28 @@ void AssimpShapeLoader::enumerateScene()
       return;
    }
 
-   //debugSceneMetaData(mScene);
-
    Con::printf("[ASSIMP] Mesh Count: %d", mScene->mNumMeshes);
    Con::printf("[ASSIMP] Material Count: %d", mScene->mNumMaterials);
+
+#ifdef TORQUE_DEBUG
+   debugSceneMetaData(mScene);
+#endif
+
+   ColladaUtils::getOptions().upAxis = UPAXISTYPE_Y_UP; // default to Y up for assimp.
+   // Handle scaling
+   configureImportUnits();
 
    // Format-specific adjustments
    String fileExt = String::ToLower(shapePath.getExtension());
    const aiImporterDesc* importerDescription = aiGetImporterDesc(fileExt.c_str());
    if (fileExt == String::ToString("gltf") || fileExt == String::ToString("glb")) {
       Con::printf("[ASSIMP] Detected GLTF format, applying reorientation...");
-      reorientGLTFScene(mScene); // Reorient GLTF
+      ColladaUtils::getOptions().upAxis = UPAXISTYPE_X_UP;
    }
 
    if (importerDescription && dStrcmp(importerDescription->mName, "Autodesk FBX Importer") == 0) {
       Con::printf("[ASSIMP] Detected FBX format, checking unit scale...");
-      F32 scaleFactor = getUnitScaleFactor(mScene);
+      F32 scaleFactor = ColladaUtils::getOptions().unit;
       if (scaleFactor != 1.0f) {
          Con::printf("[ASSIMP] Applying FBX scale factor: %f", scaleFactor);
          scaleScene(mScene, scaleFactor);
@@ -269,10 +251,9 @@ void AssimpShapeLoader::enumerateScene()
       {
          scaleScene(mScene, 0.01f);
       }
-   }
 
-   // Handle scaling and up-axis conversions if necessary
-   configureImportUnitsAndAxis();
+      ColladaUtils::getOptions().upAxis = UPAXISTYPE_Y_UP;
+   }
 
    // Extract embedded textures
    for (unsigned int i = 0; i < mScene->mNumTextures; ++i) {
@@ -296,11 +277,10 @@ void AssimpShapeLoader::enumerateScene()
 
    // Add a bounds node if none exists
    if (!boundsNode) {
-      aiNode* req[1];
-      req[0] = new aiNode("bounds");
-      mScene->mRootNode->addChildren(1, req);
+      auto* reqNode = new aiNode("bounds");
+      mScene->mRootNode->addChildren(1, &reqNode);
 
-      auto* appBoundsNode = new AssimpAppNode(mScene, req[0]);
+      auto* appBoundsNode = new AssimpAppNode(mScene, reqNode);
       if (!processNode(appBoundsNode)) {
          delete appBoundsNode;
       }
@@ -313,7 +293,7 @@ void AssimpShapeLoader::enumerateScene()
    aiDetachLogStream(&shapeLog);
 }
 
-void AssimpShapeLoader::configureImportUnitsAndAxis() {
+void AssimpShapeLoader::configureImportUnits() {
    auto& options = ColladaUtils::getOptions();
 
    // Configure unit scaling
@@ -330,14 +310,6 @@ void AssimpShapeLoader::configureImportUnitsAndAxis() {
          }
       }
       options.unit = static_cast<float>(unitScaleFactor);
-   }
-
-   // Configure up-axis
-   if (options.upAxis == UPAXISTYPE_COUNT) {
-      int upAxis = UPAXISTYPE_Z_UP;
-      if (getMetaInt("UpAxis", upAxis)) {
-         options.upAxis = static_cast<domUpAxisType>(upAxis);
-      }
    }
 }
 

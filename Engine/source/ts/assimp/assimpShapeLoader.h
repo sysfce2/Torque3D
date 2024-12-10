@@ -61,7 +61,7 @@ public:
 
    void releaseImport();
    void enumerateScene() override;
-   void configureImportUnitsAndAxis();
+   void configureImportUnits();
    void updateMaterialsScript(const Torque::Path &path);
    void processAnimations();
 
