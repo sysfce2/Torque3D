@@ -182,7 +182,7 @@ void AssimpShapeLoader::enumerateScene()
    Con::printf("[ASSIMP] Attempting to load file: %s", shapePath.getFullPath().c_str());
 
    // Define post-processing steps
-   unsigned int ppsteps = aiProcess_Triangulate | aiProcess_ConvertToLeftHanded & ~aiProcess_MakeLeftHanded;
+   unsigned int ppsteps = aiProcess_Triangulate | aiProcess_ConvertToLeftHanded & ~aiProcess_FlipWindingOrder;
 
    const auto& options = ColladaUtils::getOptions();
    if (options.reverseWindingOrder) ppsteps |= aiProcess_FlipWindingOrder;
@@ -249,12 +249,6 @@ void AssimpShapeLoader::enumerateScene()
    }
 
    aiMatrix4x4 rotationMatrix;
-   rotationMatrix = aiMatrix4x4::RotationX(-AI_MATH_PI / 2, rotationMatrix);
-   applyTransformation(mScene->mRootNode, rotationMatrix);
-
-   rotationMatrix = aiMatrix4x4::RotationY(AI_MATH_PI, rotationMatrix);
-   applyTransformation(mScene->mRootNode, rotationMatrix);
-
    for (unsigned int i = 0; i < mScene->mNumTextures; ++i) {
       extractTexture(i, mScene->mTextures[i]);
    }
@@ -280,12 +274,8 @@ void AssimpShapeLoader::enumerateScene()
    if (!boundsNode) {
       auto* reqNode = new aiNode("bounds");
       mScene->mRootNode->addChildren(1, &reqNode);
-      rotationMatrix = aiMatrix4x4::RotationX(-AI_MATH_PI / 2, rotationMatrix);
-      applyTransformation(reqNode, rotationMatrix);
-      /*rotationMatrix = aiMatrix4x4::RotationY(-AI_MATH_PI, rotationMatrix);
-      applyTransformation(reqNode, rotationMatrix);*/
-
-      auto* appBoundsNode = new AssimpAppNode(mScene, reqNode, rootNode);
+      reqNode->mTransformation = mScene->mRootNode->mTransformation;
+      auto* appBoundsNode = new AssimpAppNode(mScene, reqNode);
       if (!processNode(appBoundsNode)) {
          delete appBoundsNode;
       }
