@@ -191,14 +191,18 @@ void AssimpAppMesh::lockMesh(F32 t, const MatrixF& objOffset)
    tmpBoneIndex.setSize(totalWeights);
    tmpVertexIndex.setSize(totalWeights);
 
+   // Count the total number of weights for all of the bones.
+   Map<String, aiNode*> boneLookup;
+   for (U32 b = 0; b < boneCount; b++) {
+      boneLookup[mMeshData->mBones[b]->mName.C_Str()] =
+         AssimpAppNode::findChildNodeByName(mMeshData->mBones[b]->mName.C_Str(), appNode->mScene->mRootNode);
+   }
+
    for (U32 b = 0; b < boneCount; b++)
    {
-      String name = mMeshData->mBones[b]->mName.C_Str();
-      aiNode* nodePtr = AssimpAppNode::findChildNodeByName(mMeshData->mBones[b]->mName.C_Str(), appNode->mScene->mRootNode);
-      if (!nodePtr)
-         bones[b] = new AssimpAppNode(appNode->mScene, appNode->mNode);
-      else
-         bones[b] = new AssimpAppNode(appNode->mScene, nodePtr);
+      const aiBone* bone = mMeshData->mBones[b];
+      aiNode* nodePtr = boneLookup[bone->mName.C_Str()];
+      bones[b] = nodePtr ? new AssimpAppNode(appNode->mScene, nodePtr) : new AssimpAppNode(appNode->mScene, appNode->mNode);
 
       MatrixF boneTransform;
       AssimpAppNode::assimpToTorqueMat(mMeshData->mBones[b]->mOffsetMatrix, boneTransform);

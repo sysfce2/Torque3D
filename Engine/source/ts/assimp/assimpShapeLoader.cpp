@@ -128,7 +128,7 @@ void applyTransformation(aiNode* node, const aiMatrix4x4& transform) {
    node->mTransformation = transform * node->mTransformation; // Apply transformation to the node
 }
 
-void scaleScene(const aiScene* scene, float scaleFactor) {
+void scaleScene(const aiScene* scene, F32 scaleFactor) {
    aiMatrix4x4 scaleMatrix;
    scaleMatrix = aiMatrix4x4::Scaling(aiVector3D(scaleFactor, scaleFactor, scaleFactor), scaleMatrix);
    applyTransformation(scene->mRootNode, scaleMatrix);
@@ -140,7 +140,7 @@ void debugSceneMetaData(const aiScene* scene) {
       return;
    }
 
-   for (unsigned int i = 0; i < scene->mMetaData->mNumProperties; ++i) {
+   for (U32 i = 0; i < scene->mMetaData->mNumProperties; ++i) {
       const char* key = scene->mMetaData->mKeys[i].C_Str();
       aiMetadataType type = scene->mMetaData->mValues[i].mType;
       Con::printf("[ASSIMP] Metadata key: %s", key);
@@ -150,16 +150,16 @@ void debugSceneMetaData(const aiScene* scene) {
          Con::printf("  Value: %d (bool)", *(bool*)scene->mMetaData->mValues[i].mData);
          break;
       case AI_INT32:
-         Con::printf("  Value: %d (int)", *(int*)scene->mMetaData->mValues[i].mData);
+         Con::printf("  Value: %d (int)", *(S32*)scene->mMetaData->mValues[i].mData);
          break;
       case AI_UINT64:
-         Con::printf("  Value: %llu (uint64)", *(uint64_t*)scene->mMetaData->mValues[i].mData);
+         Con::printf("  Value: %llu (uint64)", *(U64*)scene->mMetaData->mValues[i].mData);
          break;
       case AI_FLOAT:
-         Con::printf("  Value: %f (float)", *(float*)scene->mMetaData->mValues[i].mData);
+         Con::printf("  Value: %f (float)", *(F32*)scene->mMetaData->mValues[i].mData);
          break;
       case AI_DOUBLE:
-         Con::printf("  Value: %f (double)", *(double*)scene->mMetaData->mValues[i].mData);
+         Con::printf("  Value: %f (double)", *(F64*)scene->mMetaData->mValues[i].mData);
          break;
       case AI_AISTRING:
          Con::printf("  Value: %s (string)", ((aiString*)scene->mMetaData->mValues[i].mData)->C_Str());
@@ -182,7 +182,7 @@ void AssimpShapeLoader::enumerateScene()
    Con::printf("[ASSIMP] Attempting to load file: %s", shapePath.getFullPath().c_str());
 
    // Define post-processing steps
-   unsigned int ppsteps = aiProcess_Triangulate | aiProcess_ConvertToLeftHanded & ~aiProcess_FlipWindingOrder;
+   U32 ppsteps = aiProcess_Triangulate | aiProcess_ConvertToLeftHanded & ~aiProcess_FlipWindingOrder;
 
    const auto& options = ColladaUtils::getOptions();
    if (options.reverseWindingOrder) ppsteps |= aiProcess_FlipWindingOrder;
@@ -249,13 +249,13 @@ void AssimpShapeLoader::enumerateScene()
    }
 
    aiMatrix4x4 rotationMatrix;
-   for (unsigned int i = 0; i < mScene->mNumTextures; ++i) {
+   for (U32 i = 0; i < mScene->mNumTextures; ++i) {
       extractTexture(i, mScene->mTextures[i]);
    }
 
    // Load all materials
    AssimpAppMaterial::sDefaultMatNumber = 0;
-   for (unsigned int i = 0; i < mScene->mNumMaterials; ++i) {
+   for (U32 i = 0; i < mScene->mNumMaterials; ++i) {
       AppMesh::appMaterials.push_back(new AssimpAppMaterial(mScene->mMaterials[i]));
    }
 
@@ -272,10 +272,10 @@ void AssimpShapeLoader::enumerateScene()
 
    // Add a bounds node if none exists
    if (!boundsNode) {
-      auto* reqNode = new aiNode("bounds");
+      aiNode* reqNode = new aiNode("bounds");
       mScene->mRootNode->addChildren(1, &reqNode);
       reqNode->mTransformation = mScene->mRootNode->mTransformation;
-      auto* appBoundsNode = new AssimpAppNode(mScene, reqNode);
+      AssimpAppNode* appBoundsNode = new AssimpAppNode(mScene, reqNode);
       if (!processNode(appBoundsNode)) {
          delete appBoundsNode;
       }
@@ -295,8 +295,8 @@ void AssimpShapeLoader::configureImportUnits() {
    if (options.unit <= 0.0f) {
       F64 unitScaleFactor = 1.0;
       if (!getMetaDouble("UnitScaleFactor", unitScaleFactor)) {
-         float floatVal;
-         int intVal;
+         F32 floatVal;
+         S32 intVal;
          if (getMetaFloat("UnitScaleFactor", floatVal)) {
             unitScaleFactor = static_cast<F64>(floatVal);
          }
@@ -304,7 +304,7 @@ void AssimpShapeLoader::configureImportUnits() {
             unitScaleFactor = static_cast<F64>(intVal);
          }
       }
-      options.unit = static_cast<float>(unitScaleFactor);
+      options.unit = static_cast<F32>(unitScaleFactor);
    }
 }
 
