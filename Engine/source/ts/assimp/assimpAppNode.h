@@ -47,25 +47,24 @@ class AssimpAppNode : public AppNode
    void getAnimatedTransform(MatrixF& mat, F32 t, aiAnimation* animSeq);
    Point3F interpolateVectorKey(const aiVectorKey* keys, U32 numKeys, F32 frameTime);
    QuatF interpolateQuaternionKey(const aiQuatKey* keys, U32 numKeys, F32 frameTime);
-   void buildMeshList() override;
-   void buildChildList() override;
-
+   void buildMeshList() override {};
+   void buildChildList() override {};
 protected:
 
    const aiScene*   mScene;
    const aiNode*    mNode;                  ///< Pointer to the assimp scene node
-   AssimpAppNode*          appParent;              ///< Parent node
-   MatrixF                 mNodeTransform;         ///< Scene node transform converted to TorqueSpace (filled for ALL nodes)
+   AssimpAppNode*   appParent;             ///< Parent node
+   MatrixF          mNodeTransform;         ///< Scene node transform converted to TorqueSpace (filled for ALL nodes)
 
-   bool                    mInvertMeshes;          ///< True if this node's coordinate space is inverted (left handed)
-   F32                     mLastTransformTime;     ///< Time of the last transform lookup (getTransform)
-   MatrixF                 mLastTransform;         ///< Last transform lookup (getTransform) (Only Non-Dummy Nodes)
-   bool                    mDefaultTransformValid; ///< Flag indicating whether the defaultNodeTransform is valid
-   MatrixF                 mDefaultNodeTransform;  ///< Transform at DefaultTime (Only Non-Dummy Nodes)
+   bool             mInvertMeshes;          ///< True if this node's coordinate space is inverted (left handed)
+   F32              mLastTransformTime;     ///< Time of the last transform lookup (getTransform)
+   MatrixF          mLastTransform;         ///< Last transform lookup (getTransform) (Only Non-Dummy Nodes)
+   bool             mDefaultTransformValid; ///< Flag indicating whether the defaultNodeTransform is valid
+   MatrixF          mDefaultNodeTransform;  ///< Transform at DefaultTime (Only Non-Dummy Nodes)
 
 public:
 
-   AssimpAppNode(const struct aiScene* scene, const struct aiNode* node, AssimpAppNode* parent = 0);
+   AssimpAppNode(const aiScene* scene, const aiNode* node, AssimpAppNode* parentNode = nullptr);
    virtual ~AssimpAppNode()
    {
       //
@@ -115,6 +114,9 @@ public:
    static void assimpToTorqueMat(const aiMatrix4x4& inAssimpMat, MatrixF& outMat);
    static void convertMat(MatrixF& outMat);
    static aiNode* findChildNodeByName(const char* nodeName, aiNode* rootNode);
+
+   void AssimpAppNode::addChild(AssimpAppNode* child);
+   void AssimpAppNode::addMesh(AssimpAppMesh* child);
 };
 
 #endif // _ASSIMP_APPNODE_H_

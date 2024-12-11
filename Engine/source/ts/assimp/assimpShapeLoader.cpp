@@ -182,7 +182,7 @@ void AssimpShapeLoader::enumerateScene()
    Con::printf("[ASSIMP] Attempting to load file: %s", shapePath.getFullPath().c_str());
 
    // Define post-processing steps
-   unsigned int ppsteps = aiProcess_Triangulate | aiProcess_ConvertToLeftHanded & ~aiProcess_FlipWindingOrder;
+   unsigned int ppsteps = aiProcess_Triangulate | aiProcess_ConvertToLeftHanded & ~aiProcess_MakeLeftHanded;
 
    const auto& options = ColladaUtils::getOptions();
    if (options.reverseWindingOrder) ppsteps |= aiProcess_FlipWindingOrder;
@@ -248,7 +248,13 @@ void AssimpShapeLoader::enumerateScene()
       }
    }
 
-   // Extract embedded textures
+   aiMatrix4x4 rotationMatrix;
+   rotationMatrix = aiMatrix4x4::RotationX(-AI_MATH_PI / 2, rotationMatrix);
+   applyTransformation(mScene->mRootNode, rotationMatrix);
+
+   rotationMatrix = aiMatrix4x4::RotationY(AI_MATH_PI, rotationMatrix);
+   applyTransformation(mScene->mRootNode, rotationMatrix);
+
    for (unsigned int i = 0; i < mScene->mNumTextures; ++i) {
       extractTexture(i, mScene->mTextures[i]);
    }
@@ -268,12 +274,18 @@ void AssimpShapeLoader::enumerateScene()
       delete rootNode;
    }
 
+   processAssimpNode(mScene->mRootNode, mScene, rootNode);
+
    // Add a bounds node if none exists
    if (!boundsNode) {
       auto* reqNode = new aiNode("bounds");
       mScene->mRootNode->addChildren(1, &reqNode);
+      rotationMatrix = aiMatrix4x4::RotationX(-AI_MATH_PI / 2, rotationMatrix);
+      applyTransformation(reqNode, rotationMatrix);
+      /*rotationMatrix = aiMatrix4x4::RotationY(-AI_MATH_PI, rotationMatrix);
+      applyTransformation(reqNode, rotationMatrix);*/
 
-      auto* appBoundsNode = new AssimpAppNode(mScene, reqNode);
+      auto* appBoundsNode = new AssimpAppNode(mScene, reqNode, rootNode);
       if (!processNode(appBoundsNode)) {
          delete appBoundsNode;
       }
@@ -303,6 +315,37 @@ void AssimpShapeLoader::configureImportUnits() {
          }
       }
       options.unit = static_cast<float>(unitScaleFactor);
+   }
+}
+
+void AssimpShapeLoader::processAssimpNode(const aiNode* node, const aiScene* scene, AssimpAppNode* parentNode)
+{
+   AssimpAppNode* currNode;
+   if (node == scene->mRootNode)
+   {
+      currNode = parentNode;
+   }
+   else
+   {
+      currNode = new AssimpAppNode(scene, node, parentNode);
+
+      if (parentNode)
+      {
+         parentNode->addChild(currNode);
+      }
+
+      for (U32 i = 0; i < node->mNumMeshes; i++)
+      {
+         U32 meshIdx = node->mMeshes[i];
+         const aiMesh* mesh = scene->mMeshes[meshIdx];
+         AssimpAppMesh* curMesh = new AssimpAppMesh(mesh, currNode);
+         currNode->addMesh(curMesh);
+      }
+   }
+   // Recursively process child nodes
+   for (U32 i = 0; i < node->mNumChildren; i++)
+   {
+      processAssimpNode(node->mChildren[i], scene, currNode);
    }
 }
 

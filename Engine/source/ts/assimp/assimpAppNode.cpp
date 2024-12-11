@@ -34,17 +34,14 @@
 aiAnimation* AssimpAppNode::sActiveSequence = NULL;
 F32 AssimpAppNode::sTimeMultiplier = 1.0f;
 
-AssimpAppNode::AssimpAppNode(const struct aiScene* scene, const struct aiNode* node, AssimpAppNode* parent)
+AssimpAppNode::AssimpAppNode(const aiScene* scene, const aiNode* node, AssimpAppNode* parentNode)
    :  mScene(scene),
       mNode(node ? node : scene->mRootNode),
-      appParent(parent),
       mInvertMeshes(false),
       mLastTransformTime(TSShapeLoader::DefaultTime - 1),
       mDefaultTransformValid(false)
 {
-
-   mScene = scene;
-   mNode = node ? node : scene->mRootNode; 
+   appParent = parentNode;
    // Initialize node and parent names.
    mName = dStrdup(mNode->mName.C_Str());
    if ( dStrlen(mName) == 0 )
@@ -52,44 +49,10 @@ AssimpAppNode::AssimpAppNode(const struct aiScene* scene, const struct aiNode* n
       const char* defaultName = "null";
       mName = dStrdup(defaultName);
    }
-
-   mParentName = dStrdup(parent ? parent->getName() : "ROOT");
-
+   mParentName = dStrdup(parentNode ? parentNode->mName : "ROOT");
    // Convert transformation matrix
    assimpToTorqueMat(node->mTransformation, mNodeTransform);
    Con::printf("[ASSIMP] Node Created: %s, Parent: %s", mName, mParentName);
-}
-
-// Get all child nodes
-void AssimpAppNode::buildChildList()
-{
-   // Ensure mNode is valid
-   if (!mNode) {
-      Con::errorf("[ASSIMP] Error: mNode is null in buildChildList");
-      return;
-   }
-
-   if (!mNode->mChildren)
-      return;
-    
-   for (U32 n = 0; n < mNode->mNumChildren; ++n) {
-      if (!mNode->mChildren[n]) {
-         Con::errorf("[ASSIMP] Warning: Null child node at index %d", n);
-         continue;
-      }
-
-      mChildNodes.push_back(new AssimpAppNode(mScene, mNode->mChildren[n], this));
-   }
-}
-
-// Get all geometry attached to this node
-void AssimpAppNode::buildMeshList()
-{
-   for (U32 n = 0; n < mNode->mNumMeshes; ++n)
-   {
-      const struct aiMesh* mesh = mScene->mMeshes[mNode->mMeshes[n]];
-      mMeshes.push_back(new AssimpAppMesh(mesh, this));
-   }
 }
 
 MatrixF AssimpAppNode::getTransform(F32 time)
@@ -337,4 +300,14 @@ aiNode* AssimpAppNode::findChildNodeByName(const char* nodeName, aiNode* rootNod
          return retNode;
    }
    return nullptr;
+}
+
+void AssimpAppNode::addChild(AssimpAppNode* child)
+{
+   mChildNodes.push_back(child);
+}
+
+void AssimpAppNode::addMesh(AssimpAppMesh* child)
+{
+   mMeshes.push_back(child);
 }
