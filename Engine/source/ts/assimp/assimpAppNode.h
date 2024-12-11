@@ -115,8 +115,8 @@ public:
    static void convertMat(MatrixF& outMat);
    static aiNode* findChildNodeByName(const char* nodeName, aiNode* rootNode);
 
-   void AssimpAppNode::addChild(AssimpAppNode* child);
-   void AssimpAppNode::addMesh(AssimpAppMesh* child);
+   void addChild(AssimpAppNode* child);
+   void addMesh(AssimpAppMesh* child);
 };
 
 #endif // _ASSIMP_APPNODE_H_
