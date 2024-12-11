@@ -248,7 +248,6 @@ void AssimpShapeLoader::enumerateScene()
       }
    }
 
-   aiMatrix4x4 rotationMatrix;
    for (U32 i = 0; i < mScene->mNumTextures; ++i) {
       extractTexture(i, mScene->mTextures[i]);
    }
