@@ -71,8 +71,8 @@ MatrixF AssimpAppNode::getTransform(F32 time)
       // no parent (ie. root level) => scale by global shape <unit>
       mLastTransform.identity();
       mLastTransform.scale(ColladaUtils::getOptions().unit * ColladaUtils::getOptions().formatScaleFactor);
-      if (!isBounds())
-         convertMat(mLastTransform);
+      /*if (!isBounds())
+         convertMat(mLastTransform);*/
    }
 
    // If this node is animated in the active sequence, fetch the animated transform
@@ -272,9 +272,11 @@ void AssimpAppNode::convertMat(MatrixF& outMat)
 
    case UPAXISTYPE_Y_UP:
       // rotate 180 around Y-axis, then 90 around X-axis
-      rot(0, 0) = -1.0f;
-      rot(1, 1) = 0.0f;	rot(2, 1) = 1.0f;
-      rot(1, 2) = 1.0f;	rot(2, 2) = 0.0f;
+      rot(0, 0) = 1.0f;
+      rot(1, 1) = 0.0f;
+      rot(1, 2) = -1.0f;
+      rot(2, 1) = 1.0f;
+      rot(2, 2) = 0.0f;
 
       // pre-multiply the transform by the rotation matrix
       outMat.mulL(rot);

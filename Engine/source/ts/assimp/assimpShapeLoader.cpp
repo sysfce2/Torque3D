@@ -182,10 +182,9 @@ void AssimpShapeLoader::enumerateScene()
    Con::printf("[ASSIMP] Attempting to load file: %s", shapePath.getFullPath().c_str());
 
    // Define post-processing steps
-   U32 ppsteps = aiProcess_Triangulate | aiProcess_ConvertToLeftHanded & ~aiProcess_FlipWindingOrder;
+   U32 ppsteps = aiProcess_Triangulate | /*aiProcess_PreTransformVertices |*/ aiProcess_ConvertToLeftHanded & ~aiProcess_MakeLeftHanded;
 
    const auto& options = ColladaUtils::getOptions();
-   if (options.reverseWindingOrder) ppsteps |= aiProcess_FlipWindingOrder;
    if (options.calcTangentSpace) ppsteps |= aiProcess_CalcTangentSpace;
    if (options.joinIdenticalVerts) ppsteps |= aiProcess_JoinIdenticalVertices;
    if (options.removeRedundantMats) ppsteps |= aiProcess_RemoveRedundantMaterials;
@@ -210,7 +209,14 @@ void AssimpShapeLoader::enumerateScene()
 #ifdef TORQUE_DEBUG
    aiEnableVerboseLogging(true);
 #endif
-   
+
+   /*mImporter.SetPropertyInteger(AI_CONFIG_PP_PTV_KEEP_HIERARCHY, 1);
+   mImporter.SetPropertyInteger(AI_CONFIG_PP_PTV_ADD_ROOT_TRANSFORMATION, 1);
+   mImporter.SetPropertyMatrix(AI_CONFIG_PP_PTV_ROOT_TRANSFORMATION, aiMatrix4x4(1, 0, 0, 0,
+                                                                                 0, 0, -1, 0,
+                                                                                 0, 1, 0, 0,
+                                                                                 0, 0, 0, 1));*/
+
    // Read the file
    mScene = mImporter.ReadFile(shapePath.getFullPath().c_str(), ppsteps);
 
@@ -248,6 +254,9 @@ void AssimpShapeLoader::enumerateScene()
       }
    }
 
+   if (fileExt == String::ToString("glb"))
+      ColladaUtils::getOptions().upAxis = UPAXISTYPE_X_UP;
+
    for (U32 i = 0; i < mScene->mNumTextures; ++i) {
       extractTexture(i, mScene->mTextures[i]);
    }
@@ -261,6 +270,29 @@ void AssimpShapeLoader::enumerateScene()
    // Setup LOD checks
    detectDetails();
 
+
+   aiMatrix4x4 sceneRoot;
+
+   if (ColladaUtils::getOptions().upAxis == UPAXISTYPE_X_UP) {
+      sceneRoot = aiMatrix4x4(1, 0, 0, 0,
+                              0, 0, 1, 0,
+                              0, 1, 0, 0,
+                              0, 0, 0, 1);
+   }
+
+   if (ColladaUtils::getOptions().upAxis == UPAXISTYPE_Z_UP) {
+      sceneRoot = aiMatrix4x4(1, 0, 0, 0,
+                              0, 0, -1, 0,
+                              0, 1, 0, 0,
+                              0, 0, 0, 1);
+   }
+
+   if (ColladaUtils::getOptions().upAxis == UPAXISTYPE_Y_UP) {
+      sceneRoot = aiMatrix4x4::RotationX(AI_MATH_PI / 2, sceneRoot);
+   }
+
+   applyTransformation(mScene->mRootNode, sceneRoot);
+
    // Process the scene graph
    AssimpAppNode* rootNode = new AssimpAppNode(mScene, mScene->mRootNode, 0);
    if (!processNode(rootNode)) {
@@ -273,7 +305,7 @@ void AssimpShapeLoader::enumerateScene()
    if (!boundsNode) {
       aiNode* reqNode = new aiNode("bounds");
       mScene->mRootNode->addChildren(1, &reqNode);
-      reqNode->mTransformation = mScene->mRootNode->mTransformation;
+      //reqNode->mTransformation = mScene->mRootNode->mTransformation;
       AssimpAppNode* appBoundsNode = new AssimpAppNode(mScene, reqNode);
       if (!processNode(appBoundsNode)) {
          delete appBoundsNode;
@@ -304,6 +336,11 @@ void AssimpShapeLoader::configureImportUnits() {
          }
       }
       options.unit = static_cast<F32>(unitScaleFactor);
+   }
+
+   int upAxis = UPAXISTYPE_Z_UP;
+   if (getMetaInt("UpAxis", upAxis)) {
+      options.upAxis = static_cast<domUpAxisType>(upAxis);
    }
 }
 
