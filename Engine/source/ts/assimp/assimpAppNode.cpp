@@ -71,8 +71,6 @@ MatrixF AssimpAppNode::getTransform(F32 time)
       // no parent (ie. root level) => scale by global shape <unit>
       mLastTransform.identity();
       mLastTransform.scale(ColladaUtils::getOptions().unit * ColladaUtils::getOptions().formatScaleFactor);
-      /*if (!isBounds())
-         convertMat(mLastTransform);*/
    }
 
    // If this node is animated in the active sequence, fetch the animated transform
@@ -252,41 +250,6 @@ void AssimpAppNode::assimpToTorqueMat(const aiMatrix4x4& inAssimpMat, MatrixF& o
 
    outMat.setRow(3, Point4F((F32)inAssimpMat.d1, (F32)inAssimpMat.d2,
       (F32)inAssimpMat.d3, (F32)inAssimpMat.d4));
-}
-
-void AssimpAppNode::convertMat(MatrixF& outMat)
-{
-   MatrixF rot(true);
-
-   switch (ColladaUtils::getOptions().upAxis)
-   {
-   case UPAXISTYPE_X_UP:
-      // rotate 90 around Y-axis, then 90 around Z-axis
-      rot(0, 0) = 0.0f;  rot(1, 0) = 1.0f;
-      rot(1, 1) = 0.0f;	rot(2, 1) = 1.0f;
-      rot(0, 2) = 1.0f;	rot(2, 2) = 0.0f;
-
-      // pre-multiply the transform by the rotation matrix
-      outMat.mulL(rot);
-      break;
-
-   case UPAXISTYPE_Y_UP:
-      // rotate 180 around Y-axis, then 90 around X-axis
-      rot(0, 0) = 1.0f;
-      rot(1, 1) = 0.0f;
-      rot(1, 2) = -1.0f;
-      rot(2, 1) = 1.0f;
-      rot(2, 2) = 0.0f;
-
-      // pre-multiply the transform by the rotation matrix
-      outMat.mulL(rot);
-      break;
-
-   case UPAXISTYPE_Z_UP:
-   default:
-      // nothing to do
-      break;
-   }
 }
 
 aiNode* AssimpAppNode::findChildNodeByName(const char* nodeName, aiNode* rootNode)

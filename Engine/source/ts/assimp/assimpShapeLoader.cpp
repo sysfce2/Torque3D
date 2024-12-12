@@ -128,15 +128,6 @@ void applyTransformation(aiNode* node, const aiMatrix4x4& transform) {
    node->mTransformation = transform * node->mTransformation; // Apply transformation to the node
 }
 
-void applyRootTransformation(aiNode* node, const aiMatrix4x4& transform) {
-   node->mTransformation = transform * node->mTransformation; // Apply transformation to the node
-
-   // Recursively apply to all child nodes
-   for (unsigned int i = 0; i < node->mNumChildren; ++i) {
-      applyRootTransformation(node->mChildren[i], transform);
-   }
-}
-
 void scaleScene(const aiScene* scene, F32 scaleFactor) {
    aiMatrix4x4 scaleMatrix;
    scaleMatrix = aiMatrix4x4::Scaling(aiVector3D(scaleFactor, scaleFactor, scaleFactor), scaleMatrix);
@@ -263,9 +254,6 @@ void AssimpShapeLoader::enumerateScene()
       }
    }
 
-   if (fileExt == String::ToString("glb"))
-      ColladaUtils::getOptions().upAxis = UPAXISTYPE_X_UP;
-
    for (U32 i = 0; i < mScene->mNumTextures; ++i) {
       extractTexture(i, mScene->mTextures[i]);
    }
@@ -329,11 +317,6 @@ void AssimpShapeLoader::configureImportUnits() {
          }
       }
       options.unit = static_cast<F32>(unitScaleFactor);
-   }
-
-   int upAxis = UPAXISTYPE_Z_UP;
-   if (getMetaInt("UpAxis", upAxis)) {
-      options.upAxis = static_cast<domUpAxisType>(upAxis);
    }
 }
 

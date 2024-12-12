@@ -114,7 +114,6 @@ public:
    bool isParentRoot() override { return (appParent == NULL); }
 
    static void assimpToTorqueMat(const aiMatrix4x4& inAssimpMat, MatrixF& outMat);
-   static void convertMat(MatrixF& outMat);
    static aiNode* findChildNodeByName(const char* nodeName, aiNode* rootNode);
 
    void addChild(AssimpAppNode* child);
