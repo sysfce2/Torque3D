@@ -6,6 +6,8 @@ set(ZLIB_ROOT "${ZLIB_ROOT}" CACHE STRING "ZLib root location" FORCE)
 mark_as_advanced(ZLIB_ROOT)
 # Png depends on zlib
 add_subdirectory(zlib ${TORQUE_LIB_TARG_DIRECTORY}/zlib EXCLUDE_FROM_ALL)
+set(ZLIB_FOUND 1)
+set(ZLIB_LIBRARIES zlib)
 
 if(APPLE)
     enable_language(OBJC)
@@ -116,8 +118,7 @@ add_subdirectory(convexMath ${TORQUE_LIB_TARG_DIRECTORY}/convexMath EXCLUDE_FROM
 
 # Assimp
 advanced_option(ASSIMP_HUNTER_ENABLED "Enable Hunter package manager support" OFF)
-set(ASSIMP_BUILD_NO_OWN_ZLIB ON CACHE BOOL "" FORCE)
-mark_as_advanced(ASSIMP_BUILD_NO_OWN_ZLIB)
+advanced_option(ASSIMP_BUILD_NO_OWN_ZLIB "" ON)
 advanced_option(BUILD_SHARED_LIBS "Build package with shared libraries." OFF )
 advanced_option(ASSIMP_BUILD_FRAMEWORK "Build package as Mac OS X Framework bundle." OFF )
 advanced_option(ASSIMP_DOUBLE_PRECISION "Set to ON to enable double precision processing" OFF )
