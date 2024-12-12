@@ -128,6 +128,15 @@ void applyTransformation(aiNode* node, const aiMatrix4x4& transform) {
    node->mTransformation = transform * node->mTransformation; // Apply transformation to the node
 }
 
+void applyRootTransformation(aiNode* node, const aiMatrix4x4& transform) {
+   node->mTransformation = transform * node->mTransformation; // Apply transformation to the node
+
+   // Recursively apply to all child nodes
+   for (unsigned int i = 0; i < node->mNumChildren; ++i) {
+      applyRootTransformation(node->mChildren[i], transform);
+   }
+}
+
 void scaleScene(const aiScene* scene, F32 scaleFactor) {
    aiMatrix4x4 scaleMatrix;
    scaleMatrix = aiMatrix4x4::Scaling(aiVector3D(scaleFactor, scaleFactor, scaleFactor), scaleMatrix);
@@ -270,26 +279,10 @@ void AssimpShapeLoader::enumerateScene()
    // Setup LOD checks
    detectDetails();
 
-
-   aiMatrix4x4 sceneRoot;
-
-   if (ColladaUtils::getOptions().upAxis == UPAXISTYPE_X_UP) {
-      sceneRoot = aiMatrix4x4(1, 0, 0, 0,
-                              0, 0, 1, 0,
-                              0, 1, 0, 0,
-                              0, 0, 0, 1);
-   }
-
-   if (ColladaUtils::getOptions().upAxis == UPAXISTYPE_Z_UP) {
-      sceneRoot = aiMatrix4x4(1, 0, 0, 0,
-                              0, 0, -1, 0,
-                              0, 1, 0, 0,
-                              0, 0, 0, 1);
-   }
-
-   if (ColladaUtils::getOptions().upAxis == UPAXISTYPE_Y_UP) {
-      sceneRoot = aiMatrix4x4::RotationX(AI_MATH_PI / 2, sceneRoot);
-   }
+   aiMatrix4x4 sceneRoot = aiMatrix4x4(1, 0, 0, 0,
+      0, 0, -1, 0,
+      0, 1, 0, 0,
+      0, 0, 0, 1);
 
    applyTransformation(mScene->mRootNode, sceneRoot);
 
@@ -305,7 +298,7 @@ void AssimpShapeLoader::enumerateScene()
    if (!boundsNode) {
       aiNode* reqNode = new aiNode("bounds");
       mScene->mRootNode->addChildren(1, &reqNode);
-      //reqNode->mTransformation = mScene->mRootNode->mTransformation;
+      reqNode->mTransformation = aiMatrix4x4();// *sceneRoot;
       AssimpAppNode* appBoundsNode = new AssimpAppNode(mScene, reqNode);
       if (!processNode(appBoundsNode)) {
          delete appBoundsNode;

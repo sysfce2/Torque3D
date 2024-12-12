@@ -23,7 +23,7 @@
 #include "platform/platform.h"
 #include "ts/loader/appSequence.h"
 #include "ts/assimp/assimpAppNode.h"
-
+#include "ts/assimp/assimpAppMesh.h"
 
 // assimp include files. 
 #include <assimp/cimport.h>

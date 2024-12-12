@@ -32,13 +32,13 @@
 #ifndef _COLLADA_EXTENSIONS_H_
 #include "ts/collada/colladaExtensions.h"
 #endif
-#ifndef _ASSIMP_APPMESH_H_
-#include "ts/assimp/assimpAppMesh.h"
-#endif
+
 #ifndef AI_TYPES_H_INC
 #include <assimp/types.h>
 #endif
 #include <assimp/scene.h>
+
+class AssimpAppMesh;
 
 class AssimpAppNode : public AppNode
 {
