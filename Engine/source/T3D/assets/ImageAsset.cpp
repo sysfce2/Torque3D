@@ -111,7 +111,7 @@ ConsoleSetType(TypeImageAssetId)
 ImplementEnumType(ImageAssetType,
    "Type of mesh data available in a shape.\n"
    "@ingroup gameObjects")
-{ ImageAsset::Albedo, "Albedo", "" },
+{ ImageAsset::Albedo,      "Albedo",      "" },
 { ImageAsset::Normal,      "Normal",      "" },
 { ImageAsset::ORMConfig,   "ORMConfig",   "" },
 { ImageAsset::GUI,         "GUI",         "" },
@@ -121,7 +121,8 @@ ImplementEnumType(ImageAssetType,
 { ImageAsset::Glow,        "Glow",        "" },
 { ImageAsset::Particle,    "Particle",    "" },
 { ImageAsset::Decal,       "Decal",       "" },
-{ ImageAsset::Cubemap,     "Cubemap",       "" },
+{ ImageAsset::Cubemap,     "Cubemap",     "" },
+{ ImageAsset::Target,      "Target",     "" },
 
 EndImplementEnumType;
 
@@ -274,6 +275,21 @@ U32 ImageAsset::load()
    if (mLoadedState == AssetErrCode::Ok) return mLoadedState;
    if (mImagePath)
    {
+      // this is a target.
+      if (mImageFileName[0] == '$' || mImageFileName[0] == '#')
+      {
+         NamedTexTarget* namedTarget = NamedTexTarget::find(mImageFileName + 1);
+         if (namedTarget) {
+            mLoadedState = Ok;
+            mIsValidImage = true;
+            return mLoadedState;
+         }
+         else
+         {
+            Con::errorf("ImageAsset::initializeAsset: Attempted find named target %s failed.", mImageFileName);
+         }
+      }
+
       if (!Torque::FS::IsFile(mImagePath))
       {
          Con::errorf("ImageAsset::initializeAsset: Attempted to load file %s but it was not valid!", mImageFileName);
@@ -295,12 +311,26 @@ void ImageAsset::initializeAsset()
 {
    ResourceManager::get().getChangedSignal().notify(this, &ImageAsset::_onResourceChanged);
 
-   mImagePath = getOwned() ? expandAssetFilePath(mImageFileName) : mImagePath;
+   if (mImageFileName[0] != '$' && mImageFileName[0] != '#')
+   {
+      mImagePath = getOwned() ? expandAssetFilePath(mImageFileName) : mImagePath;
+   }
+   else
+   {
+      mImagePath = mImageFileName;
+   }
 }
 
 void ImageAsset::onAssetRefresh()
 {
-   mImagePath = getOwned() ? expandAssetFilePath(mImageFileName) : mImagePath;
+   if (mImageFileName[0] != '$' && mImageFileName[0] != '#')
+   {
+      mImagePath = getOwned() ? expandAssetFilePath(mImageFileName) : mImagePath;
+   }
+   else
+   {
+      mImagePath = mImageFileName;
+   }
 
    AssetManager::typeAssetDependsOnHash::Iterator assetDependenciesItr = mpOwningAssetManager->getDependedOnAssets()->find(mpAssetDefinition->mAssetId);
    // Iterate all dependencies.
@@ -398,6 +428,7 @@ const char* ImageAsset::getImageTypeNameFromType(ImageAsset::ImageTypes type)
       "Particle",
       "Decal",
       "Cubemap"
+      "Target"
    };
 
    if (type < 0 || type >= ImageTypeCount)

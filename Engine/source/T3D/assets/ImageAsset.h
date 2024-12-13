@@ -39,7 +39,11 @@
 #endif
 #ifndef _ASSET_PTR_H_
 #include "assets/assetPtr.h"
-#endif 
+#endif
+
+#ifndef _MATTEXTURETARGET_H_
+#include "materials/matTextureTarget.h"
+#endif
 
 #include "gfx/bitmap/gBitmap.h"
 #include "gfx/gfxTextureHandle.h"
@@ -71,7 +75,8 @@ public:
       Particle = 8,
       Decal = 9,
       Cubemap = 10,
-      ImageTypeCount = 11
+      Target = 11,
+      ImageTypeCount = 12
    };
 
    static StringTableEntry smNoImageAssetFallback;
@@ -205,8 +210,8 @@ public: \
          }\
          else if(_in[0] == '$' || _in[0] == '#')\
          {\
-            m##name##Name = _in;\
-            m##name##AssetId = StringTable->EmptyString();\
+            m##name##Name =  _in;\
+            m##name##AssetId = _in;\
             m##name##Asset = NULL;\
             m##name.free();\
             m##name = NULL;\
@@ -250,6 +255,16 @@ public: \
             m##name##Asset->getChangedSignal().notify(this, &className::changeFunc);\
          }\
          \
+         if (get##name()[0] == '$' || get##name()[0] == '#') {\
+            NamedTexTarget* namedTarget = NamedTexTarget::find(get##name() + 1);\
+            if (namedTarget)\
+            {\
+               m##name = namedTarget->getTexture(0);\
+               m##name##Name = get##name();\
+               m##name##AssetId = StringTable->EmptyString();\
+            }\
+         }\
+         else\
          m##name.set(get##name(), m##name##Profile, avar("%s() - mTextureObject (line %d)", __FUNCTION__, __LINE__));\
       }\
       else\
@@ -278,7 +293,10 @@ public: \
    const StringTableEntry get##name() const\
    {\
       if (m##name##Asset && (m##name##Asset->getImageFileName() != StringTable->EmptyString()))\
-         return  Platform::makeRelativePathName(m##name##Asset->getImagePath(), Platform::getMainDotCsDir());\
+         if (m##name##Asset->getImageFileName()[0] == '#' || m##name##Asset->getImageFileName()[0] == '$')\
+            return m##name##Asset->getImageFileName();\
+         else\
+            return  Platform::makeRelativePathName(m##name##Asset->getImagePath(), Platform::getMainDotCsDir());\
       else if (m##name##AssetId != StringTable->EmptyString())\
          return m##name##AssetId;\
       else if (m##name##Name != StringTable->EmptyString())\
@@ -353,8 +371,8 @@ public: \
          }\
          else if(_in[0] == '$' || _in[0] == '#')\
          {\
-            m##name##Name[index] = _in;\
-            m##name##AssetId[index] = StringTable->EmptyString();\
+            m##name##Name[index] =  _in;\
+            m##name##AssetId[index] = _in;\
             m##name##Asset[index] = NULL;\
             m##name[index].free();\
             m##name[index] = NULL;\
@@ -393,6 +411,16 @@ public: \
       }\
       if (get##name(index) != StringTable->EmptyString() && m##name##Name[index] != StringTable->insert("texhandle"))\
       {\
+         if (get##name(index)[0] == '$' || get##name(index)[0] == '#') {\
+            NamedTexTarget* namedTarget = NamedTexTarget::find(get##name(index) + 1);\
+            if (namedTarget)\
+            {\
+               m##name[index] = namedTarget->getTexture(0);\
+               m##name##Name[index] = get##name(index);\
+               m##name##AssetId[index] = StringTable->EmptyString();\
+            }\
+         }\
+         else\
          m##name[index].set(get##name(index), m##name##Profile[index], avar("%s() - mTextureObject (line %d)", __FUNCTION__, __LINE__));\
       }\
       else\
@@ -421,7 +449,10 @@ public: \
    const StringTableEntry get##name(const U32& index) const\
    {\
       if (m##name##Asset[index] && (m##name##Asset[index]->getImageFileName() != StringTable->EmptyString()))\
-         return  Platform::makeRelativePathName(m##name##Asset[index]->getImagePath(), Platform::getMainDotCsDir());\
+         if (m##name##Asset[index]->getImageFileName()[0] == '#' || m##name##Asset[index]->getImageFileName()[0] == '$')\
+            return m##name##Asset[index]->getImageFileName();\
+         else\
+            return  Platform::makeRelativePathName(m##name##Asset[index]->getImagePath(), Platform::getMainDotCsDir());\
       else if (m##name##AssetId[index] != StringTable->EmptyString())\
          return m##name##AssetId[index];\
       else if (m##name##Name[index] != StringTable->EmptyString())\
