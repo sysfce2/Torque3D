@@ -212,7 +212,7 @@ public: \
          else if(_in[0] == '$' || _in[0] == '#')\
          {\
             m##name##Name =  _in;\
-            m##name##AssetId = _in;\
+            m##name##AssetId = StringTable->EmptyString();\
             m##name##Asset = NULL;\
             m##name.free();\
             m##name = NULL;\
@@ -256,15 +256,9 @@ public: \
             m##name##Asset->getChangedSignal().notify(this, &className::changeFunc);\
          }\
          \
-         if (get##name()[0] == '$' || get##name()[0] == '#') {\
-            NamedTexTargetRef namedTarget = NamedTexTarget::find(get##name() + 1);\
-            if (namedTarget.isValid())\
-            {\
-               m##name = namedTarget->getTexture(0);\
-            }\
+         if (get##name()[0] != '$' && get##name()[0] != '#') {\
+            m##name.set(get##name(), m##name##Profile, avar("%s() - mTextureObject (line %d)", __FUNCTION__, __LINE__));\
          }\
-         else\
-         m##name.set(get##name(), m##name##Profile, avar("%s() - mTextureObject (line %d)", __FUNCTION__, __LINE__));\
       }\
       else\
       {\
@@ -373,7 +367,7 @@ public: \
          else if(_in[0] == '$' || _in[0] == '#')\
          {\
             m##name##Name[index] =  _in;\
-            m##name##AssetId[index] = _in;\
+            m##name##AssetId[index] = StringTable->EmptyString();\
             m##name##Asset[index] = NULL;\
             m##name[index].free();\
             m##name[index] = NULL;\

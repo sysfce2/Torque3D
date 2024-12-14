@@ -377,12 +377,10 @@ GFXTexHandle ImageAsset::getTexture(GFXTextureProfile* requestedProfile)
          NamedTexTargetRef namedTarget = NamedTexTarget::find(mImageFileName + 1);
          if (namedTarget.isValid() && namedTarget->getTexture())
          {
-            if (mNamedTarget == NULL) {
-               mNamedTarget = namedTarget;
-               mResourceMap.insert(requestedProfile, mNamedTarget->getTexture());
-               mIsValidImage = true;
-               mChangeSignal.trigger();
-            }
+            mNamedTarget = namedTarget;
+            mIsValidImage = true;
+            mResourceMap.insert(requestedProfile, mNamedTarget->getTexture());
+            mChangeSignal.trigger();
          }
          if (mNamedTarget == NULL)
             return nullptr;

@@ -208,9 +208,7 @@ public:
    //-----------------------------------------------------------------------
    // Data
    //-----------------------------------------------------------------------
-   void onImageAssetChanged() {
-      reload();
-   }
+   void onImageAssetChanged();
 
    DECLARE_IMAGEASSET_ARRAY(Material, DiffuseMap, MAX_STAGES, onImageAssetChanged);
    DECLARE_IMAGEASSET_ARRAY_SETGET(Material, DiffuseMap);

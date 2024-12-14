@@ -243,6 +243,10 @@ Material::Material()
    mReverbSoundOcclusion = 1.0;
 }
 
+void Material::onImageAssetChanged()
+{
+   reload();
+}
 
 void Material::initPersistFields()
 {
@@ -857,3 +861,4 @@ DEF_IMAGEASSET_ARRAY_BINDS(Material, AOMap);
 DEF_IMAGEASSET_ARRAY_BINDS(Material, MetalMap);
 DEF_IMAGEASSET_ARRAY_BINDS(Material, GlowMap);
 DEF_IMAGEASSET_ARRAY_BINDS(Material, DetailNormalMap);
+
