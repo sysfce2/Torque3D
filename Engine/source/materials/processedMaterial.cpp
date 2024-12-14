@@ -398,10 +398,9 @@ void ProcessedMaterial::_setStageData()
          if (!mStages[i].getTex(MFT_DiffuseMap))
          {
             // If we start with a #, we're probably actually attempting to hit a named target and it may not get a hit on the first pass.
-            if (String(mMaterial->mDiffuseMapAsset[i]->getImageFileName()).startsWith("#") || String(mMaterial->mDiffuseMapAsset[i]->getImageFileName()).startsWith("$"))
-            {
-               mMaterial->logError("Named Target not ready %s for stage %i", mMaterial->mDiffuseMapAsset[i]->getImageFileName(), i);
-            }
+            if (!String(mMaterial->mDiffuseMapAsset[i]->getImageFileName()).startsWith("#") && !String(mMaterial->mDiffuseMapAsset[i]->getImageFileName()).startsWith("$"))
+               mMaterial->logError("Failed to load diffuse map %s for stage %i", mMaterial->mDiffuseMapAsset[i]->getImageFileName(), i);
+
             mStages[i].setTex(MFT_DiffuseMap, _createTexture(GFXTextureManager::getMissingTexturePath().c_str(), &GFXStaticTextureSRGBProfile));
          }
       }
@@ -410,12 +409,10 @@ void ProcessedMaterial::_setStageData()
          mStages[i].setTex(MFT_DiffuseMap, _createTexture(mMaterial->mDiffuseMapName[i], &GFXStaticTextureSRGBProfile));
          if (!mStages[i].getTex(MFT_DiffuseMap))
          {
-            //If we start with a #, we're probably actually attempting to hit a named target and it may not get a hit on the first pass. So we'll
-            //pass on the error rather than spamming the console
-            if (String(mMaterial->mDiffuseMapName[i]).startsWith("#") || String(mMaterial->mDiffuseMapName[i]).startsWith("$"))
-            {
-               mMaterial->logError("Named Target not ready %s for stage %i", mMaterial->mDiffuseMapName[i], i);
-            }
+            //If we start with a #, we're probably actually attempting to hit a named target and it may not get a hit on the first pass.
+            if (!String(mMaterial->mDiffuseMapName[i]).startsWith("#") && !String(mMaterial->mDiffuseMapName[i]).startsWith("$"))
+               mMaterial->logError("Failed to load diffuse map %s for stage %i", mMaterial->mDiffuseMapName[i], i);
+
             // Load a debug texture to make it clear to the user 
             // that the texture for this stage was missing.
             mStages[i].setTex(MFT_DiffuseMap, _createTexture(GFXTextureManager::getMissingTexturePath().c_str(), &GFXStaticTextureSRGBProfile));
