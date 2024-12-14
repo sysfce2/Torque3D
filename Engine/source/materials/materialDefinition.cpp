@@ -245,6 +245,7 @@ Material::Material()
 
 void Material::onImageAssetChanged()
 {
+   flush();
    reload();
 }
 

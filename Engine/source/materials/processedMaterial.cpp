@@ -401,14 +401,8 @@ void ProcessedMaterial::_setStageData()
             if (String(mMaterial->mDiffuseMapAsset[i]->getImageFileName()).startsWith("#") || String(mMaterial->mDiffuseMapAsset[i]->getImageFileName()).startsWith("$"))
             {
                mMaterial->logError("Named Target not ready %s for stage %i", mMaterial->mDiffuseMapAsset[i]->getImageFileName(), i);
-               mHasSetStageData = false;
             }
-            else
-            {
-               // Load a debug texture to make it clear to the user 
-               // that the texture for this stage was missing.
-               mStages[i].setTex(MFT_DiffuseMap, _createTexture(GFXTextureManager::getMissingTexturePath().c_str(), &GFXStaticTextureSRGBProfile));
-            }
+            mStages[i].setTex(MFT_DiffuseMap, _createTexture(GFXTextureManager::getMissingTexturePath().c_str(), &GFXStaticTextureSRGBProfile));
          }
       }
       else if (mMaterial->mDiffuseMapName[i] != StringTable->EmptyString())
@@ -421,14 +415,10 @@ void ProcessedMaterial::_setStageData()
             if (String(mMaterial->mDiffuseMapName[i]).startsWith("#") || String(mMaterial->mDiffuseMapName[i]).startsWith("$"))
             {
                mMaterial->logError("Named Target not ready %s for stage %i", mMaterial->mDiffuseMapName[i], i);
-               mHasSetStageData = false;
             }
-            else
-            {
-               // Load a debug texture to make it clear to the user 
-               // that the texture for this stage was missing.
-               mStages[i].setTex(MFT_DiffuseMap, _createTexture(GFXTextureManager::getMissingTexturePath().c_str(), &GFXStaticTextureSRGBProfile));
-            }
+            // Load a debug texture to make it clear to the user 
+            // that the texture for this stage was missing.
+            mStages[i].setTex(MFT_DiffuseMap, _createTexture(GFXTextureManager::getMissingTexturePath().c_str(), &GFXStaticTextureSRGBProfile));
          }
       }
       // OverlayMap

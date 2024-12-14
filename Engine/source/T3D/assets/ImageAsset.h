@@ -406,11 +406,9 @@ public: \
       }\
       if (get##name(index) != StringTable->EmptyString() && m##name##Name[index] != StringTable->insert("texhandle"))\
       {\
-         if (get##name(index)[0] == '$' || get##name(index)[0] == '#') {\
-             m##name##Asset[index]->getChangedSignal().notify(this, &className::changeFunc);\
-         }\
-         else\
-         m##name[index].set(get##name(index), m##name##Profile[index], avar("%s() - mTextureObject (line %d)", __FUNCTION__, __LINE__));\
+         m##name##Asset[index]->getChangedSignal().notify(this, &className::changeFunc);\
+         if (get##name(index)[0] != '$' && get##name(index)[0] != '#')\
+            m##name[index].set(get##name(index), m##name##Profile[index], avar("%s() - mTextureObject (line %d)", __FUNCTION__, __LINE__));\
       }\
       else\
       {\
