@@ -111,7 +111,7 @@ ConsoleSetType(TypeImageAssetId)
 ImplementEnumType(ImageAssetType,
    "Type of mesh data available in a shape.\n"
    "@ingroup gameObjects")
-{ ImageAsset::Albedo,      "Albedo",      "" },
+{ ImageAsset::Albedo, "Albedo", "" },
 { ImageAsset::Normal,      "Normal",      "" },
 { ImageAsset::ORMConfig,   "ORMConfig",   "" },
 { ImageAsset::GUI,         "GUI",         "" },
@@ -121,8 +121,7 @@ ImplementEnumType(ImageAssetType,
 { ImageAsset::Glow,        "Glow",        "" },
 { ImageAsset::Particle,    "Particle",    "" },
 { ImageAsset::Decal,       "Decal",       "" },
-{ ImageAsset::Cubemap,     "Cubemap",     "" },
-{ ImageAsset::Target,      "Target",     "" },
+{ ImageAsset::Cubemap,     "Cubemap",       "" },
 
 EndImplementEnumType;
 
@@ -278,7 +277,7 @@ U32 ImageAsset::load()
       // this is a target.
       if (mImageFileName[0] == '$' || mImageFileName[0] == '#')
       {
-         NamedTexTarget* namedTarget = NamedTexTarget::find(mImageFileName + 1);
+         NamedTexTargetRef namedTarget = NamedTexTarget::find(mImageFileName + 1);
          if (namedTarget) {
             mLoadedState = Ok;
             mIsValidImage = true;
@@ -289,7 +288,6 @@ U32 ImageAsset::load()
             Con::errorf("ImageAsset::initializeAsset: Attempted find named target %s failed.", mImageFileName);
          }
       }
-
       if (!Torque::FS::IsFile(mImagePath))
       {
          Con::errorf("ImageAsset::initializeAsset: Attempted to load file %s but it was not valid!", mImageFileName);
@@ -364,6 +362,7 @@ void ImageAsset::setImageFileName(const char* pScriptFile)
 
 GFXTexHandle ImageAsset::getTexture(GFXTextureProfile* requestedProfile)
 {
+   load();
    if (mResourceMap.contains(requestedProfile))
    {
       mLoadedState = Ok;
@@ -371,20 +370,40 @@ GFXTexHandle ImageAsset::getTexture(GFXTextureProfile* requestedProfile)
    }
    else
    {
-      //If we don't have an existing map case to the requested format, we'll just create it and insert it in
-      GFXTexHandle newTex = TEXMGR->createTexture(mImagePath, requestedProfile);
-      if (newTex)
+      // this is a target.
+      if (mImageFileName[0] == '$' || mImageFileName[0] == '#')
       {
-         mResourceMap.insert(requestedProfile, newTex);
          mLoadedState = Ok;
-         return newTex;
+         NamedTexTargetRef namedTarget = NamedTexTarget::find(mImageFileName + 1);
+         if (namedTarget.isValid() && namedTarget->getTexture())
+         {
+            if (mNamedTarget == NULL) {
+               mNamedTarget = namedTarget;
+               mResourceMap.insert(requestedProfile, mNamedTarget->getTexture());
+               mIsValidImage = true;
+               mChangeSignal.trigger();
+            }
+         }
+         if (mNamedTarget == NULL)
+            return nullptr;
+         else
+            return mNamedTarget->getTexture();
+         
       }
       else
-         mLoadedState = BadFileReference;
+      {
+         //If we don't have an existing map case to the requested format, we'll just create it and insert it in
+         GFXTexHandle newTex = TEXMGR->createTexture(mImagePath, requestedProfile);
+         if (newTex)
+         {
+            mResourceMap.insert(requestedProfile, newTex);
+            mLoadedState = Ok;
+            return newTex;
+         }
+         else
+            mLoadedState = BadFileReference;
+      }
    }
-
-   //if (mTexture.isValid())
-   //   return mTexture;
 
    return nullptr;
 }
@@ -428,7 +447,6 @@ const char* ImageAsset::getImageTypeNameFromType(ImageAsset::ImageTypes type)
       "Particle",
       "Decal",
       "Cubemap"
-      "Target"
    };
 
    if (type < 0 || type >= ImageTypeCount)

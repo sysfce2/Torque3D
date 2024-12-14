@@ -398,29 +398,20 @@ void ProcessedMaterial::_setStageData()
          //mStages[i].setTex(MFT_DiffuseMap, _createTexture(mMaterial->getDiffuseMap(i), &GFXStaticTextureSRGBProfile));
          if (!mStages[i].getTex(MFT_DiffuseMap))
          {
-            // Load a debug texture to make it clear to the user 
-            // that the texture for this stage was missing.
-            mStages[i].setTex(MFT_DiffuseMap, _createTexture(GFXTextureManager::getMissingTexturePath().c_str(), &GFXStaticTextureSRGBProfile));
-         }
-      }
-      else if (mMaterial->mDiffuseMapName[i] != StringTable->EmptyString())
-      {
-         mStages[i].setTex(MFT_DiffuseMap, _createTexture(mMaterial->mDiffuseMapName[i], &GFXStaticTextureSRGBProfile));
-         if (!mStages[i].getTex(MFT_DiffuseMap))
-         {
-            //If we start with a #, we're probably actually attempting to hit a named target and it may not get a hit on the first pass. So we'll
-            //pass on the error rather than spamming the console
-            if (String(mMaterial->mDiffuseMapName[i]).startsWith("#") || String(mMaterial->mDiffuseMapName[i]).startsWith("$"))
+            if (String(mMaterial->mDiffuseMapAsset[i]->getImageFileName()).startsWith("#") || String(mMaterial->mDiffuseMapAsset[i]->getImageFileName()).startsWith("$"))
             {
-               NamedTexTarget* namedTarget = NamedTexTarget::find(mMaterial->mDiffuseMapName[i] + 1);
-               if(namedTarget)
+               NamedTexTarget* namedTarget = NamedTexTarget::find(mMaterial->mDiffuseMapAsset[i]->getImageFileName() + 1);
+               if (namedTarget)
                   mStages[i].setTex(MFT_DiffuseMap, namedTarget->getTexture(0));
-            }
-            else
-            {
-               if (!String(mMaterial->mDiffuseMapName[i]).startsWith("#"))
-                  mMaterial->logError("Failed to load diffuse map %s for stage %i", mMaterial->mDiffuseMapName[i], i);
+               if (mStages[i].getTex(MFT_DiffuseMap))
+               {
+                  mMaterial->mDiffuseMap[i] = namedTarget->getTexture(0);
+               }
 
+               if (!mStages[i].getTex(MFT_DiffuseMap))
+                  mHasSetStageData = false;
+            }
+            else {
                // Load a debug texture to make it clear to the user 
                // that the texture for this stage was missing.
                mStages[i].setTex(MFT_DiffuseMap, _createTexture(GFXTextureManager::getMissingTexturePath().c_str(), &GFXStaticTextureSRGBProfile));
