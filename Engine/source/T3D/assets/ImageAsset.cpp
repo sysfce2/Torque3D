@@ -381,12 +381,8 @@ GFXTexHandle ImageAsset::getTexture(GFXTextureProfile* requestedProfile)
             mIsValidImage = true;
             mResourceMap.insert(requestedProfile, mNamedTarget->getTexture());
             mChangeSignal.trigger();
-         }
-         if (mNamedTarget == NULL)
-            return nullptr;
-         else
             return mNamedTarget->getTexture();
-         
+         }
       }
       else
       {
