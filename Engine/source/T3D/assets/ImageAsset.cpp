@@ -104,7 +104,7 @@ ConsoleSetType(TypeImageAssetId)
    }
 
    // Warn.
-   Con::warnf("(TypeAssetId) - Cannot set multiple args to a single asset.");
+   Con::warnf("(TypeImageAssetId) - Cannot set multiple args to a single asset.");
 }
 //-----------------------------------------------------------------------------
 
@@ -748,7 +748,7 @@ void GuiInspectorTypeImageAssetPtr::setPreviewImage(StringTableEntry assetId)
 IMPLEMENT_CONOBJECT(GuiInspectorTypeImageAssetId);
 
 ConsoleDocClass(GuiInspectorTypeImageAssetId,
-   "@brief Inspector field type for Shapes\n\n"
+   "@brief Inspector field type for Images\n\n"
    "Editor use only.\n\n"
    "@internal"
 );
