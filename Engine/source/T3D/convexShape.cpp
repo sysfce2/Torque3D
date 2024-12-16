@@ -545,6 +545,8 @@ const char* ConvexShape::getSpecialFieldOut(StringTableEntry fieldName, const U3
 
       return StringTable->insert(buffer);
    }
+
+   return NULL;
 }
 
 void ConvexShape::onScaleChanged()

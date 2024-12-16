@@ -54,7 +54,29 @@ function ChooseLevelMenu::onWake(%this)
    ChooseLevelMenuTabList.visible = true;//$pref::HostMultiPlayer;
    ChooseLevelMenuNavButtonOverlay.visible = true;//$pref::HostMultiPlayer;
       
-   %this.schedule(32, openMenu, 0);
+   //If we've only got one gamemode, just force it to use that one, as we can
+   //assume that is THE game's gamemode
+   %gamemodeList = getGameModesList();
+   if(%gamemodeList.count() == 1)
+   {
+      %gameModeObj = %gamemodeList.getKey(0);
+      if(isObject(%gameModeObj))
+      {
+         %gameModeObj.active = true;
+         
+         ChooseLevelMenuTabList-->LevelBtn.active = true;
+         ChooseLevelMenuTabList-->GameModeBtn.active = false;
+         
+         ChooseLevelMenu.openMenu(1);
+         
+         return;
+      }
+   }
+   else
+   {
+      //Otherwise open the gamemode list as normal
+      %this.schedule(32, openMenu, 0);
+   }
 }
 
 function refreshGameModesList()
@@ -77,36 +99,36 @@ function refreshGameModesList()
          if(%gameModeName $= "")
             %gameModeName = %gameModeObj.getName();
             
-            %preview = new GuiContainer() {
-               position = "0 0";
-               extent = $LevelPreviewButtonSize;
+         %preview = new GuiContainer() {
+            position = "0 0";
+            extent = $LevelPreviewButtonSize;
+            horizSizing = "right";
+            vertSizing = "bottom";
+            gameModeObj = %gameModeObj;
+            gameModeDesc = %gameModeObj.description;
+            previewImage = %gameModeObj.previewImage;
+            cansave = false;
+            
+            new GuiToggleButtonCtrl() {
+               position = $LevelPreviewButtonSize.y SPC 0;
+               extent = $LevelPreviewButtonSize.x - $LevelPreviewButtonSize.y - 5 SPC $LevelPreviewButtonSize.y;
+               profile = GuiMenuButtonProfile;
                horizSizing = "right";
                vertSizing = "bottom";
-               gameModeObj = %gameModeObj;
-               gameModeDesc = %gameModeObj.description;
-               previewImage = %gameModeObj.previewImage;
-               cansave = false;
-               
-               new GuiToggleButtonCtrl() {
-                  position = $LevelPreviewButtonSize.y SPC 0;
-                  extent = $LevelPreviewButtonSize.x - $LevelPreviewButtonSize.y - 5 SPC $LevelPreviewButtonSize.y;
-                  profile = GuiMenuButtonProfile;
-                  horizSizing = "right";
-                  vertSizing = "bottom";
-                  internalName = "button";
-                  class = "GameModePreviewButton";
-                  text = %gameModeName;
-                  command = "ToggleGameMode(" @ %i @ ");"; //allow doubleclick to quick action it
-                  textMargin = 120;
-               };
-               
-               new GuiBitmapCtrl() {
-                  position = "0 0";
-                  extent = $LevelPreviewButtonSize.y SPC $LevelPreviewButtonSize.y;
-                  internalName = "checkbox";
-                  bitmapAsset = "UI:toggleMarker_image";
-               };
+               internalName = "button";
+               class = "GameModePreviewButton";
+               text = %gameModeName;
+               command = "ToggleGameMode(" @ %i @ ");"; //allow doubleclick to quick action it
+               textMargin = 120;
             };
+            
+            new GuiBitmapCtrl() {
+               position = "0 0";
+               extent = $LevelPreviewButtonSize.y SPC $LevelPreviewButtonSize.y;
+               internalName = "checkbox";
+               bitmapAsset = "UI:toggleMarker_image";
+            };
+         };
         
          
          GameModePreviewArray.add(%preview);
@@ -133,6 +155,8 @@ function refreshLevelsList()
       ChooseLevelAssetQuery.clear();
       return;
    }
+   
+   %gameModesList = getGameModesList();
    
    //filter the levelAssets by the gamemode selected
    %filteredIndex = 0;
@@ -168,14 +192,14 @@ function refreshLevelsList()
          for(%gm = 0; %gm < getTokenCount(%levelGameModes, ";"); %gm++)
          {
             %gameModeName = getToken(%levelGameModes, ";", %gm);
-            
-            for(%g=0; %g < GameModePreviewArray.getCount(); %g++)
+            for(%g=0; %g < %gameModesList.count(); %g++)
             {
-               %gmb = GameModePreviewArray.getObject(%g);
-               if(!isObject(%gmb.gameModeObj) || (!%gmb.gameModeObj.active && !%gmb.gameModeObj.alwaysActive))
+               %gameModeObj = %gameModesList.getKey(%g);
+               
+               if(!isObject(%gameModeObj) || (!%gameModeObj.active && !%gameModeObj.alwaysActive && %gameModesList.count() > 1))
                   continue;
                   
-               if(%gameModeName $= %gmb.gameModeObj.getName())
+               if(%gameModeName $= %gameModeObj.getName())
                {
                   %foundGameModeMatch = true;
                   break;  
@@ -315,8 +339,6 @@ function GameModePreviewArray::syncGUI(%this)
    
    %btn = %this.getObject(%this.listPosition);
    %btn-->button.setHighlighted(true);
-   
-   //$pref::Server::GameMode = %btn.gameModeObject;
 }
 
 function ChooseLevelMenuPrevMenu(%val)
