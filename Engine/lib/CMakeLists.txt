@@ -6,8 +6,6 @@ set(ZLIB_ROOT "${ZLIB_ROOT}" CACHE STRING "ZLib root location" FORCE)
 mark_as_advanced(ZLIB_ROOT)
 # Png depends on zlib
 add_subdirectory(zlib ${TORQUE_LIB_TARG_DIRECTORY}/zlib EXCLUDE_FROM_ALL)
-set(ZLIB_FOUND 1)
-set(ZLIB_LIBRARIES zlib)
 
 if(APPLE)
     enable_language(OBJC)
