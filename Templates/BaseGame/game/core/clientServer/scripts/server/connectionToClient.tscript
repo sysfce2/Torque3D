@@ -81,9 +81,35 @@ function GameConnection::onConnect( %this, %clientData )
 	
 	%this.connectData = %clientData;
 	
+	//Signal and listener logic for the spawn config/processing here
+	%this.GetEventManager().registerEvent("setSpawnObjectTypeComplete");
+   %this.GetEventManager().registerEvent("setSpawnObjectTypeFailed");
+   %this.GetEventManager().registerEvent("setSpawnPointComplete");
+   %this.GetEventManager().registerEvent("setSpawnPointFailed");
+   %this.GetEventManager().registerEvent("postSpawnComplete");
+   
+   %this.listener = new ScriptMsgListener() {
+      class = GameConnectionListener;
+   }; 
+   %this.GetEventManager().subscribe( %this.listener, "setSpawnObjectTypeComplete" ); 
+   %this.GetEventManager().subscribe( %this.listener, "setSpawnObjectTypeFailed" ); 
+   %this.GetEventManager().subscribe( %this.listener, "setSpawnPointComplete" );
+   %this.GetEventManager().subscribe( %this.listener, "setSpawnPointFailed" );
+   %this.GetEventManager().subscribe( %this.listener, "postSpawnComplete" );
+	
 	callGamemodeFunction("onClientConnect", %this);
 	
 	$Server::PlayerCount++;
+}
+
+function GameConnection::GetEventManager(%this)
+{
+   if( !isObject( %this.eventManager ) )
+      %this.eventManager = new EventManager() { 
+         queue = "GameConnectionEventManager";
+      };
+      
+   return %this.eventManager;
 }
 
 function GameConnection::spawnControlObject( %this )
@@ -92,13 +118,27 @@ function GameConnection::spawnControlObject( %this )
     %this.spawnClass = "Camera";
     %this.spawnDBType = "CameraData";
     %this.spawnDataBlock = "Observer";
-    callOnModules("setSpawnObjectType", "Game", %this);
-	 callGamemodeFunction("setSpawnObjectType", %this);
+    
+    %this.numModsNeedingLoaded = 0;
+    %this.moduleLoadedDone = 0;
+    %modulesIDList = getModulesAndGameModesList(true, "Game");
+    
+    %this.numModsNeedingLoaded = getNumCanCallOnObjectList("setSpawnObjectType", %modulesIDList);
+    
+    if (%this.numModsNeedingLoaded)
+       callOnObjectList("setSpawnObjectType", %modulesIdList, %this);
+    else
+        %this.GetEventManager().onSetSpawnObjectTypeComplete(); //just jump to progress
 }
 
-function GameConnection::onSetSpawnObjectTypeComplete( %this )
+function GameConnectionListener::onSetSpawnObjectTypeComplete( %this, %client )
 {
-    if (isObject(%this.player))
+    %client.moduleLoadedDone++;
+
+    if (%client.moduleLoadedDone < %client.numModsNeedingLoaded)
+        return; //continue to wait  
+    
+    if (isObject(%client.player))
     {
         // The client should not already have a player. Assigning
         // a new one could result in an uncontrolled player object.
@@ -106,36 +146,41 @@ function GameConnection::onSetSpawnObjectTypeComplete( %this )
     }
    
     // Spawn with the engine's Sim::spawnObject() function
-    %this.player = spawnObject(%this.spawnClass, %this.spawnDataBlock);
+    %client.player = spawnObject(%client.spawnClass, %client.spawnDataBlock);
     
-    if (!%this.player.isMemberOfClass(%this.spawnClass))
-        warn("Trying to spawn a class that does not derive from "@ %this.spawnClass);
+    if (!%client.player.isMemberOfClass(%client.spawnClass))
+        warn("Trying to spawn a class that does not derive from "@ %client.spawnClass);
 
     // Add the player object to MissionCleanup so that it
     // won't get saved into the level files and will get
     // cleaned up properly
-    MissionCleanup.add(%this.player);
+    MissionCleanup.add(%client.player);
    
     // Store the client object on the player object for
     // future reference
-    %this.player.client = %this;
+    %client.player.client = %client;
    
-    %this.setSpawnPoint();
+    %client.setSpawnPoint();
     
    // Give the client control of the camera if in the editor
    if( $startWorldEditor )
    {
-      %control = %this.camera;
+      %control = %client.camera;
       %control.mode = "Fly";
       EditorGui.syncCameraGui();
    }
    else
-      %control = %this.player;
+      %control = %client.player;
       
    // Allow the player/camera to receive move data from the GameConnection.  Without this
    // the user is unable to control the player/camera.
    if (!isDefined("%noControl"))
-      %this.setControlObject(%control);
+      %client.setControlObject(%control);
+}
+
+function GameConnectionListener::onSetSpawnObjectTypeFailed( %this, %client, %canContinueOnFail )
+{
+   errorf("Failed to properly set Spawn Object Type for client: " @ %client);
 }
 
 function GameConnection::setSpawnPoint( %this )
@@ -144,14 +189,27 @@ function GameConnection::setSpawnPoint( %this )
     %this.playerSpawnGroups = "PlayerSpawnPoints PlayerDropPoints";
     %this.spawnPoint = "";
     %this.spawnLocation = "0 0 0";
-    callOnModules("setSpawnPoint", "Game", %this);
-	 callGamemodeFunction("setSpawnPoint", %this);    
+    
+    %this.numModsNeedingLoaded = 0;
+    %this.moduleLoadedDone = 0;
+    %modulesIDList = getModulesAndGameModesList(true, "Game");
+    
+    %this.numModsNeedingLoaded = getNumCanCallOnObjectList("setSpawnPoint", %modulesIDList);
+    
+    if (%this.numModsNeedingLoaded)
+        callOnObjectList("setSpawnPoint", %modulesIdList, %this);
+    else
+        %this.GetEventManager().onSetSpawnPointComplete();   
 }
 
-function GameConnection::onSetSpawnPointComplete( %this )
+function GameConnectionListener::onSetSpawnPointComplete( %this, %client )
 {
-    if (isObject(%this.player))
-        %this.player.setTransform(%this.spawnLocation);
+    %client.moduleLoadedDone++;
+    if (%client.moduleLoadedDone < %client.numModsNeedingLoaded)
+        return; //continue to wait 
+    
+    if (isObject(%client.player))
+        %client.player.setTransform(%client.spawnLocation);
     else
     {
         // If we weren't able to create the player object then warn the user
@@ -160,26 +218,47 @@ function GameConnection::onSetSpawnPointComplete( %this )
         if (isDefined("%this.spawnDataBlock"))
         {
             MessageBoxOK("Spawn Failed",
-                "Unable to create a player with class " @ %this.spawnClass @
-                " and datablock " @ %this.spawnDataBlock @ ".\n\nStarting as an Observer instead.",
+                "Unable to create a player with class " @ %client.spawnClass @
+                " and datablock " @ %client.spawnDataBlock @ ".\n\nStarting as an Observer instead.",
                 "");
         }
         else
         {
             MessageBoxOK("Spawn Failed",
-                "Unable to create a player with class " @ %this.spawnClass @
+                "Unable to create a player with class " @ %client.spawnClass @
                 ".\n\nStarting as an Observer instead.",
                 "");
         }
     }
-    %this.onPostSpawn();
+    %client.onPostSpawn();
+}
+
+function GameConnectionListener::onSetSpawnPointFailed( %this, %client, %canContinueOnFail )
+{
+   errorf("Failed to properly set Spawn Object Type for client: " @ %client);
 }
 
 function GameConnection::onPostSpawn( %this )
 {
-    //post controlObject create extention points
-    callOnModules("onPostSpawn", "Game", %this);
-	callGamemodeFunction("onPostSpawn", %this);    
+    %this.numModsNeedingLoaded = 0;
+    %this.moduleLoadedDone = 0;
+    %modulesIDList = getModulesAndGameModesList(true, "Game");
+    
+    %this.numModsNeedingLoaded = getNumCanCallOnObjectList("onPostSpawn", %modulesIDList);
+    
+    if (%this.numModsNeedingLoaded)
+        callOnObjectList("onPostSpawn", %modulesIdList, %this);
+    else
+        %this.GetEventManager().onPostSpawnComplete();    
+}
+
+function GameConnectionListener::onPostSpawnComplete(%this, %client)
+{
+    %client.moduleLoadedDone++;
+    if (%client.moduleLoadedDone < %client.numModsNeedingLoaded)
+        return; //continue to wait 
+        
+    //Continue on. Room for special handling here if needbe but not expressly required
 }
 
 //-----------------------------------------------------------------------------
