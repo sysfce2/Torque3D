@@ -128,7 +128,7 @@ function GameConnection::spawnControlObject( %this )
     if (%this.numModsNeedingLoaded)
        callOnObjectList("setSpawnObjectType", %modulesIdList, %this);
     else
-        %this.GetEventManager().onSetSpawnObjectTypeComplete(); //just jump to progress
+        %this.listener.onSetSpawnObjectTypeComplete(%this); //just jump to progress
 }
 
 function GameConnectionListener::onSetSpawnObjectTypeComplete( %this, %client )
@@ -144,38 +144,8 @@ function GameConnectionListener::onSetSpawnObjectTypeComplete( %this, %client )
         // a new one could result in an uncontrolled player object.
         error("Attempting to create a player for a client that already has one!");
     }
-   
-    // Spawn with the engine's Sim::spawnObject() function
-    %client.player = spawnObject(%client.spawnClass, %client.spawnDataBlock);
-    
-    if (!%client.player.isMemberOfClass(%client.spawnClass))
-        warn("Trying to spawn a class that does not derive from "@ %client.spawnClass);
 
-    // Add the player object to MissionCleanup so that it
-    // won't get saved into the level files and will get
-    // cleaned up properly
-    MissionCleanup.add(%client.player);
-   
-    // Store the client object on the player object for
-    // future reference
-    %client.player.client = %client;
-   
     %client.setSpawnPoint();
-    
-   // Give the client control of the camera if in the editor
-   if( $startWorldEditor )
-   {
-      %control = %client.camera;
-      %control.mode = "Fly";
-      EditorGui.syncCameraGui();
-   }
-   else
-      %control = %client.player;
-      
-   // Allow the player/camera to receive move data from the GameConnection.  Without this
-   // the user is unable to control the player/camera.
-   if (!isDefined("%noControl"))
-      %client.setControlObject(%control);
 }
 
 function GameConnectionListener::onSetSpawnObjectTypeFailed( %this, %client, %canContinueOnFail )
@@ -189,6 +159,8 @@ function GameConnection::setSpawnPoint( %this )
     %this.playerSpawnGroups = "PlayerSpawnPoints PlayerDropPoints";
     %this.spawnPoint = "";
     %this.spawnLocation = "0 0 0";
+    %this.spawnProperties = "";
+    %this.spawnScript = "";
     
     %this.numModsNeedingLoaded = 0;
     %this.moduleLoadedDone = 0;
@@ -199,7 +171,7 @@ function GameConnection::setSpawnPoint( %this )
     if (%this.numModsNeedingLoaded)
         callOnObjectList("setSpawnPoint", %modulesIdList, %this);
     else
-        %this.GetEventManager().onSetSpawnPointComplete();   
+        %this.listener.onSetSpawnPointComplete(%this);   
 }
 
 function GameConnectionListener::onSetSpawnPointComplete( %this, %client )
@@ -207,8 +179,26 @@ function GameConnectionListener::onSetSpawnPointComplete( %this, %client )
     %client.moduleLoadedDone++;
     if (%client.moduleLoadedDone < %client.numModsNeedingLoaded)
         return; //continue to wait 
+        
+    // Spawn with the engine's Sim::spawnObject() function
+    %client.player = spawnObject(%client.spawnClass, %client.spawnDataBlock, %client.spawnProperties, %client.spawnScript);
     
-    if (isObject(%client.player))
+    if(!isObject(%client.player))
+       error("Failed to spawn player object!");
+    
+    if (!%client.player.isMemberOfClass(%client.spawnClass))
+        warn("Trying to spawn a class that does not derive from "@ %client.spawnClass);
+
+    // Add the player object to MissionCleanup so that it
+    // won't get saved into the level files and will get
+    // cleaned up properly
+    MissionCleanup.add(%client.player);
+   
+    // Store the client object on the player object for
+    // future reference
+    %client.player.client = %client;
+    
+    if (isObject(%client.player) && %client.spawnLocation != "-1")
         %client.player.setTransform(%client.spawnLocation);
     else
     {
@@ -230,6 +220,27 @@ function GameConnectionListener::onSetSpawnPointComplete( %this, %client )
                 "");
         }
     }
+    
+    // Give the client control of the camera if in the editor
+   if( $startWorldEditor )
+   {
+      %control = %client.camera;
+      %control.mode = "Fly";
+      EditorGui.syncCameraGui();
+   }
+   else
+      %control = %client.player;
+      
+   //Non-cameras will scope down to the client automatically, but if it's 
+   //JUST a camera, we'll tell it to do so now
+   if(%control.isMemberOfClass("Camera"))
+      %control.scopeToClient(%client);
+      
+   // Allow the player/camera to receive move data from the GameConnection.  Without this
+   // the user is unable to control the player/camera.
+   if (!isDefined("%noControl"))
+      %client.setControlObject(%control);
+    
     %client.onPostSpawn();
 }
 
@@ -249,7 +260,7 @@ function GameConnection::onPostSpawn( %this )
     if (%this.numModsNeedingLoaded)
         callOnObjectList("onPostSpawn", %modulesIdList, %this);
     else
-        %this.GetEventManager().onPostSpawnComplete();    
+        %this.listener.onPostSpawnComplete(%this);    
 }
 
 function GameConnectionListener::onPostSpawnComplete(%this, %client)
