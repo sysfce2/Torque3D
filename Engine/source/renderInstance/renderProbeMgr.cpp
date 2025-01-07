@@ -566,13 +566,15 @@ void RenderProbeMgr::bakeProbe(ReflectionProbe* probe)
 
    ReflectParams reflParams;
 
+   MatrixF camTrans = clientProbe->getTransform();
+   camTrans.setPosition(clientProbe->getTransform().getPosition() + clientProbe->mProbeRefOffset);
    //need to get the query somehow. Likely do some sort of get function to fetch from the guiTSControl that's active
    CameraQuery query; //need to get the last cameraQuery
    query.fov = 90; //90 degree slices for each of the 6 sides
-   query.nearPlane = 0.1f;
+   query.nearPlane = 0.0001f;
    query.farPlane = farPlane;
    query.headMatrix = MatrixF();
-   query.cameraMatrix = clientProbe->getTransform();
+   query.cameraMatrix = camTrans;
 
    Frustum culler;
    culler.set(false,
