@@ -152,10 +152,11 @@ ReflectionProbe::~ReflectionProbe()
 void ReflectionProbe::initPersistFields()
 {
    docsURL;
-   addField("canDamp", TypeBool, Offset(mCanDamp, ReflectionProbe),"wetness allowed");
    addGroup("Rendering");
       addProtectedField("enabled", TypeBool, Offset(mEnabled, ReflectionProbe),
          &_setEnabled, &defaultProtectedGetFn, "Is the probe enabled or not");
+      addField("canDamp", TypeBool, Offset(mCanDamp, ReflectionProbe),"wetness allowed");
+      addField("attenuation", TypeF32, Offset(mAtten, ReflectionProbe), "falloff percent");
    endGroup("Rendering");
 
    addGroup("Reflection");
@@ -436,6 +437,7 @@ U32 ReflectionProbe::packUpdate(NetConnection *conn, U32 mask, BitStream *stream
       stream->write(mProbeUniqueID);
       stream->write((U32)mReflectionModeType);
       stream->writeString(mCubemapName);
+      stream->write(mAtten);
    }
 
    if (stream->writeFlag(mask & EnabledMask))
@@ -490,6 +492,7 @@ void ReflectionProbe::unpackUpdate(NetConnection *conn, BitStream *stream)
       if(oldReflectModeType != mReflectionModeType || oldCubemapName != mCubemapName)
          mCubemapDirty = true;
 
+      stream->read(&mAtten);
       mDirty = true;
    }
 
@@ -565,6 +568,7 @@ void ReflectionProbe::updateProbeParams()
    mProbeInfo.mProbeRefOffset = mProbeRefOffset;
    mProbeInfo.mProbeRefScale = mProbeRefScale;
    mProbeInfo.mCanDamp = mCanDamp;
+   mProbeInfo.mAtten = mAtten;
    
    mProbeInfo.mDirty = true;
 

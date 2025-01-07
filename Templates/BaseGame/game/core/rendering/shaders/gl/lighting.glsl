@@ -351,8 +351,9 @@ vec4 compute4Lights( Surface surface,
 //Probe IBL stuff
 float defineSphereSpaceInfluence(vec3 wsPosition, vec3 wsProbePosition, float radius)
 {
-   vec3 L = wsProbePosition.xyz - wsPosition;
-   float contribution = 1.0 - length(L) / radius;
+   float3 L = (wsProbePosition.xyz - wsPosition);
+   float innerRadius = radius-(radius*atten);
+   float contribution = 1.0-saturate(mix(length(L), radius-innerRadius, atten)/radius);
    return saturate(contribution);
 }
 
@@ -436,7 +437,7 @@ vec4 computeForwardProbes(Surface surface,
       }
       else if (inProbeConfigData[i].r == 1) //sphere
       {
-         contribution[i] = defineSphereSpaceInfluence(surface.P, inProbePosArray[i].xyz, inProbeConfigData[i].g)*atten;
+         contribution[i] = defineSphereSpaceInfluence(surface.P, inProbePosArray[i].xyz, inProbeConfigData[i].g, inProbeConfigData[i].b*atten);
       }
 
       if (contribution[i]>0.0)
@@ -593,7 +594,7 @@ vec4 debugVizForwardProbes(Surface surface,
       }
       else if (inProbeConfigData[i].r == 1) //sphere
       {
-         contribution[i] = defineSphereSpaceInfluence(surface.P, inProbePosArray[i].xyz, inProbeConfigData[i].g);
+         contribution[i] = defineSphereSpaceInfluence(surface.P, inProbePosArray[i].xyz, inProbeConfigData[i].g, inProbeConfigData[i].b);
          if (contribution[i] > 0.0)
             probehits++;
       }

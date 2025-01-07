@@ -94,8 +94,6 @@ void BoxEnvironmentProbe::initPersistFields()
    // SceneObject already handles exposing the transform
    Parent::initPersistFields();
 
-   addField("attenuation", TypeF32, Offset(mAtten, BoxEnvironmentProbe), "falloff percent");
-
    removeField("radius");
 }
 
@@ -127,12 +125,6 @@ U32 BoxEnvironmentProbe::packUpdate(NetConnection *conn, U32 mask, BitStream *st
 {
    // Allow the Parent to get a crack at writing its info
    U32 retMask = Parent::packUpdate(conn, mask, stream);
-
-   if (stream->writeFlag(mask & StaticDataMask))
-   {
-      stream->write(mAtten);
-   }
-
    return retMask;
 }
 
@@ -140,12 +132,6 @@ void BoxEnvironmentProbe::unpackUpdate(NetConnection *conn, BitStream *stream)
 {
    // Let the Parent read any info it sent
    Parent::unpackUpdate(conn, stream);
-
-   if (stream->readFlag())  // StaticDataMask
-   {
-      stream->read(&mAtten);
-      mDirty = true;
-   }
 
    if (mDirty)
    {
@@ -160,8 +146,6 @@ void BoxEnvironmentProbe::unpackUpdate(NetConnection *conn, BitStream *stream)
 void BoxEnvironmentProbe::updateProbeParams()
 {
    mProbeShapeType = ProbeInfo::Box;
-   mProbeInfo.mAtten = mAtten;
-
    Parent::updateProbeParams();
 }
 
