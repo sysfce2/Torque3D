@@ -353,7 +353,7 @@ float defineSphereSpaceInfluence(vec3 wsPosition, vec3 wsProbePosition, float ra
 {
    float3 L = (wsProbePosition.xyz - wsPosition);
    float innerRadius = radius-(radius*atten);
-   float contribution = 1.0-saturate(mix(length(L), radius-innerRadius, atten)/radius);
+   float contribution = 1.0-pow(saturate(length(L)/mix(radius, innerRadius, atten)), M_2PI_F*(1.0-atten));
    return saturate(contribution);
 }
 
