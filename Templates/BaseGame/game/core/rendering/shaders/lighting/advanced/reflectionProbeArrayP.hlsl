@@ -87,8 +87,8 @@ float4 main(PFXVertToPix IN) : SV_TARGET
             contribution[i] = defineBoxSpaceInfluence(surface.P, worldToObjArray[i], probeConfigData[i].b)*atten;
          }
          else if (probeConfigData[i].r == 1) //sphere  
-         {
-            contribution[i] = defineSphereSpaceInfluence(surface.P, probePosArray[i].xyz, probeConfigData[i].g, probeConfigData[i].b*atten); 
+         { 
+            contribution[i] = defineSphereSpaceInfluence(surface.P, probePosArray[i].xyz, probeConfigData[i].g, probeConfigData[i].b)*atten; 
          }
 
             if (contribution[i]>0.0)

@@ -133,6 +133,7 @@ ReflectionProbe::ReflectionProbe()
 
    mCaptureMask = REFLECTION_PROBE_CAPTURE_TYPEMASK;
    mCanDamp = false;
+   mAtten = 0.0f;
 }
 
 ReflectionProbe::~ReflectionProbe()

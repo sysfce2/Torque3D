@@ -349,7 +349,7 @@ vec4 compute4Lights( Surface surface,
 }
 
 //Probe IBL stuff
-float defineSphereSpaceInfluence(vec3 wsPosition, vec3 wsProbePosition, float radius)
+float defineSphereSpaceInfluence(vec3 wsPosition, vec3 wsProbePosition, float radius, float atten)
 {
    float3 L = (wsProbePosition.xyz - wsPosition);
    float innerRadius = radius-(radius*atten);

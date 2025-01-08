@@ -78,7 +78,6 @@ BoxEnvironmentProbe::BoxEnvironmentProbe() : ReflectionProbe()
 {
    mCaptureMask = REFLECTION_PROBE_CAPTURE_TYPEMASK;
    mProbeShapeType = ProbeInfo::Box;
-   mAtten = 0.0;
 }
 
 BoxEnvironmentProbe::~BoxEnvironmentProbe()
