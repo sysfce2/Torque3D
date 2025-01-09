@@ -281,7 +281,7 @@ float computeSpecOcclusion( float NdotV , float AO , float roughness )
 
 float roughnessToMipLevel(float roughness, float numMips)
 {	
-   return roughness * numMips;
+   return pow(abs(roughness),0.25) * numMips;
 }
 
 vec4 compute4Lights( Surface surface,
