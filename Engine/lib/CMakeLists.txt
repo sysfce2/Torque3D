@@ -116,8 +116,7 @@ add_subdirectory(convexMath ${TORQUE_LIB_TARG_DIRECTORY}/convexMath EXCLUDE_FROM
 
 # Assimp
 advanced_option(ASSIMP_HUNTER_ENABLED "Enable Hunter package manager support" OFF)
-set(ASSIMP_BUILD_NO_OWN_ZLIB ON CACHE BOOL "" FORCE)
-mark_as_advanced(ASSIMP_BUILD_NO_OWN_ZLIB)
+advanced_option(ASSIMP_BUILD_NO_OWN_ZLIB "" ON)
 advanced_option(BUILD_SHARED_LIBS "Build package with shared libraries." OFF )
 advanced_option(ASSIMP_BUILD_FRAMEWORK "Build package as Mac OS X Framework bundle." OFF )
 advanced_option(ASSIMP_DOUBLE_PRECISION "Set to ON to enable double precision processing" OFF )
@@ -199,8 +198,6 @@ add_subdirectory(glad ${TORQUE_LIB_TARG_DIRECTORY}/glad EXCLUDE_FROM_ALL)
 if(TORQUE_SFX_OPENAL)
     advanced_option(TORQUE_OGGVORBIS "Enable OGG Vorbis" ON)
     advanced_option(ALSOFT_EAX "Enable legacy EAX extensions" ${WIN32})
-    advanced_option(ALSOFT_INSTALL_EXAMPLES "Install example programs (alplay, alstream, ...)" OFF)
-    advanced_option(ALSOFT_INSTALL_UTILS "Install utility programs (openal-info, alsoft-config, ...)" OFF)
     advanced_option(ALSOFT_UPDATE_BUILD_VERSION "Update git build version info" ON)
     mark_as_advanced(ALSOFT_BACKEND_COREAUDIO)
     mark_as_advanced(ALSOFT_BACKEND_DSOUND)    

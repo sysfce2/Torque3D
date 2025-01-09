@@ -1900,3 +1900,17 @@ DefineEngineMethod(TSStatic, getNodeTransform, TransformF, (const char *nodeName
    object->getNodeTransform(nodeName, MatrixF::Identity, &xf);
    return xf;
 }
+
+DefineEngineMethod(TSStatic, setSkinName, void, (const char* name), ,
+   "@brief Apply a new skin to this shape.\n\n"
+
+   "'Skinning' the shape effectively renames the material targets, allowing "
+   "different materials to be used on different instances of the same model.\n\n"
+
+   "@param name name of the skin to apply\n\n"
+
+   "@see skin\n"
+   "@see getSkinName()\n")
+{
+   object->setSkinName(name);
+}

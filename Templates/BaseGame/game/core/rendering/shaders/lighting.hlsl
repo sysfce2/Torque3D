@@ -282,7 +282,7 @@ float computeSpecOcclusion( float NdotV , float AO , float roughness )
 
 float roughnessToMipLevel(float roughness, float numMips)
 {	
-   return roughness * numMips;
+   return pow(abs(roughness),0.25) * numMips;
 }
 
 float4 compute4Lights( Surface surface,
@@ -352,10 +352,11 @@ float4 compute4Lights( Surface surface,
 }
 
 //Probe IBL stuff
-float defineSphereSpaceInfluence(float3 wsPosition, float3 wsProbePosition, float radius)
+float defineSphereSpaceInfluence(float3 wsPosition, float3 wsProbePosition, float radius, float atten)
 {
-   float3 L = wsProbePosition.xyz - wsPosition;
-   float contribution = 1.0 - length(L) / radius;
+   float3 L = (wsProbePosition.xyz - wsPosition);
+   float innerRadius = radius-(radius*atten);
+   float contribution = 1.0-pow(saturate(length(L)/lerp(radius, innerRadius, atten)), M_2PI_F*(1.0-atten));
    return saturate(contribution);
 }
 
@@ -441,7 +442,7 @@ float4 computeForwardProbes(Surface surface,
       }
       else if (inProbeConfigData[i].r == 1) //sphere
       {
-         contribution[i] = defineSphereSpaceInfluence(surface.P, inProbePosArray[i].xyz, inProbeConfigData[i].g)*atten;
+         contribution[i] = defineSphereSpaceInfluence(surface.P, inProbePosArray[i].xyz, inProbeConfigData[i].g, inProbeConfigData[i].b*atten);
       }
 
       if (contribution[i]>0.0)
@@ -533,7 +534,7 @@ float4 computeForwardProbes(Surface surface,
       if (contrib > 0.0f)
       {
          int cubemapIdx = inProbeConfigData[i].a;
-         float3 dir = boxProject(surface.P, surface.R, inWorldToObjArray[i], inRefScaleArray[i].xyz, inRefPosArray[i].xyz);
+         float3 dir = boxProject(surface.P-inRefPosArray[i].xyz, surface.R, inWorldToObjArray[i], inRefScaleArray[i].xyz, inProbePosArray[i].xyz);
 
          irradiance += TORQUE_TEXCUBEARRAYLOD(irradianceCubemapAR, dir, cubemapIdx, 0).xyz * contrib;
          specular += TORQUE_TEXCUBEARRAYLOD(specularCubemapAR, dir, cubemapIdx, lod).xyz * contrib;
@@ -599,7 +600,7 @@ float4 debugVizForwardProbes(Surface surface,
       }
       else if (inProbeConfigData[i].r == 1) //sphere
       {
-         contribution[i] = defineSphereSpaceInfluence(surface.P, inProbePosArray[i].xyz, inProbeConfigData[i].g);
+         contribution[i] = defineSphereSpaceInfluence(surface.P, inProbePosArray[i].xyz, inProbeConfigData[i].g, inProbeConfigData[i].b);
          if (contribution[i] > 0.0)
             probehits++;
       }
@@ -685,7 +686,7 @@ float4 debugVizForwardProbes(Surface surface,
       if (contrib > 0.0f)
       {
          int cubemapIdx = inProbeConfigData[i].a;
-         float3 dir = boxProject(surface.P, surface.R, inWorldToObjArray[i], inRefScaleArray[i].xyz, inRefPosArray[i].xyz);
+         float3 dir = boxProject(surface.P-inRefPosArray[i].xyz, surface.R, inWorldToObjArray[i], inRefScaleArray[i].xyz, inProbePosArray[i].xyz);
 
          irradiance += TORQUE_TEXCUBEARRAYLOD(irradianceCubemapAR, dir, cubemapIdx, 0).xyz * contrib;
          specular += TORQUE_TEXCUBEARRAYLOD(specularCubemapAR, dir, cubemapIdx, lod).xyz * contrib;
