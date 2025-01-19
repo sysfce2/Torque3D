@@ -347,7 +347,7 @@ function replaceInFile(%fileName, %fromWord, %toWord)
    {
       if( %file.openForWrite(%fileName) )
       {
-         for(%i=0; %i < %lineArray.getCount(); %i++)
+         for(%i=0; %i < %lineArray.count(); %i++)
          {
             %file.writeline(%lineArray.getKey(%i));
          }
