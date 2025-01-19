@@ -33,7 +33,9 @@ endmacro()
 
 function(installTemplate templateName)
   message("Prepare Template(${templateName}) install...")
-
+  
+  file(COPY "${CMAKE_SOURCE_DIR}/Templates/${templateName}/" DESTINATION "${TORQUE_APP_ROOT_DIRECTORY}" FILES_MATCHING PATTERN "*.in")
+  file(COPY "${CMAKE_SOURCE_DIR}/Templates/${templateName}/" DESTINATION "${TORQUE_APP_ROOT_DIRECTORY}" FILES_MATCHING PATTERN "*.cmake")
   add_subdirectory("${CMAKE_SOURCE_DIR}/Templates/${templateName}")
 endfunction()
 
@@ -128,6 +130,7 @@ endmacro (filterOut)
 ################# apple frameworks ###################
 macro(addFramework framework)
 	if (APPLE)
-      set(TORQUE_LINK_FRAMEWORKS ${TORQUE_LINK_FRAMEWORKS} "${CMAKE_FRAMEWORK_PATH}/${framework}.framework")
+      find_library(_${framework}_FRAMEWORK_PATH ${framework} PATHS /System/Library/Frameworks /Library/Frameworks)
+      set(TORQUE_LINK_FRAMEWORKS ${TORQUE_LINK_FRAMEWORKS} "${_${framework}_FRAMEWORK_PATH}")
 	endif()
 endmacro()

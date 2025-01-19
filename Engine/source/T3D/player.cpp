@@ -4771,6 +4771,9 @@ void Player::updateAttachment(){
         Point3F(pos.x, pos.y, pos.z - 1.0f ),
         PathShapeObjectType, &rInfo))
     {
+       if ((mJumpSurfaceLastContact < JumpSkipContactsMax) && !mSwimming)
+          setPosition(rInfo.point, getRotation());
+
        if( rInfo.object->getTypeMask() & PathShapeObjectType) //Ramen
        {
           if (getParent() == NULL)
