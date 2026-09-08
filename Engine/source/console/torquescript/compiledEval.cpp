@@ -234,6 +234,7 @@ static void getFieldComponent(SimObject* object, StringTableEntry field, const c
             if (id == -1)
             {
                val[0] = 0;
+               Con::warnf(ConsoleLogEntry::General, "getFieldComponent: unrecognized suffix char '%c' in '%s' - ignored", suffix[i], suffix);
                return;
             }
             const char* unit = StringUnit::getUnit(prevVal, id, " \t\n");
@@ -271,35 +272,48 @@ static void setFieldComponent(SimObject* object, StringTableEntry field, const c
    if (!prevVal)
       return;
 
-   static const StringTableEntry xyzw[] =
+   const char* suffix = subField;
+   S32 suffixLen = dStrlen(suffix);
+
+   if (suffixLen == 1)
    {
-      StringTable->insert("x"),
-      StringTable->insert("y"),
-      StringTable->insert("z"),
-      StringTable->insert("w")
-   };
-
-   static const StringTableEntry rgba[] =
+      S32 id = tscriptSuffixMap(suffix[0]);
+      if (id != -1)
+         dStrcpy(val, StringUnit::setUnit(prevVal, id, strValue, " \t\n"), 1024);
+   }
+   else
    {
-      StringTable->insert("r"),
-      StringTable->insert("g"),
-      StringTable->insert("b"),
-      StringTable->insert("a")
-   };
+      char outVal[1024];
+      dStrcpy(outVal, prevVal, 1024);
 
-   // Insert the value into the specified
-   // component of the string.
-   if (subField == xyzw[0] || subField == rgba[0])
-      dStrcpy(val, StringUnit::setUnit(prevVal, 0, strValue, " \t\n"), 128);
+      S32 unitCount = StringUnit::getUnitCount(strValue, " \t\n");
+      if (unitCount != suffixLen)
+      {
+         Con::warnf(ConsoleLogEntry::General,
+            "setFieldComponent: component count mismatch - suffix '%s' expects %d value(s), got %d ('%s')!",
+            suffix, suffixLen, unitCount, strValue);
+      }
 
-   else if (subField == xyzw[1] || subField == rgba[1])
-      dStrcpy(val, StringUnit::setUnit(prevVal, 1, strValue, " \t\n"), 128);
+      for (S32 i = 0; i < suffixLen; i++)
+      {
+         S32 id = tscriptSuffixMap(suffix[i]);
+         if (id == -1)
+         {
+            Con::warnf(ConsoleLogEntry::General,
+               "setFieldComponent: unrecognized suffix char '%c' in '%s'!",
+               suffix[i], suffix);
+            return;
+         }
 
-   else if (subField == xyzw[2] || subField == rgba[2])
-      dStrcpy(val, StringUnit::setUnit(prevVal, 2, strValue, " \t\n"), 128);
+         const char* unit = StringUnit::getUnit(strValue, i, " \t\n");
+         if (!unit || !*unit)
+            continue;
 
-   else if (subField == xyzw[3] || subField == rgba[3])
-      dStrcpy(val, StringUnit::setUnit(prevVal, 3, strValue, " \t\n"), 128);
+         dStrcpy(outVal, StringUnit::setUnit(outVal, id, unit , " \t\n"), 1024);
+      }
+
+      dStrcpy(val, outVal, 1024);
+   }
 
    if (val[0] != 0)
    {
@@ -415,7 +429,6 @@ void ExprEvalState::setStringVariable(const char *val)
    AssertFatal(currentVariable != NULL, "Invalid evaluator state - trying to set null variable!");
    currentVariable->setStringValue(val);
 }
-
 //-----------------------------------------------------------------------------
 
 enum class FloatOperation
