@@ -234,7 +234,6 @@ static void getFieldComponent(SimObject* object, StringTableEntry field, const c
             if (id == -1)
             {
                val[0] = 0;
-               Con::warnf(ConsoleLogEntry::General, "getFieldComponent: unrecognized suffix char '%c' in '%s' - ignored", suffix[i], suffix);
                return;
             }
             const char* unit = StringUnit::getUnit(prevVal, id, " \t\n");
@@ -287,21 +286,12 @@ static void setFieldComponent(SimObject* object, StringTableEntry field, const c
       dStrcpy(outVal, prevVal, 1024);
 
       S32 unitCount = StringUnit::getUnitCount(strValue, " \t\n");
-      if (unitCount != suffixLen)
-      {
-         Con::warnf(ConsoleLogEntry::General,
-            "setFieldComponent: component count mismatch - suffix '%s' expects %d value(s), got %d ('%s')!",
-            suffix, suffixLen, unitCount, strValue);
-      }
 
       for (S32 i = 0; i < suffixLen; i++)
       {
          S32 id = tscriptSuffixMap(suffix[i]);
          if (id == -1)
          {
-            Con::warnf(ConsoleLogEntry::General,
-               "setFieldComponent: unrecognized suffix char '%c' in '%s'!",
-               suffix[i], suffix);
             return;
          }
 
@@ -310,6 +300,13 @@ static void setFieldComponent(SimObject* object, StringTableEntry field, const c
             continue;
 
          dStrcpy(outVal, StringUnit::setUnit(outVal, id, unit , " \t\n"), 1024);
+      }
+
+      if (unitCount != suffixLen)
+      {
+         Con::warnf(ConsoleLogEntry::General,
+            "setFieldComponent: component count mismatch - suffix '%s' expects %d value(s), got %d ('%s')!",
+            suffix, suffixLen, unitCount, strValue);
       }
 
       dStrcpy(val, outVal, 1024);
